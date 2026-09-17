@@ -1,0 +1,10 @@
+@use '../../styles/mixins' as *;
+
+.home-container {
+  padding: 16px;
+  background-color: var(--color-primary);
+
+  @include respond-to(tablet) {
+    padding: 8px;
+  }
+}
