@@ -1,0 +1,10 @@
+@use './tokens';
+@use './mixins';
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
