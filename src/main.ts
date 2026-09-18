@@ -1,5 +1,8 @@
-import './styles/globals.scss';
+import { initRouter, registerRoute } from './app/router';
+import { renderHomePage } from './pages/home/home-page';
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <h1>MiniGames</h1>
-`;
+registerRoute('/', renderHomePage);
+
+document.addEventListener('DOMContentLoaded', () => {
+  initRouter();
+});
