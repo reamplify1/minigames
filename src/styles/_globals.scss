@@ -1,7 +1,7 @@
 @use 'tokens';
 
 :root {
-  --color-primary: #{tokens.$color-primary};
+  --color-accent: #{tokens.$color-accent};
   --color-text: #{tokens.$color-text};
   --size-1: #{tokens.$size-1};
   --size-2: #{tokens.$size-2};
@@ -10,7 +10,7 @@
 
 body {
   margin: 0;
-  font-family: sans-serif;
+  font-family: tokens.$font-family-base;
   color: var(--color-text);
   background-color: tokens.$color-background;
 }

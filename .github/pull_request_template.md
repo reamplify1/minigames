@@ -1,10 +1,10 @@
 **Description**
-Task: 
+Task:
 
 Screenshot:
 
-Deployment: 
+Deployment:
 
 Done / deadline:
 
-Score: 
+Score:
