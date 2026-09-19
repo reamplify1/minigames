@@ -1,4 +1,5 @@
-$breakpoint-tablet-max: 1919px; 
+$breakpoint-tablet-max: 1919px;
+$breakpoint-burger-max: 768px;
 $breakpoint-mobile-max: 767px;
 
 $font-family-base: 'Inter', sans-serif;
@@ -10,6 +11,14 @@ $color-text-muted: #6b7280;
 $color-accent: #ffc107;
 $color-border: #242145;
 $color-border-btn: #242145;
+
+$color-bg-footer: #1e1b3a;
+$color-white: #ffffff;
+
+$color-primary: #ffd02b;
+$color-on-primary: #242145;
+$color-on-bg: #5f5d75;
+$color-hero-overlay: #1e1b3a;
 
 $size-1: 4px;
 $size-2: 8px;
@@ -32,22 +41,14 @@ $radius-pill: 999px;
 
 $shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
 
-$color-primary: #ffd02b; // Figma "primary". Отличается от $color-accent (#ffc107) — сверьте с хедером
-$color-on-primary: #242145; // Figma "on-primary" (текст и рамки)
-$color-on-bg: #5f5d75; // Figma "on-bg" (текст абзаца)
-$color-hero-overlay: #1e1b3a; // заливка секции, opacity 65%
-
-// Размеры из Figma
-$size-14: 112px; // вертикальный padding Hero
-$size-15: 120px; // горизонтальный padding Hero
-$size-btn-padding-x-large: 24px; // btn-large-x
-$size-btn-padding-y-large: 16px; // btn-large-y
+$size-14: 112px;
+$size-15: 120px;
+$size-btn-padding-x-large: 24px;
+$size-btn-padding-y-large: 16px;
 
 $radius-lg: 24px;
 
-// Типографика из Figma
 $font-size-display-large: 56px;
 $font-size-body-large: 18px;
 
-// Жёсткая тень карточки
 $shadow-card: 8px 8px 0 $color-on-primary;
