@@ -1,4 +1,5 @@
 import './header.scss';
+import logoIcon from '../../assets/icons/minigames-icon.svg';
 import burgerIcon from '../../assets/icons/burger-icon.svg';
 
 export function createHeader(): HTMLElement {
@@ -7,6 +8,7 @@ export function createHeader(): HTMLElement {
   header.innerHTML = `
     <div class="header__inner">
       <a class="header__logo" href="/">
+      <img class="header__logo-icon" src="${logoIcon}" alt="burger menu"/>
         <span class="header__logo-text">MiniGames</span>
       </a>
 
