@@ -10,14 +10,14 @@
     align-items: center;
     max-width: 1920px;
     margin: 0 auto;
-    padding: $size-3 $size-3; 
+    padding: $size-6 $size-7;
 
     @include respond-to(tablet) {
-      padding: $size-3 $size-8; 
+      padding: $size-3 $size-8;
     }
 
-    @include respond-to(desktop) {
-      padding: $size-6 $size-7; 
+    @include respond-to(mobile) {
+      padding: $size-3 $size-3;
     }
   }
 
@@ -39,10 +39,10 @@
   }
 
   &__nav {
-    display: none;
+    display: block;
 
-    @include respond-to(desktop) {
-      display: block;
+    @include respond-to(tablet) {
+      display: none;
     }
   }
 
@@ -72,15 +72,15 @@
   &__actions {
     display: flex;
     align-items: center;
-    gap: $size-3; 
+    gap: $size-3;
   }
 
   &__btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: 32px;
-    padding: 0 $size-btn-padding-x-compact; 
+    height: auto;
+    padding: $size-btn-padding-y $size-btn-padding-x;
     border-radius: $radius-md;
     font-size: 0.875rem;
     font-weight: 600;
@@ -88,18 +88,18 @@
     border: $border-width-btn solid $color-border-btn;
     box-sizing: border-box;
 
-    @include respond-to(desktop) {
-      height: auto;
-      padding: $size-btn-padding-y $size-btn-padding-x;
+    @include respond-to(tablet) {
+      height: 32px;
+      padding: 0 $size-btn-padding-x-compact;
     }
 
     &--outline {
-      display: none;
+      display: inline-block;
       background: transparent;
       color: $color-text;
 
-      @include respond-to(desktop) {
-        display: inline-block;
+      @include respond-to(tablet) {
+        display: none;
       }
 
       &:hover {
@@ -112,12 +112,12 @@
     }
 
     &--accent {
-      display: none;
+      display: inline-block;
       background-color: $color-accent;
       color: $color-text;
 
-      @include respond-to(tablet) {
-        display: inline-block;
+      @include respond-to(mobile) {
+        display: none;
       }
 
       &:hover {
@@ -131,7 +131,7 @@
   }
 
   &__burger {
-    display: inline-flex;
+    display: none;
     align-items: center;
     justify-content: center;
     width: 32px;
@@ -142,8 +142,8 @@
     background: $color-surface;
     cursor: pointer;
 
-    @include respond-to(desktop) {
-      display: none;
+    @include respond-to(tablet) {
+      display: inline-flex;
     }
 
     img {

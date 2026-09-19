@@ -8,8 +8,8 @@ export function createHeader(): HTMLElement {
   header.innerHTML = `
     <div class="header__inner">
       <a class="header__logo" href="/">
+      <img class="header__logo-icon" src="${logoIcon}" alt="burger menu"/>
         <span class="header__logo-text">MiniGames</span>
-        <img class="header__logo-icon" src="${logoIcon}" alt="burger menu"/>
       </a>
 
       <div class="header__right">
