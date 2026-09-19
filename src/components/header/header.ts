@@ -1,6 +1,7 @@
 import './header.scss';
 import logoIcon from '../../assets/icons/minigames-icon.svg';
 import burgerIcon from '../../assets/icons/burger-icon.svg';
+import { createMobileMenu } from '../mobile-menu/mobile-menu';
 
 export function createHeader(): HTMLElement {
   const header = document.createElement('header');
@@ -36,6 +37,11 @@ export function createHeader(): HTMLElement {
   const signInButtons = header.querySelectorAll('.header__btn--outline, .header__btn--accent');
   for (const button of signInButtons) {
     button.addEventListener('click', handleAuthTrigger);
+  }
+
+  const burger = header.querySelector<HTMLButtonElement>('.header__burger');
+  if (burger) {
+    header.append(createMobileMenu(burger));
   }
 
   return header;

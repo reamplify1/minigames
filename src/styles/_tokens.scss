@@ -1,8 +1,9 @@
-$breakpoint-tablet-max: 1919px; 
-$breakpoint-mobile-max: 768px; 
- 
+$breakpoint-tablet-max: 1919px;
+$breakpoint-burger-max: 768px; 
+$breakpoint-mobile-max: 767px; 
+
 $font-family-base: 'Inter', sans-serif;
- 
+
 $color-background: #f7f3ea;
 $color-surface: #ffffff;
 $color-text: #211c3b;
@@ -10,7 +11,15 @@ $color-text-muted: #6b7280;
 $color-accent: #ffc107;
 $color-border: #242145;
 $color-border-btn: #242145;
- 
+
+$color-bg-footer: #1e1b3a;
+$color-white: #ffffff;
+
+$color-primary: #ffd02b;
+$color-on-primary: #242145;
+$color-on-bg: #5f5d75;
+$color-hero-overlay: #1e1b3a;
+
 $size-1: 4px;
 $size-2: 8px;
 $size-3: 16px;
@@ -19,15 +28,15 @@ $size-5: 32px;
 $size-6: 28px;
 $size-7: 80px;
 $size-8: 40px;
- 
+
 $size-btn-padding-x: 20px;
 $size-btn-padding-y: 10px;
 $size-btn-padding-x-compact: 16px;
 $size-btn-padding-y-compact: 8px;
 $border-width-btn: 2px;
- 
+
 $radius-sm: 4px;
 $radius-md: 8px;
 $radius-pill: 999px;
- 
+
 $shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
