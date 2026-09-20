@@ -130,6 +130,10 @@ $color-shadow-dark: #111111;
 $border-width-heavy: 3px;
 $shadow-dialog: 8px 8px 0 $color-shadow-dark;
 
+$transition-dialog: 0.25s ease;
+$dialog-scale-from: 0.96;
+
+$opacity-hover: 0.7;
 $color-highlight: #fff8e1;
 $color-highlight-active: #ffefc2;
 $shadow-ring-primary: inset 0 0 0 $border-width $color-primary;
