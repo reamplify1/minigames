@@ -1,0 +1,194 @@
+@use '../../styles/tokens' as *;
+@use '../../styles/mixins' as *;
+
+$mobile-menu-close-icon-size: 14px;
+
+.no-scroll {
+  overflow: hidden;
+}
+
+.mobile-menu {
+  display: none;
+
+  @include respond-to(burger) {
+    position: fixed;
+    inset: 0;
+    z-index: $z-index-menu;
+    display: flex;
+    flex-direction: column;
+    gap: $size-5;
+    box-sizing: border-box;
+    padding: $size-4;
+    overflow-y: auto;
+    background-color: $color-bg-footer;
+
+    visibility: hidden;
+    transform: translateX(100%);
+    transition:
+      transform $duration-menu ease,
+      visibility 0s linear $duration-menu;
+
+    &--open {
+      visibility: visible;
+      transform: translateX(0);
+      transition:
+        transform $duration-menu ease,
+        visibility 0s;
+    }
+  }
+
+  &__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__logo {
+    display: flex;
+    align-items: center;
+    gap: $size-2;
+    color: $color-white;
+    font-size: $font-size-title-medium;
+    font-weight: $font-weight-bold;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  &__logo-icon {
+    width: $size-5;
+    height: $size-5;
+  }
+
+  &__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: $size-5;
+    height: $size-5;
+    padding: 0;
+    border: 0;
+    border-radius: $radius-md;
+    background-color: $color-white-10;
+    cursor: pointer;
+    transition:
+      background-color $transition-base,
+      box-shadow $transition-base;
+
+    @include hover-only {
+      box-shadow: $shadow-ring-primary;
+    }
+
+    &:active {
+      background-color: $color-white-20;
+      box-shadow: $shadow-ring-primary;
+    }
+  }
+
+  &__close-icon {
+    width: $mobile-menu-close-icon-size;
+    height: $mobile-menu-close-icon-size;
+    filter: brightness(0) invert(1);
+    pointer-events: none;
+  }
+
+  &__nav {
+    flex: 1;
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: $size-4;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__link {
+    display: block;
+    color: $color-white-75;
+    font-size: $font-size-body-large;
+    font-weight: $font-weight-medium;
+    line-height: $line-height-120;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color $transition-base;
+
+    @include hover-only {
+      color: $color-primary;
+      text-decoration: underline;
+    }
+
+    &:active {
+      color: $color-primary;
+    }
+
+    &--active,
+    &--active:hover {
+      color: $color-primary;
+      font-weight: $font-weight-bold;
+      text-decoration: none;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: $size-3;
+  }
+
+  &__btn {
+    box-sizing: border-box;
+    width: 100%;
+    padding: ($size-btn-padding-y - $border-width-btn) ($size-btn-padding-x - $border-width-btn);
+    border: $border-width-btn solid $color-white;
+    border-radius: $radius-md;
+    font-family: inherit;
+    font-size: $font-size-body-small;
+    font-weight: $font-weight-bold;
+    line-height: $line-height-120;
+    cursor: pointer;
+    transition:
+      background-color $transition-base,
+      border-color $transition-base;
+
+    &--outline {
+      background-color: transparent;
+      color: $color-white;
+
+      @include hover-only {
+        border-color: $color-primary;
+      }
+
+      &:active {
+        border-color: $color-primary;
+        background-color: $color-white-10;
+      }
+    }
+
+    &--accent {
+      border-color: $color-primary;
+      background-color: $color-primary;
+      color: $color-on-primary;
+
+      @include hover-only {
+        border-color: $color-primary-hover;
+        background-color: $color-primary-hover;
+      }
+
+      &:active {
+        border-color: $color-primary-active;
+        background-color: $color-primary-active;
+      }
+    }
+  }
+
+  &__close,
+  &__link,
+  &__btn {
+    &:focus-visible {
+      outline: $border-width solid $color-white;
+      outline-offset: $outline-offset;
+    }
+  }
+}

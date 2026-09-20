@@ -1,0 +1,181 @@
+@use '../../styles/tokens' as *;
+@use '../../styles/mixins' as *;
+
+$hero-card-max-width: 640px;
+$hero-card-min-width: 480px;
+$hero-image-inset: -7%;
+$hero-image-position: center 65%;
+$hero-image-opacity: 0.2;
+$hero-overlay-opacity: 0.65;
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: $viewport-desktop;
+  margin-inline: auto;
+  padding: (space(14) - $border-width) space(15) space(14);
+  border-top: $border-width solid $color-on-primary;
+  background-color: rgba($color-hero-overlay, $hero-overlay-opacity);
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: $hero-image-inset;
+    z-index: $z-index-behind;
+    background: url('../../assets/images/hero-bg.png') $hero-image-position / cover no-repeat;
+    opacity: $hero-image-opacity;
+  }
+
+  @include respond-to(tablet) {
+    padding: fluid-tablet(space(9) - $border-width, space(14) - $border-width)
+      fluid-tablet(space(5), space(15)) fluid-tablet(space(9), space(14));
+  }
+
+  @include respond-to(mobile) {
+    padding: fluid-mobile(space(8) - $border-width, space(9) - $border-width)
+      fluid-mobile(space(2), space(5)) fluid-mobile(space(8), space(9));
+  }
+
+  &__card {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: space(3);
+    width: 100%;
+    max-width: $hero-card-max-width;
+    padding: space(6) - $border-width;
+    border: $border-width solid $color-on-primary;
+    border-radius: $radius-2xl;
+    background-color: $color-background;
+    box-shadow: $shadow-hard-lg;
+
+    @include respond-to(tablet) {
+      gap: fluid-tablet(space(2), space(3));
+      max-width: fluid-tablet($hero-card-min-width, $hero-card-max-width);
+      padding: fluid-tablet(space(3) - $border-width, space(6) - $border-width);
+      border-radius: $radius-xl;
+      box-shadow: $shadow-hard-md;
+    }
+
+    @include respond-to(mobile) {
+      max-width: none;
+      border-radius: $radius-lg;
+      box-shadow: $shadow-hard-sm;
+    }
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-display-large;
+    font-weight: $font-weight-bold;
+    line-height: $line-height-110;
+    color: $color-on-primary;
+
+    @include respond-to(tablet) {
+      font-size: fluid-tablet($font-size-display-medium, $font-size-display-large);
+      line-height: $line-height-115;
+    }
+
+    @include respond-to(mobile) {
+      font-size: fluid-mobile($font-size-display-small, $font-size-display-medium);
+      line-height: $line-height-120;
+    }
+  }
+
+  &__text {
+    margin: 0;
+    font-size: $font-size-body-large;
+    font-weight: $font-weight-medium;
+    line-height: $line-height-150;
+    color: $color-on-bg;
+
+    @include respond-to(tablet) {
+      font-size: fluid-tablet($font-size-body-small, $font-size-body-large);
+      line-height: $line-height-140;
+    }
+
+    @include respond-to(mobile) {
+      font-size: fluid-mobile($font-size-label-medium, $font-size-body-small);
+    }
+  }
+
+  &__text-short {
+    display: none;
+
+    @include respond-to(mobile) {
+      display: inline;
+    }
+  }
+
+  &__text-full {
+    @include respond-to(mobile) {
+      display: none;
+    }
+  }
+
+  &__button {
+    padding: ($size-btn-padding-y-large - $border-width-btn)
+      ($size-btn-padding-x-large - $border-width-btn);
+    border: $border-width-btn solid $color-on-primary;
+    border-radius: $radius-md;
+    background-color: $color-primary;
+    font-family: inherit;
+    font-size: $font-size-body-large;
+    font-weight: $font-weight-bold;
+    line-height: $line-height-120;
+    color: $color-on-primary;
+    cursor: pointer;
+    transition:
+      background-color $transition-base,
+      transform $transition-press;
+
+    @include respond-to(tablet) {
+      padding: fluid-tablet(
+          $size-btn-padding-y - $border-width-btn,
+          $size-btn-padding-y-large - $border-width-btn
+        )
+        fluid-tablet(
+          $size-btn-padding-x - $border-width-btn,
+          $size-btn-padding-x-large - $border-width-btn
+        );
+      font-size: fluid-tablet($font-size-body-small, $font-size-body-large);
+    }
+
+    @include respond-to(mobile) {
+      padding: fluid-mobile(
+          $size-btn-padding-y-compact - $border-width-btn,
+          $size-btn-padding-y - $border-width-btn
+        )
+        fluid-mobile(
+          $size-btn-padding-x-compact - $border-width-btn,
+          $size-btn-padding-x - $border-width-btn
+        );
+      font-size: fluid-mobile($font-size-label-medium, $font-size-body-small);
+    }
+
+    &:hover:not(:disabled) {
+      background-color: $color-primary-hover;
+    }
+
+    &:active:not(:disabled) {
+      background-color: $color-primary-active;
+      transform: translateY($press-offset);
+    }
+
+    &:focus-visible {
+      outline: $border-width solid $color-on-primary;
+      outline-offset: $outline-offset;
+    }
+
+    &:disabled {
+      opacity: $opacity-disabled;
+      cursor: not-allowed;
+    }
+  }
+}

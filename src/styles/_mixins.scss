@@ -1,0 +1,47 @@
+@use 'sass:math';
+@use 'tokens' as *;
+
+@function space($n) {
+  @return $n * $space-unit;
+}
+
+@function fluid($min, $max, $from, $to) {
+  $slope: math.div($max - $min, $to - $from);
+  $base: $min - $slope * $from;
+
+  @return clamp(#{$min}, calc(#{$base} + #{$slope * 100vw}), #{$max});
+}
+
+@function fluid-tablet($min, $max) {
+  @return fluid($min, $max, $viewport-tablet, $viewport-desktop);
+}
+
+@function fluid-mobile($min, $max) {
+  @return fluid($min, $max, $viewport-mobile, $viewport-tablet);
+}
+
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == tablet {
+    @media (max-width: $breakpoint-tablet-max) {
+      @content;
+    }
+  } @else if $breakpoint == burger {
+    @media (max-width: $breakpoint-burger-max) {
+      @content;
+    }
+  } @else if $breakpoint == mobile {
+    @media (max-width: $breakpoint-mobile-max) {
+      @content;
+    }
+  } @else {
+    @error "Unknown breakpoint: #{$breakpoint}. Use 'tablet', 'burger' or 'mobile'.";
+  }
+}
+
+@mixin hover-only {
+  @media (hover: hover) {
+    &:hover {
+      @content;
+    }
+  }
+}

@@ -1,0 +1,272 @@
+@use '../../styles/tokens' as *;
+@use '../../styles/mixins' as *;
+
+$footer-description-max-width: 392px;
+$footer-social-size: space(4);
+$footer-icon-size: space(2);
+$footer-round-icon-size: space(3);
+
+.footer {
+  background-color: $color-bg-footer;
+  color: $color-white-75;
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    gap: space(5);
+    box-sizing: border-box;
+    width: 100%;
+    max-width: $viewport-desktop;
+    margin-inline: auto;
+    padding: space(5) space(15);
+
+    @include respond-to(tablet) {
+      gap: fluid-tablet(space(4), space(5));
+      padding: fluid-tablet(space(4), space(5)) fluid-tablet(space(5), space(15));
+    }
+
+    @include respond-to(mobile) {
+      gap: fluid-mobile(space(3), space(4));
+      padding: fluid-mobile(space(3), space(4)) fluid-mobile(space(2), space(5));
+    }
+  }
+
+  &__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: space(5) space(10);
+
+    @include respond-to(tablet) {
+      gap: fluid-tablet(space(4), space(5)) fluid-tablet(space(5), space(10));
+    }
+
+    @include respond-to(mobile) {
+      gap: fluid-mobile(space(3), space(4)) fluid-mobile(space(3), space(5));
+    }
+  }
+
+  &__brand {
+    display: flex;
+    flex-direction: column;
+    gap: space(2);
+    max-width: $footer-description-max-width;
+  }
+
+  &__logo {
+    display: inline-flex;
+    align-items: center;
+    gap: $size-2;
+    align-self: flex-start;
+    font-size: $font-size-title-medium;
+    font-weight: $font-weight-bold;
+    line-height: $line-height-120;
+    color: $color-white;
+    text-decoration: none;
+    cursor: pointer;
+
+    @include respond-to(mobile) {
+      font-size: fluid-mobile($font-size-body-large, $font-size-title-medium);
+    }
+
+    &:focus-visible {
+      outline: $border-width solid $color-white;
+      outline-offset: $outline-offset;
+    }
+  }
+
+  &__logo-icon {
+    width: $size-5;
+    height: $size-5;
+  }
+
+  &__description {
+    margin: 0;
+    font-size: $font-size-body-small;
+    line-height: $line-height-150;
+
+    @include respond-to(tablet) {
+      font-size: fluid-tablet($font-size-label-medium, $font-size-body-small);
+    }
+  }
+
+  &__columns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: space(4) space(10);
+
+    @include respond-to(tablet) {
+      gap: fluid-tablet(space(3), space(4)) fluid-tablet(space(5), space(10));
+    }
+
+    @include respond-to(mobile) {
+      gap: fluid-mobile(space(3), space(3)) fluid-mobile(space(3), space(5));
+    }
+  }
+
+  &__column {
+    display: flex;
+    flex-direction: column;
+    gap: space(2);
+
+    @include respond-to(tablet) {
+      gap: fluid-tablet(space(1.5), space(2));
+    }
+  }
+
+  &__heading {
+    margin: 0;
+    font-size: $font-size-body-small;
+    font-weight: $font-weight-bold;
+    line-height: $line-height-120;
+    color: $color-white;
+
+    @include respond-to(tablet) {
+      font-size: fluid-tablet($font-size-label-medium, $font-size-body-small);
+    }
+  }
+
+  &__list,
+  &__socials {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__list {
+    flex-direction: column;
+    gap: space(1.5);
+
+    @include respond-to(tablet) {
+      gap: fluid-tablet(space(1), space(1.5));
+    }
+  }
+
+  &__link {
+    font-size: $font-size-body-small;
+    line-height: $line-height-140;
+    color: $color-white-75;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color $transition-base;
+
+    @include respond-to(tablet) {
+      font-size: fluid-tablet($font-size-label-medium, $font-size-body-small);
+    }
+
+    @include hover-only {
+      color: $color-primary;
+      text-decoration: underline;
+    }
+
+    &:active {
+      color: $color-primary;
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: $border-width solid $color-white;
+      outline-offset: $outline-offset;
+    }
+  }
+
+  &__socials {
+    gap: space(1);
+  }
+
+  &__social {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: $footer-social-size;
+    height: $footer-social-size;
+    border-radius: $radius-circle;
+    background-color: $color-white-10;
+    cursor: pointer;
+    transition:
+      background-color $transition-base,
+      box-shadow $transition-base;
+
+    @include hover-only {
+      box-shadow: $shadow-ring-primary;
+    }
+
+    &:active {
+      background-color: $color-white-20;
+      box-shadow: $shadow-ring-primary;
+    }
+
+    &:focus-visible {
+      outline: $border-width solid $color-white;
+      outline-offset: $outline-offset;
+    }
+  }
+
+  &__social-icon {
+    width: $footer-icon-size;
+    height: $footer-icon-size;
+  }
+
+  &__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: space(2) space(3);
+    padding-top: space(6);
+    border-top: $border-width-hairline solid $color-white-10;
+    font-size: $font-size-label-medium;
+    line-height: $line-height-140;
+
+    @include respond-to(tablet) {
+      padding-top: fluid-tablet(space(4), space(6));
+    }
+
+    @include respond-to(mobile) {
+      justify-content: flex-start;
+      padding-top: fluid-mobile(space(3), space(4));
+    }
+  }
+
+  &__copyright,
+  &__credit {
+    margin: 0;
+  }
+
+  &__bottom-link {
+    display: inline-flex;
+    align-items: center;
+    gap: space(1);
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color $transition-base;
+
+    @include hover-only {
+      color: $color-primary;
+      text-decoration: underline;
+    }
+
+    &:active {
+      color: $color-primary;
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: $border-width solid $color-white;
+      outline-offset: $outline-offset;
+    }
+  }
+
+  &__bottom-icon {
+    width: $footer-icon-size;
+    height: $footer-icon-size;
+  }
+
+  &__bottom-icon--round {
+    width: $footer-round-icon-size;
+    height: $footer-round-icon-size;
+  }
+}
