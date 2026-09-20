@@ -44,6 +44,7 @@ $color-border: #242145;
 $color-border-btn: #242145;
 
 $color-bg-footer: #1e1b3a;
+$color-backdrop: rgba($color-bg-footer, 0.6);
 $color-white: #ffffff;
 $color-black: #000000;
 
@@ -121,3 +122,7 @@ $color-avatar-lavender: #d4d0f7;
 
 $font-size-label-small: 11px;
 $border-width-hairline: 1px;
+
+$color-shadow-dark: #111111;
+$border-width-heavy: 3px;
+$shadow-dialog: 8px 8px 0 $color-shadow-dark;

@@ -1,0 +1,303 @@
+@use '../../styles/tokens' as *;
+@use '../../styles/mixins' as *;
+
+$auth-dialog-width: 420px;
+$auth-tab-height: space(6);
+$auth-control-height: space(6);
+$auth-button-height: space(6);
+$auth-icon-size: space(2);
+$auth-google-icon-size: space(3);
+$auth-button-shadow: 0 $size-1 0 $color-on-primary;
+
+.auth-dialog {
+  box-sizing: border-box;
+  width: calc(100% - #{space(4)});
+  max-width: $auth-dialog-width;
+  max-height: calc(100dvh - #{space(4)});
+  margin: auto;
+  padding: space(4) - $border-width-heavy;
+  overflow-y: auto;
+  border: $border-width-heavy solid $color-on-primary;
+  border-radius: $radius-3xl;
+  background-color: $color-background;
+  color: $color-on-primary;
+  box-shadow: $shadow-dialog;
+
+  &[open] {
+    display: flex;
+    flex-direction: column;
+    gap: space(3);
+  }
+
+  &::backdrop {
+    background-color: $color-backdrop;
+  }
+
+  &__tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    overflow: hidden;
+    border: $border-width solid $color-on-primary;
+    border-radius: $radius-md;
+    background-color: $color-surface;
+  }
+
+  &__tab {
+    height: $auth-tab-height - $border-width * 2;
+    padding: 0;
+    border: 0;
+    background-color: $color-surface;
+    font-family: inherit;
+    font-size: $font-size-body-medium;
+    font-weight: $font-weight-bold;
+    color: $color-on-primary;
+    cursor: pointer;
+    transition:
+      background-color $transition-base,
+      color $transition-base;
+
+    &:focus-visible {
+      outline: $border-width solid $color-on-primary;
+      outline-offset: -$border-width * 2;
+    }
+  }
+
+  &[data-mode='login'] .auth-dialog__tab--login,
+  &[data-mode='register'] .auth-dialog__tab--register {
+    background-color: $color-on-primary;
+    color: $color-white;
+  }
+
+  &__panel {
+    display: none;
+    flex-direction: column;
+    gap: space(3);
+  }
+
+  &[data-mode='login'] .auth-dialog__panel--login,
+  &[data-mode='register'] .auth-dialog__panel--register {
+    display: flex;
+  }
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: space(1);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-headline-medium;
+    font-weight: $font-weight-bold;
+    line-height: $line-height-120;
+  }
+
+  &__subtitle {
+    margin: 0;
+    font-size: $font-size-body-small;
+    line-height: $line-height-140;
+    color: $color-on-bg;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: space(2);
+  }
+
+  &__fields {
+    display: flex;
+    flex-direction: column;
+    gap: space(3);
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: space(1);
+  }
+
+  &__label {
+    font-size: $font-size-body-small;
+    font-weight: $font-weight-bold;
+    line-height: $line-height-120;
+  }
+
+  &__control {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: space(1.5);
+    height: $auth-control-height;
+    padding-inline: space(2);
+    border: $border-width solid $color-on-primary;
+    border-radius: $radius-md;
+    background-color: $color-surface;
+
+    &:focus-within {
+      outline: $border-width solid $color-on-primary;
+      outline-offset: $outline-offset;
+    }
+  }
+
+  &__control-icon,
+  &__toggle-icon {
+    flex: none;
+    width: $auth-icon-size;
+    height: $auth-icon-size;
+  }
+
+  &__google-icon {
+    flex: none;
+    width: $auth-google-icon-size;
+    height: $auth-google-icon-size;
+  }
+
+  &__input {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    outline: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: $font-size-body-small;
+    color: $color-on-primary;
+
+    &::placeholder {
+      color: $color-text-muted;
+    }
+  }
+
+  &__toggle {
+    display: inline-flex;
+    flex: none;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: $border-width solid $color-on-primary;
+      outline-offset: $outline-offset;
+    }
+  }
+
+  &__links-row {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  &__link {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font-family: inherit;
+    font-size: $font-size-body-small;
+    font-weight: $font-weight-bold;
+    color: $color-on-primary;
+    text-decoration: underline;
+    cursor: pointer;
+
+    &:hover {
+      color: $color-on-bg;
+    }
+
+    &:focus-visible {
+      outline: $border-width solid $color-on-primary;
+      outline-offset: $outline-offset;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: space(2);
+    margin-top: space(1);
+  }
+
+  &__submit,
+  &__google {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: space(1.5);
+    height: $auth-button-height;
+    border: $border-width solid $color-on-primary;
+    border-radius: $radius-md;
+    font-family: inherit;
+    font-size: $font-size-body-medium;
+    font-weight: $font-weight-bold;
+    line-height: $line-height-120;
+    color: $color-on-primary;
+    cursor: pointer;
+    transition:
+      background-color $transition-base,
+      filter $transition-base,
+      transform $transition-press;
+
+    &:focus-visible {
+      outline: $border-width solid $color-on-primary;
+      outline-offset: $outline-offset;
+    }
+  }
+
+  &__submit {
+    background-color: $color-primary;
+    box-shadow: $auth-button-shadow;
+
+    &:hover {
+      background-color: $color-primary-hover;
+    }
+
+    &:active {
+      background-color: $color-primary-active;
+      transform: translateY($press-offset);
+    }
+  }
+
+  &__google {
+    background-color: $color-surface;
+
+    &:hover {
+      filter: brightness($brightness-hover);
+    }
+
+    &:active {
+      filter: brightness($brightness-active);
+    }
+  }
+
+  &__divider {
+    display: flex;
+    align-items: center;
+    gap: space(2);
+    margin: 0;
+    font-size: $font-size-label-medium;
+    font-weight: $font-weight-semibold;
+    line-height: $line-height-120;
+    color: $color-on-bg;
+    text-transform: uppercase;
+
+    &::before,
+    &::after {
+      content: '';
+      flex: 1;
+      height: $border-width-hairline;
+      background-color: $color-outline;
+    }
+  }
+
+  &__switch {
+    margin: 0;
+    font-size: $font-size-body-small;
+    line-height: $line-height-140;
+    color: $color-on-bg;
+    text-align: center;
+  }
+}
+
+body:has(.auth-dialog[open]) {
+  overflow: hidden;
+}

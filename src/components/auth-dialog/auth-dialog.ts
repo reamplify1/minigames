@@ -1,0 +1,161 @@
+import './auth-dialog.scss';
+import mailIcon from '../../assets/icons/mail-icon.svg';
+import lockIcon from '../../assets/icons/lock-icon.svg';
+import eyeIcon from '../../assets/icons/eye-icon.svg';
+import userIcon from '../../assets/icons/user-icon.svg';
+import googleIcon from '../../assets/icons/google-icon.svg';
+
+const DEFAULT_MODE = 'login';
+
+interface FieldOptions {
+  id: string;
+  label: string;
+  type: 'text' | 'email' | 'password';
+  placeholder: string;
+  icon: string;
+  autocomplete: string;
+  withToggle?: boolean;
+}
+
+function createField(options: FieldOptions): string {
+  const toggle = options.withToggle
+    ? `<button class="auth-dialog__toggle" type="button" aria-label="Show password">
+         <img class="auth-dialog__toggle-icon" src="${eyeIcon}" alt="" />
+       </button>`
+    : '';
+
+  return `
+    <div class="auth-dialog__field">
+      <label class="auth-dialog__label" for="${options.id}">${options.label}</label>
+      <div class="auth-dialog__control">
+        <img class="auth-dialog__control-icon" src="${options.icon}" alt="" />
+        <input
+          class="auth-dialog__input"
+          id="${options.id}"
+          name="${options.id}"
+          type="${options.type}"
+          placeholder="${options.placeholder}"
+          autocomplete="${options.autocomplete}"
+          required
+        />
+        ${toggle}
+      </div>
+    </div>
+  `;
+}
+
+function createActions(submitLabel: string, googleLabel: string): string {
+  return `
+    <div class="auth-dialog__actions">
+      <button class="auth-dialog__submit" type="submit">${submitLabel}</button>
+      <p class="auth-dialog__divider">or</p>
+      <button class="auth-dialog__google" type="button">
+        <img class="auth-dialog__google-icon" src="${googleIcon}" alt="" />
+        ${googleLabel}
+      </button>
+    </div>
+  `;
+}
+
+export function createAuthDialog(): HTMLDialogElement {
+  const dialog = document.createElement('dialog');
+  dialog.className = 'auth-dialog';
+  dialog.dataset.mode = DEFAULT_MODE;
+  dialog.setAttribute('aria-label', 'Log in or register');
+  dialog.innerHTML = `
+    <div class="auth-dialog__tabs">
+      <button class="auth-dialog__tab auth-dialog__tab--login" type="button">Login</button>
+      <button class="auth-dialog__tab auth-dialog__tab--register" type="button">Register</button>
+    </div>
+
+    <section class="auth-dialog__panel auth-dialog__panel--login">
+      <header class="auth-dialog__header">
+        <h2 class="auth-dialog__title">Welcome Back!</h2>
+        <p class="auth-dialog__subtitle">Sign in to resume your games and progress.</p>
+      </header>
+      <form class="auth-dialog__form">
+        <div class="auth-dialog__fields">
+          ${createField({
+            id: 'login-email',
+            label: 'Email Address',
+            type: 'email',
+            placeholder: 'e.g. alex@minigames.com',
+            icon: mailIcon,
+            autocomplete: 'email',
+          })}
+          ${createField({
+            id: 'login-password',
+            label: 'Password',
+            type: 'password',
+            placeholder: '••••••••',
+            icon: lockIcon,
+            autocomplete: 'current-password',
+            withToggle: true,
+          })}
+        </div>
+        <div class="auth-dialog__links-row">
+          <button class="auth-dialog__link" type="button">Forgot Password?</button>
+        </div>
+        ${createActions('Login', 'Continue with Google')}
+      </form>
+      <p class="auth-dialog__switch">
+        Don't have an account?
+        <button class="auth-dialog__link" type="button">Register</button>
+      </p>
+    </section>
+
+    <section class="auth-dialog__panel auth-dialog__panel--register">
+      <header class="auth-dialog__header">
+        <h2 class="auth-dialog__title">Create Account</h2>
+        <p class="auth-dialog__subtitle">Join MiniGames to track your score &amp; streak.</p>
+      </header>
+      <form class="auth-dialog__form">
+        <div class="auth-dialog__fields">
+          ${createField({
+            id: 'register-username',
+            label: 'Username',
+            type: 'text',
+            placeholder: 'e.g. CozyGamer_99',
+            icon: userIcon,
+            autocomplete: 'username',
+          })}
+          ${createField({
+            id: 'register-email',
+            label: 'Email Address',
+            type: 'email',
+            placeholder: 'your.email@domain.com',
+            icon: mailIcon,
+            autocomplete: 'email',
+          })}
+          ${createField({
+            id: 'register-password',
+            label: 'Password',
+            type: 'password',
+            placeholder: 'Min. 8 characters',
+            icon: lockIcon,
+            autocomplete: 'new-password',
+          })}
+          ${createField({
+            id: 'register-confirm-password',
+            label: 'Confirm Password',
+            type: 'password',
+            placeholder: 'Repeat your password',
+            icon: lockIcon,
+            autocomplete: 'new-password',
+          })}
+        </div>
+        ${createActions('Create Account', 'Sign up with Google')}
+      </form>
+      <p class="auth-dialog__switch">
+        Already have an account?
+        <button class="auth-dialog__link" type="button">Login</button>
+      </p>
+    </section>
+  `;
+
+  dialog.addEventListener('submit', (event) => {
+    event.preventDefault();
+  });
+
+  return dialog;
+}
