@@ -11,6 +11,7 @@ $viewport-desktop: 1920px;
 $space-unit: 8px;
 
 $font-family-base: 'Inter', sans-serif;
+$font-family-table: 'Roboto', sans-serif;
 
 $font-weight-medium: 500;
 $font-weight-semibold: 600;
@@ -109,3 +110,14 @@ $duration-menu: 0.3s;
 
 $z-index-behind: -1;
 $z-index-menu: 100;
+
+$color-table-header: #3a2ebf;
+$color-outline: #e5e7eb;
+$color-avatar-yellow: $color-primary;
+$color-avatar-green: #a8e6cf;
+$color-avatar-blue: #bfdbfe;
+$color-avatar-pink: #f5b8f5;
+$color-avatar-lavender: #d4d0f7;
+
+$font-size-label-small: 11px;
+$border-width-hairline: 1px;

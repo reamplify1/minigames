@@ -1,0 +1,325 @@
+@use '../../styles/tokens' as *;
+@use '../../styles/mixins' as *;
+
+$leaderboard-avatar-size: space(5);
+$leaderboard-avatar-size-tablet: space(4.5);
+$leaderboard-avatar-size-mobile: space(3);
+$leaderboard-rank-width: space(14);
+$leaderboard-rank-width-tablet: space(12);
+$leaderboard-player-width-tablet: 28%;
+$leaderboard-col-rank-mobile: 16%;
+$leaderboard-col-player-mobile: 36%;
+$leaderboard-col-score-mobile: 20%;
+$leaderboard-header-height-mobile: space(6);
+$leaderboard-row-height-mobile: space(7);
+
+.leaderboard {
+  display: flex;
+  flex-direction: column;
+  gap: space(5);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: $viewport-desktop;
+  margin-inline: auto;
+  padding: space(5) space(15);
+
+  @include respond-to(tablet) {
+    gap: fluid-tablet(space(3), space(5));
+    padding: fluid-tablet(space(3), space(5)) fluid-tablet(space(5), space(15));
+  }
+
+  @include respond-to(mobile) {
+    gap: fluid-mobile(space(2), space(3));
+    padding: fluid-mobile(space(2), space(3)) fluid-mobile(space(2), space(5));
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: space(1);
+  }
+
+  &__marker {
+    box-sizing: border-box;
+    width: space(1);
+    height: space(4);
+    border: $border-width-thin solid $color-on-primary;
+    border-radius: $radius-sm;
+    background-color: $color-primary;
+
+    @include respond-to(tablet) {
+      height: fluid-tablet(space(3), space(4));
+    }
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-headline-large;
+    font-weight: $font-weight-bold;
+    line-height: $line-height-120;
+    color: $color-on-primary;
+
+    @include respond-to(tablet) {
+      font-size: fluid-tablet($font-size-headline-medium, $font-size-headline-large);
+    }
+  }
+
+  &__text-compact {
+    display: none;
+
+    @include respond-to(tablet) {
+      display: inline;
+    }
+  }
+
+  &__text-full {
+    @include respond-to(tablet) {
+      display: none;
+    }
+  }
+
+  &__table-wrap {
+    box-sizing: border-box;
+    border: $border-width-thick solid $color-on-primary;
+    border-radius: $radius-lg;
+    background-color: $color-surface;
+    box-shadow: $shadow-hard-md;
+    overflow: hidden;
+
+    @include respond-to(tablet) {
+      box-shadow: $shadow-hard-sm;
+    }
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-family: $font-family-table;
+  }
+
+  &__row {
+    &:nth-child(odd) {
+      background-color: $color-background;
+    }
+
+    &:nth-child(even) {
+      background-color: $color-surface;
+    }
+
+    & + & .leaderboard__cell {
+      border-top: $border-width-hairline solid $color-outline;
+    }
+
+    &--extra {
+      @include respond-to(tablet) {
+        display: none;
+      }
+    }
+  }
+
+  &__cell {
+    padding: space(2) space(1);
+    font-size: $font-size-body-medium;
+    font-weight: $font-weight-bold;
+    line-height: $line-height-140;
+    color: $color-on-primary;
+    text-align: center;
+    vertical-align: middle;
+
+    &:first-child {
+      padding-left: space(3);
+    }
+
+    &:last-child {
+      padding-right: space(3);
+    }
+
+    @include respond-to(tablet) {
+      padding-block: fluid-tablet(space(1.5), space(2));
+      font-size: fluid-tablet($font-size-body-small, $font-size-body-medium);
+
+      &:first-child {
+        padding-left: space(2);
+      }
+
+      &:last-child {
+        padding-right: space(2);
+      }
+    }
+
+    @include respond-to(mobile) {
+      height: $leaderboard-row-height-mobile;
+      padding-block: 0;
+      padding-inline: space(0.5);
+      font-size: $font-size-body-small;
+
+      &:first-child {
+        padding-left: space(2);
+      }
+
+      &:last-child {
+        padding-right: space(2);
+      }
+    }
+
+    &--rank {
+      width: $leaderboard-rank-width;
+
+      @include respond-to(tablet) {
+        width: $leaderboard-rank-width-tablet;
+      }
+
+      @include respond-to(mobile) {
+        width: $leaderboard-col-rank-mobile;
+      }
+    }
+
+    &--player {
+      @include respond-to(tablet) {
+        width: $leaderboard-player-width-tablet;
+      }
+
+      @include respond-to(mobile) {
+        width: $leaderboard-col-player-mobile;
+      }
+    }
+
+    &--score {
+      @include respond-to(mobile) {
+        width: $leaderboard-col-score-mobile;
+      }
+    }
+
+    &--games {
+      @include respond-to(mobile) {
+        display: none;
+      }
+    }
+
+    &--favorite {
+      @include respond-to(tablet) {
+        display: none;
+      }
+    }
+
+    &--first-place {
+      color: $color-primary;
+
+      @include respond-to(tablet) {
+        color: $color-table-header;
+      }
+    }
+
+    &--head {
+      padding-block: space(3);
+      background-color: $color-table-header;
+      font-size: $font-size-body-small;
+      font-weight: $font-weight-bold;
+      line-height: $line-height-150;
+      color: $color-white;
+      text-transform: uppercase;
+
+      @include respond-to(tablet) {
+        padding-block: fluid-tablet(space(2), space(3));
+      }
+
+      @include respond-to(mobile) {
+        height: $leaderboard-header-height-mobile;
+        padding-block: 0;
+      }
+    }
+  }
+
+  &__player {
+    display: flex;
+    align-items: center;
+    gap: space(1.5);
+    text-align: left;
+
+    @include respond-to(mobile) {
+      gap: space(0.75);
+    }
+  }
+
+  &__avatar {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: $leaderboard-avatar-size;
+    height: $leaderboard-avatar-size;
+    border: $border-width-thin solid $color-on-primary;
+    border-radius: $radius-circle;
+    font-size: $font-size-label-medium;
+    font-weight: $font-weight-bold;
+    line-height: 1;
+
+    @include respond-to(tablet) {
+      width: fluid-tablet($leaderboard-avatar-size-tablet, $leaderboard-avatar-size);
+      height: fluid-tablet($leaderboard-avatar-size-tablet, $leaderboard-avatar-size);
+    }
+
+    @include respond-to(mobile) {
+      width: fluid-mobile($leaderboard-avatar-size-mobile, $leaderboard-avatar-size-tablet);
+      height: fluid-mobile($leaderboard-avatar-size-mobile, $leaderboard-avatar-size-tablet);
+      font-size: $font-size-label-small;
+    }
+
+    &--yellow {
+      background-color: $color-avatar-yellow;
+    }
+
+    &--green {
+      background-color: $color-avatar-green;
+    }
+
+    &--blue {
+      background-color: $color-avatar-blue;
+    }
+
+    &--pink {
+      background-color: $color-avatar-pink;
+    }
+
+    &--lavender {
+      background-color: $color-avatar-lavender;
+    }
+  }
+
+  &__name {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &__streak {
+    display: inline-flex;
+    align-items: center;
+    gap: $size-1;
+  }
+
+  &__streak-icon {
+    flex: none;
+    line-height: 1;
+  }
+
+  &__pill {
+    display: inline-block;
+    box-sizing: border-box;
+    max-width: 100%;
+    padding: $size-1 space(1.5);
+    overflow: hidden;
+    border: $border-width-hairline solid $color-on-primary;
+    border-radius: $radius-pill;
+    background-color: $color-surface;
+    font-size: $font-size-label-small;
+    font-weight: $font-weight-semibold;
+    line-height: $line-height-120;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+  }
+}
