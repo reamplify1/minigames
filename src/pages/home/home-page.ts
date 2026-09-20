@@ -1,3 +1,4 @@
+import { createDeveloperCta } from '../../components/developer-cta/developer-cta';
 import { createHeader } from '../../components/header/header';
 import { createHero } from '../../components/hero/hero';
 import { createLeaderboard } from '../../components/leaderboard/leaderboard';
@@ -8,7 +9,7 @@ export function renderHomePage(): void {
   root.id = 'app';
 
   const main = document.createElement('main');
-  main.append(createHero(), createNewGames(), createLeaderboard());
+  main.append(createHero(), createNewGames(), createLeaderboard(), createDeveloperCta());
   root.append(createHeader(), main);
 
   document.body.replaceChildren(root);
