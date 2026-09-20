@@ -1,6 +1,7 @@
 import './mobile-menu.scss';
 import logoIcon from '../../assets/icons/minigames-icon.svg';
 import closeIcon from '../../assets/icons/close-button-icon.svg';
+import { openAuthDialog } from '../auth-dialog/auth-dialog';
 
 const OPEN_CLASS = 'mobile-menu--open';
 const NO_SCROLL_CLASS = 'no-scroll';
@@ -81,7 +82,8 @@ export function createMobileMenu(trigger: HTMLElement): HTMLElement {
   }
 
   function handleAuthTrigger(): void {
-    // TODO: open Auth dialog
+    closeMenu();
+    openAuthDialog();
   }
 
   trigger.addEventListener('click', openMenu);
