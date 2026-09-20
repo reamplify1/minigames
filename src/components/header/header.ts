@@ -2,6 +2,7 @@ import './header.scss';
 import logoIcon from '../../assets/icons/minigames-icon.svg';
 import burgerIcon from '../../assets/icons/burger-icon.svg';
 import { createMobileMenu } from '../mobile-menu/mobile-menu';
+import { openAuthDialog } from '../auth-dialog/auth-dialog';
 
 export function createHeader(): HTMLElement {
   const header = document.createElement('header');
@@ -48,5 +49,5 @@ export function createHeader(): HTMLElement {
 }
 
 function handleAuthTrigger(): void {
-  // TODO: open Auth dialog
+  openAuthDialog();
 }
