@@ -11,14 +11,20 @@ const DEFAULT_MODE: AuthMode = 'login';
 const DIALOG_SELECTOR = '.auth-dialog';
 const TAB_SELECTOR = '.auth-dialog__tab';
 const SWITCH_SELECTOR = '[data-switch-to]';
+const PASSWORD_TOGGLE_SELECTOR = '[data-password-toggle]';
+const CONTROL_SELECTOR = '.auth-dialog__control';
+const INPUT_SELECTOR = '.auth-dialog__input';
+const PASSWORD_MIN_LENGTH = 8;
 
 interface FieldOptions {
   id: string;
+  name: string;
   label: string;
   type: 'text' | 'email' | 'password';
   placeholder: string;
   icon: string;
   autocomplete: string;
+  minLength?: number;
   withToggle?: boolean;
 }
 
@@ -27,8 +33,17 @@ function isAuthMode(value: string | undefined): value is AuthMode {
 }
 
 function createField(options: FieldOptions): string {
+  const minLength = options.minLength ? `minlength="${options.minLength}"` : '';
+  const textAttributes =
+    options.type === 'password' ? '' : 'autocapitalize="none" spellcheck="false"';
   const toggle = options.withToggle
-    ? `<button class="auth-dialog__toggle" type="button" aria-label="Show password">
+    ? `<button
+         class="auth-dialog__toggle"
+         type="button"
+         aria-label="Show password"
+         aria-pressed="false"
+         data-password-toggle
+       >
          <img class="auth-dialog__toggle-icon" src="${eyeIcon}" alt="" />
        </button>`
     : '';
@@ -41,10 +56,12 @@ function createField(options: FieldOptions): string {
         <input
           class="auth-dialog__input"
           id="${options.id}"
-          name="${options.id}"
+          name="${options.name}"
           type="${options.type}"
           placeholder="${options.placeholder}"
           autocomplete="${options.autocomplete}"
+          ${minLength}
+          ${textAttributes}
           required
         />
         ${toggle}
@@ -80,6 +97,20 @@ function switchMode(dialog: HTMLDialogElement, mode: AuthMode): void {
   }
 
   dialog.querySelector<HTMLButtonElement>(`${TAB_SELECTOR}[aria-selected="true"]`)?.focus();
+}
+
+function togglePassword(button: HTMLButtonElement): void {
+  const input = button.closest(CONTROL_SELECTOR)?.querySelector<HTMLInputElement>(INPUT_SELECTOR);
+
+  if (!input) {
+    return;
+  }
+
+  const isHidden = input.type === 'password';
+
+  input.type = isHidden ? 'text' : 'password';
+  button.setAttribute('aria-pressed', String(isHidden));
+  button.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
 }
 
 function createAuthDialog(): HTMLDialogElement {
@@ -121,13 +152,14 @@ function createAuthDialog(): HTMLDialogElement {
         aria-labelledby="auth-tab-login"
       >
         <header class="auth-dialog__header">
-          <h2 class="auth-dialog__title">Welcome Back!</h2>
+          <h2 class="auth-dialog__title" id="auth-login-title">Welcome Back!</h2>
           <p class="auth-dialog__subtitle">Sign in to resume your games and progress.</p>
         </header>
-        <form class="auth-dialog__form">
+        <form class="auth-dialog__form" aria-labelledby="auth-login-title">
           <div class="auth-dialog__fields">
             ${createField({
               id: 'login-email',
+              name: 'email',
               label: 'Email Address',
               type: 'email',
               placeholder: 'e.g. alex@minigames.com',
@@ -136,6 +168,7 @@ function createAuthDialog(): HTMLDialogElement {
             })}
             ${createField({
               id: 'login-password',
+              name: 'password',
               label: 'Password',
               type: 'password',
               placeholder: '••••••••',
@@ -162,13 +195,14 @@ function createAuthDialog(): HTMLDialogElement {
         aria-labelledby="auth-tab-register"
       >
         <header class="auth-dialog__header">
-          <h2 class="auth-dialog__title">Create Account</h2>
+          <h2 class="auth-dialog__title" id="auth-register-title">Create Account</h2>
           <p class="auth-dialog__subtitle">Join MiniGames to track your score &amp; streak.</p>
         </header>
-        <form class="auth-dialog__form">
+        <form class="auth-dialog__form" aria-labelledby="auth-register-title">
           <div class="auth-dialog__fields">
             ${createField({
               id: 'register-username',
+              name: 'username',
               label: 'Username',
               type: 'text',
               placeholder: 'e.g. CozyGamer_99',
@@ -177,6 +211,7 @@ function createAuthDialog(): HTMLDialogElement {
             })}
             ${createField({
               id: 'register-email',
+              name: 'email',
               label: 'Email Address',
               type: 'email',
               placeholder: 'your.email@domain.com',
@@ -185,14 +220,17 @@ function createAuthDialog(): HTMLDialogElement {
             })}
             ${createField({
               id: 'register-password',
+              name: 'password',
               label: 'Password',
               type: 'password',
               placeholder: 'Min. 8 characters',
               icon: lockIcon,
               autocomplete: 'new-password',
+              minLength: PASSWORD_MIN_LENGTH,
             })}
             ${createField({
               id: 'register-confirm-password',
+              name: 'confirmPassword',
               label: 'Confirm Password',
               type: 'password',
               placeholder: 'Repeat your password',
@@ -217,6 +255,13 @@ function createAuthDialog(): HTMLDialogElement {
     }
 
     if (!(event.target instanceof Element)) {
+      return;
+    }
+
+    const passwordToggle = event.target.closest<HTMLButtonElement>(PASSWORD_TOGGLE_SELECTOR);
+
+    if (passwordToggle) {
+      togglePassword(passwordToggle);
       return;
     }
 
