@@ -7,7 +7,7 @@ import rsSchoolIcon from '../../assets/icons/rs-icon.svg';
 import githubIcon from '../../assets/icons/github-icon.svg';
 
 const HOME_URL = '/';
-const RS_SCHOOL_URL = 'https://rs.school';
+const RS_SCHOOL_URL = 'https://rs.school/courses/short-track';
 const GITHUB_URL = 'https://github.com/reamplify1';
 const GITHUB_NICKNAME = '@reamplify1';
 
