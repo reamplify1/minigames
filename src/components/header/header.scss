@@ -7,7 +7,7 @@
   &__inner {
     display: flex;
     align-items: center;
-    max-width: 1920px;
+    max-width: $viewport-desktop;
     margin: 0 auto;
     padding: $size-6 $size-7;
 
@@ -16,7 +16,7 @@
     }
 
     @include respond-to(mobile) {
-      padding: $size-3 $size-3;
+      padding: $size-3;
     }
   }
 
@@ -25,9 +25,14 @@
     align-items: center;
     gap: $size-2;
     color: $color-text;
-    font-weight: 700;
+    font-weight: $font-weight-bold;
     text-decoration: none;
     cursor: pointer;
+
+    &:focus-visible {
+      outline: $border-width solid $color-text;
+      outline-offset: $outline-offset;
+    }
   }
 
   &__right {
@@ -48,23 +53,33 @@
   &__nav-list {
     display: flex;
     gap: $size-4;
-    list-style: none;
     margin: 0;
     padding: 0;
+    list-style: none;
   }
 
   &__nav-link {
     color: $color-text-muted;
     text-decoration: none;
     cursor: pointer;
+    transition: color $transition-base;
 
-    &:hover {
+    @include hover-only {
       color: $color-text;
+    }
+
+    &:active {
+      color: $color-text;
+    }
+
+    &:focus-visible {
+      outline: $border-width solid $color-text;
+      outline-offset: $outline-offset;
     }
 
     &--active {
       color: $color-text;
-      font-weight: 600;
+      font-weight: $font-weight-semibold;
     }
   }
 
@@ -78,53 +93,56 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: auto;
-    padding: $size-btn-padding-y $size-btn-padding-x;
-    border-radius: $radius-md;
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    border: $border-width-btn solid $color-border-btn;
     box-sizing: border-box;
+    padding: $size-btn-padding-y $size-btn-padding-x;
+    border: $border-width-btn solid $color-border-btn;
+    border-radius: $radius-md;
+    font-family: inherit;
+    font-size: $font-size-body-small;
+    font-weight: $font-weight-semibold;
+    color: $color-text;
+    cursor: pointer;
+    transition: background-color $transition-base;
 
     @include respond-to(tablet) {
-      height: 32px;
+      height: $size-5;
       padding: 0 $size-btn-padding-x-compact;
     }
 
+    &:focus-visible {
+      outline: $border-width solid $color-text;
+      outline-offset: $outline-offset;
+    }
+
     &--outline {
-      display: inline-block;
-      background: transparent;
-      color: $color-text;
+      background-color: transparent;
 
       @include respond-to(tablet) {
         display: none;
       }
 
-      &:hover {
-        background-color: rgba(0, 0, 0, 0.05);
+      @include hover-only {
+        background-color: $color-highlight;
       }
 
       &:active {
-        background-color: rgba(0, 0, 0, 0.1);
+        background-color: $color-highlight-active;
       }
     }
 
     &--accent {
-      display: inline-block;
-      background-color: $color-accent;
-      color: $color-text;
+      background-color: $color-primary;
 
       @include respond-to(mobile) {
         display: none;
       }
 
-      &:hover {
-        filter: brightness(0.95);
+      @include hover-only {
+        background-color: $color-primary-hover;
       }
 
       &:active {
-        filter: brightness(0.9);
+        background-color: $color-primary-active;
       }
     }
   }
@@ -133,16 +151,31 @@
     display: none;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    box-sizing: border-box;
+    width: $size-5;
+    height: $size-5;
     padding: $size-2;
-    border-radius: $radius-md;
     border: $border-width-btn solid $color-border-btn;
-    background: $color-surface;
+    border-radius: $radius-md;
+    background-color: $color-surface;
     cursor: pointer;
+    transition: background-color $transition-base;
 
     @include respond-to(tablet) {
       display: inline-flex;
+    }
+
+    @include hover-only {
+      background-color: $color-highlight;
+    }
+
+    &:active {
+      background-color: $color-highlight-active;
+    }
+
+    &:focus-visible {
+      outline: $border-width solid $color-text;
+      outline-offset: $outline-offset;
     }
 
     img {
