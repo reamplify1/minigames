@@ -74,7 +74,6 @@ export function createMobileMenu(trigger: HTMLElement): HTMLElement {
     }
   }
 
-  // Если окно расширили выше 768px, закрываем меню, чтобы оно не блокировало прокрутку
   function handleResize(): void {
     if (!isMenuAvailable()) {
       closeMenu();

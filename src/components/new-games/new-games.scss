@@ -1,0 +1,128 @@
+@use '../../styles/tokens' as *;
+@use '../../styles/mixins' as *;
+
+$new-games-arrow-icon-size: 20px;
+
+.new-games {
+  display: flex;
+  flex-direction: column;
+  gap: space(5);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: $viewport-desktop;
+  margin-inline: auto;
+  padding: space(5) space(15);
+
+  @include respond-to(tablet) {
+    gap: fluid-tablet(space(3), space(5));
+    padding: fluid-tablet(space(3), space(5)) fluid-tablet(space(5), space(15));
+  }
+
+  @include respond-to(mobile) {
+    gap: fluid-mobile(space(2), space(3));
+    padding: fluid-mobile(space(2), space(3)) fluid-mobile(space(2), space(5));
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__heading {
+    display: flex;
+    align-items: center;
+    gap: space(1);
+  }
+
+  &__marker {
+    box-sizing: border-box;
+    width: space(1);
+    height: space(4);
+    border: $border-width-thin solid $color-on-primary;
+    border-radius: $radius-sm;
+    background-color: $color-primary;
+
+    @include respond-to(tablet) {
+      height: fluid-tablet(space(3), space(4));
+    }
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-headline-large;
+    font-weight: $font-weight-bold;
+    line-height: $line-height-120;
+    color: $color-on-primary;
+
+    @include respond-to(tablet) {
+      font-size: fluid-tablet($font-size-headline-medium, $font-size-headline-large);
+    }
+  }
+
+  &__controls {
+    display: flex;
+    gap: space(2);
+
+    @include respond-to(mobile) {
+      display: none;
+    }
+  }
+
+  &__arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: space(6);
+    height: space(6);
+    padding: 0;
+    border: $border-width solid $color-on-primary;
+    border-radius: $radius-circle;
+    background-color: $color-surface;
+    cursor: pointer;
+    transition: filter $transition-base;
+
+    @include respond-to(tablet) {
+      width: fluid-tablet(space(5), space(6));
+      height: fluid-tablet(space(5), space(6));
+    }
+
+    &:hover {
+      filter: brightness($brightness-hover);
+    }
+
+    &:active {
+      filter: brightness($brightness-active);
+    }
+
+    &:focus-visible {
+      outline: $border-width solid $color-on-primary;
+      outline-offset: $outline-offset;
+    }
+
+    &--accent {
+      background-color: $color-primary;
+    }
+  }
+
+  &__arrow-icon {
+    width: $new-games-arrow-icon-size;
+    height: $new-games-arrow-icon-size;
+  }
+
+  &__track {
+    display: flex;
+    gap: space(1);
+    justify-content: center;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0 space(1) $size-1;
+    list-style: none;
+    overflow: hidden;
+
+    @include respond-to(mobile) {
+      padding-inline: fluid-mobile($size-1, space(1));
+    }
+  }
+}
