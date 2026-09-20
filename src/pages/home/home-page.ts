@@ -3,6 +3,7 @@ import { createHeader } from '../../components/header/header';
 import { createHero } from '../../components/hero/hero';
 import { createLeaderboard } from '../../components/leaderboard/leaderboard';
 import { createNewGames } from '../../components/new-games/new-games';
+import { createFooter } from '../../components/footer/footer';
 
 export function renderHomePage(): void {
   const root = document.createElement('div');
@@ -10,7 +11,8 @@ export function renderHomePage(): void {
 
   const main = document.createElement('main');
   main.append(createHero(), createNewGames(), createLeaderboard(), createDeveloperCta());
-  root.append(createHeader(), main);
+  
+  root.append(createHeader(), main, createFooter());
 
   document.body.replaceChildren(root);
 }
