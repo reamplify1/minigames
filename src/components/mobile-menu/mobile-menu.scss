@@ -1,17 +1,19 @@
 @use '../../styles/tokens' as *;
 @use '../../styles/mixins' as *;
 
+$mobile-menu-close-icon-size: 14px;
+
 .no-scroll {
   overflow: hidden;
 }
 
 .mobile-menu {
-  display: none; 
+  display: none;
 
-  @include respond-to(mobile) {
+  @include respond-to(burger) {
     position: fixed;
     inset: 0;
-    z-index: 100;
+    z-index: $z-index-menu;
     display: flex;
     flex-direction: column;
     gap: $size-5;
@@ -23,14 +25,14 @@
     visibility: hidden;
     transform: translateX(100%);
     transition:
-      transform 0.3s ease,
-      visibility 0s linear 0.3s;
+      transform $duration-menu ease,
+      visibility 0s linear $duration-menu;
 
     &--open {
       visibility: visible;
       transform: translateX(0);
       transition:
-        transform 0.3s ease,
+        transform $duration-menu ease,
         visibility 0s;
     }
   }
@@ -46,48 +48,48 @@
     align-items: center;
     gap: $size-2;
     color: $color-white;
-    font-size: 20px;
-    font-weight: 700;
+    font-size: $font-size-title-medium;
+    font-weight: $font-weight-bold;
     text-decoration: none;
     cursor: pointer;
   }
 
   &__logo-icon {
-    width: 32px;
-    height: 32px;
+    width: $size-5;
+    height: $size-5;
   }
 
   &__close {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: $size-5;
+    height: $size-5;
     padding: 0;
     border: 0;
     border-radius: $radius-md;
-    background-color: rgba($color-white, 0.1);
+    background-color: $color-white-10;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color $transition-base;
 
     &:hover {
-      background-color: rgba($color-white, 0.2);
+      background-color: $color-white-20;
     }
 
     &:active {
-      background-color: rgba($color-white, 0.3);
+      background-color: $color-white-30;
     }
   }
 
   &__close-icon {
-    width: 14px;
-    height: 14px;
+    width: $mobile-menu-close-icon-size;
+    height: $mobile-menu-close-icon-size;
     filter: brightness(0) invert(1);
     pointer-events: none;
   }
 
   &__nav {
-    flex: 1; 
+    flex: 1;
   }
 
   &__list {
@@ -101,13 +103,13 @@
 
   &__link {
     display: block;
-    color: rgba($color-white, 0.75);
-    font-size: 18px;
-    font-weight: 500;
-    line-height: 1.2;
+    color: $color-white-75;
+    font-size: $font-size-body-large;
+    font-weight: $font-weight-medium;
+    line-height: $line-height-120;
     text-decoration: none;
     cursor: pointer;
-    transition: color 0.2s ease;
+    transition: color $transition-base;
 
     &:hover {
       color: $color-white;
@@ -116,7 +118,7 @@
     &--active,
     &--active:hover {
       color: $color-primary;
-      font-weight: 700;
+      font-weight: $font-weight-bold;
     }
   }
 
@@ -133,24 +135,24 @@
     border: $border-width-btn solid $color-white;
     border-radius: $radius-md;
     font-family: inherit;
-    font-size: 14px;
-    font-weight: 700;
-    line-height: 1.2;
+    font-size: $font-size-body-small;
+    font-weight: $font-weight-bold;
+    line-height: $line-height-120;
     cursor: pointer;
     transition:
-      background-color 0.2s ease,
-      filter 0.2s ease;
+      background-color $transition-base,
+      filter $transition-base;
 
     &--outline {
       background-color: transparent;
       color: $color-white;
 
       &:hover {
-        background-color: rgba($color-white, 0.1);
+        background-color: $color-white-10;
       }
 
       &:active {
-        background-color: rgba($color-white, 0.2);
+        background-color: $color-white-20;
       }
     }
 
@@ -160,11 +162,11 @@
       color: $color-on-primary;
 
       &:hover {
-        filter: brightness(0.95);
+        filter: brightness($brightness-hover);
       }
 
       &:active {
-        filter: brightness(0.9);
+        filter: brightness($brightness-active);
       }
     }
   }
@@ -173,8 +175,8 @@
   &__link,
   &__btn {
     &:focus-visible {
-      outline: 2px solid $color-white;
-      outline-offset: 2px;
+      outline: $border-width solid $color-white;
+      outline-offset: $outline-offset;
     }
   }
 }

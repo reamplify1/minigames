@@ -1,6 +1,12 @@
-@use 'sass:color';
 @use '../../styles/tokens' as *;
 @use '../../styles/mixins' as *;
+
+$hero-card-max-width: 640px;
+$hero-card-min-width: 480px;
+$hero-image-inset: -7%;
+$hero-image-position: center 65%;
+$hero-image-opacity: 0.2;
+$hero-overlay-opacity: 0.65;
 
 .hero {
   position: relative;
@@ -9,30 +15,30 @@
   display: flex;
   align-items: center;
   width: 100%;
-  max-width: 1920px;
+  max-width: $viewport-desktop;
   margin-inline: auto;
-  padding: 110px 120px 112px;
-  border-top: 2px solid $color-on-primary;
-  background-color: rgba($color-hero-overlay, 0.65);
+  padding: (space(14) - $border-width) space(15) space(14);
+  border-top: $border-width solid $color-on-primary;
+  background-color: rgba($color-hero-overlay, $hero-overlay-opacity);
   overflow: hidden;
 
   &::before {
     content: '';
     position: absolute;
-    inset: -7%;
-    z-index: -1;
-    background: url('../../assets/images/hero-bg.png') center 65% / cover no-repeat;
-    opacity: 0.2;
+    inset: $hero-image-inset;
+    z-index: $z-index-behind;
+    background: url('../../assets/images/hero-bg.png') $hero-image-position / cover no-repeat;
+    opacity: $hero-image-opacity;
   }
 
   @include respond-to(tablet) {
-    padding: clamp(70px, 43.33px + 3.47vw, 110px) clamp(40px, 6.94vw - 13.33px, 120px)
-      clamp(72px, 45.33px + 3.47vw, 112px);
+    padding: fluid-tablet(space(9) - $border-width, space(14) - $border-width)
+      fluid-tablet(space(5), space(15)) fluid-tablet(space(9), space(14));
   }
 
   @include respond-to(mobile) {
-    padding: clamp(62px, 54.37px + 2.04vw, 70px) clamp(16px, 6.11vw - 6.9px, 40px)
-      clamp(64px, 56.37px + 2.04vw, 72px);
+    padding: fluid-mobile(space(8) - $border-width, space(9) - $border-width)
+      fluid-mobile(space(2), space(5)) fluid-mobile(space(8), space(9));
   }
 
   &__card {
@@ -40,62 +46,62 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 24px;
+    gap: space(3);
     width: 100%;
-    max-width: 640px;
-    padding: 46px;
-    border: 2px solid $color-on-primary;
-    border-radius: 24px;
+    max-width: $hero-card-max-width;
+    padding: space(6) - $border-width;
+    border: $border-width solid $color-on-primary;
+    border-radius: $radius-2xl;
     background-color: $color-background;
-    box-shadow: 8px 8px 0 $color-on-primary;
+    box-shadow: $shadow-hard-lg;
 
     @include respond-to(tablet) {
-      gap: clamp(16px, 10.67px + 0.69vw, 24px);
-      max-width: clamp(480px, 373.33px + 13.89vw, 640px);
-      padding: clamp(22px, 6px + 2.08vw, 46px);
-      border-radius: 20px;
-      box-shadow: 6px 6px 0 $color-on-primary;
+      gap: fluid-tablet(space(2), space(3));
+      max-width: fluid-tablet($hero-card-min-width, $hero-card-max-width);
+      padding: fluid-tablet(space(3) - $border-width, space(6) - $border-width);
+      border-radius: $radius-xl;
+      box-shadow: $shadow-hard-md;
     }
 
     @include respond-to(mobile) {
       max-width: none;
-      border-radius: 16px;
-      box-shadow: 4px 4px 0 $color-on-primary;
+      border-radius: $radius-lg;
+      box-shadow: $shadow-hard-sm;
     }
   }
 
   &__title {
     margin: 0;
-    font-size: 56px;
-    font-weight: 700;
-    line-height: 1.1;
+    font-size: $font-size-display-large;
+    font-weight: $font-weight-bold;
+    line-height: $line-height-110;
     color: $color-on-primary;
 
     @include respond-to(tablet) {
-      font-size: clamp(36px, 22.67px + 1.74vw, 56px);
-      line-height: 1.15;
+      font-size: fluid-tablet($font-size-display-medium, $font-size-display-large);
+      line-height: $line-height-115;
     }
 
     @include respond-to(mobile) {
-      font-size: clamp(24px, 12.52px + 3.06vw, 36px);
-      line-height: 1.2;
+      font-size: fluid-mobile($font-size-display-small, $font-size-display-medium);
+      line-height: $line-height-120;
     }
   }
 
   &__text {
     margin: 0;
-    font-size: 18px;
-    font-weight: 500;
-    line-height: 1.5;
+    font-size: $font-size-body-large;
+    font-weight: $font-weight-medium;
+    line-height: $line-height-150;
     color: $color-on-bg;
 
     @include respond-to(tablet) {
-      font-size: clamp(14px, 11.33px + 0.35vw, 18px);
-      line-height: 1.4;
+      font-size: fluid-tablet($font-size-body-small, $font-size-body-large);
+      line-height: $line-height-140;
     }
 
     @include respond-to(mobile) {
-      font-size: clamp(12px, 10.09px + 0.51vw, 14px);
+      font-size: fluid-mobile($font-size-label-medium, $font-size-body-small);
     }
   }
 
@@ -114,46 +120,61 @@
   }
 
   &__button {
-    padding: 14px 22px;
-    border: 2px solid $color-on-primary;
-    border-radius: 8px;
+    padding: ($size-btn-padding-y-large - $border-width-btn)
+      ($size-btn-padding-x-large - $border-width-btn);
+    border: $border-width-btn solid $color-on-primary;
+    border-radius: $radius-md;
     background-color: $color-primary;
     font-family: inherit;
-    font-size: 18px;
-    font-weight: 700;
-    line-height: 1.2;
+    font-size: $font-size-body-large;
+    font-weight: $font-weight-bold;
+    line-height: $line-height-120;
     color: $color-on-primary;
     cursor: pointer;
     transition:
-      background-color 0.2s ease,
-      transform 0.1s ease;
+      background-color $transition-base,
+      transform $transition-press;
 
     @include respond-to(tablet) {
-      padding: clamp(8px, 4px + 0.52vw, 14px) clamp(18px, 15.33px + 0.35vw, 22px);
-      font-size: clamp(14px, 11.33px + 0.35vw, 18px);
+      padding: fluid-tablet(
+          $size-btn-padding-y - $border-width-btn,
+          $size-btn-padding-y-large - $border-width-btn
+        )
+        fluid-tablet(
+          $size-btn-padding-x - $border-width-btn,
+          $size-btn-padding-x-large - $border-width-btn
+        );
+      font-size: fluid-tablet($font-size-body-small, $font-size-body-large);
     }
 
     @include respond-to(mobile) {
-      padding: clamp(6px, 4.09px + 0.51vw, 8px) clamp(14px, 10.18px + 1.02vw, 18px);
-      font-size: clamp(12px, 10.09px + 0.51vw, 14px);
+      padding: fluid-mobile(
+          $size-btn-padding-y-compact - $border-width-btn,
+          $size-btn-padding-y - $border-width-btn
+        )
+        fluid-mobile(
+          $size-btn-padding-x-compact - $border-width-btn,
+          $size-btn-padding-x - $border-width-btn
+        );
+      font-size: fluid-mobile($font-size-label-medium, $font-size-body-small);
     }
 
     &:hover:not(:disabled) {
-      background-color: color.adjust($color-primary, $lightness: 8%);
+      background-color: $color-primary-hover;
     }
 
     &:active:not(:disabled) {
-      background-color: color.adjust($color-primary, $lightness: -8%);
-      transform: translateY(1px);
+      background-color: $color-primary-active;
+      transform: translateY($press-offset);
     }
 
     &:focus-visible {
-      outline: 2px solid $color-on-primary;
-      outline-offset: 2px;
+      outline: $border-width solid $color-on-primary;
+      outline-offset: $outline-offset;
     }
 
     &:disabled {
-      opacity: 0.5;
+      opacity: $opacity-disabled;
       cursor: not-allowed;
     }
   }

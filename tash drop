@@ -1,0 +1,37 @@
+[1mdiff --git a/src/styles/_tokens.scss b/src/styles/_tokens.scss[m
+[1mindex 3980a39..72bcb55 100644[m
+[1m--- a/src/styles/_tokens.scss[m
+[1m+++ b/src/styles/_tokens.scss[m
+[36m@@ -32,22 +32,20 @@[m [m$radius-pill: 999px;[m
+ [m
+ $shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);[m
+ [m
+[31m-$color-primary: #ffd02b; // Figma "primary". Отличается от $color-accent (#ffc107) — сверьте с хедером[m
+[31m-$color-on-primary: #242145; // Figma "on-primary" (текст и рамки)[m
+[31m-$color-on-bg: #5f5d75; // Figma "on-bg" (текст абзаца)[m
+[31m-$color-hero-overlay: #1e1b3a; // заливка секции, opacity 65%[m
+[32m+[m[32m$color-primary: #ffd02b;[m[41m [m
+[32m+[m[32m$color-on-primary: #242145;[m[41m [m
+[32m+[m[32m$color-on-bg: #5f5d75;[m[41m [m
+[32m+[m[32m$color-hero-overlay: #1e1b3a;[m[41m [m
+ [m
+[31m-// Размеры из Figma[m
+[31m-$size-14: 112px; // вертикальный padding Hero[m
+[31m-$size-15: 120px; // горизонтальный padding Hero[m
+[31m-$size-btn-padding-x-large: 24px; // btn-large-x[m
+[31m-$size-btn-padding-y-large: 16px; // btn-large-y[m
+[32m+[m[32m$size-14: 112px;[m[41m [m
+[32m+[m[32m$size-15: 120px;[m[41m [m
+[32m+[m[32m$size-btn-padding-x-large: 24px;[m[41m [m
+[32m+[m[32m$size-btn-padding-y-large: 16px;[m[41m [m
+ [m
+ $radius-lg: 24px;[m
+ [m
+[31m-// Типографика из Figma[m
+ $font-size-display-large: 56px;[m
+ $font-size-body-large: 18px;[m
+ [m
+[31m-// Жёсткая тень карточки[m
+[32m+[m
+ $shadow-card: 8px 8px 0 $color-on-primary;[m
+\ No newline at end of file[m
