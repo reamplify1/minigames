@@ -112,8 +112,14 @@ $auth-backdrop-transition:
       background-color $transition-base,
       color $transition-base;
 
-    &:hover:not([aria-selected='true']) {
-      background-color: $color-background;
+    &:not([aria-selected='true']) {
+      @include hover-only {
+        background-color: $color-background;
+      }
+
+      &:active {
+        background-color: $color-outline;
+      }
     }
 
     &:focus-visible {
@@ -168,7 +174,7 @@ $auth-backdrop-transition:
   &__fields {
     display: flex;
     flex-direction: column;
-    gap: space(3);
+    gap: space(2);
   }
 
   &__field {
@@ -197,7 +203,7 @@ $auth-backdrop-transition:
       border-color $transition-base,
       box-shadow $transition-base;
 
-    &:hover {
+    @include hover-only {
       border-color: $color-on-bg;
     }
 
@@ -261,7 +267,11 @@ $auth-backdrop-transition:
     cursor: pointer;
     transition: opacity $transition-base;
 
-    &:hover {
+    @include hover-only {
+      opacity: $opacity-hover;
+    }
+
+    &:active {
       opacity: $opacity-hover;
     }
 
@@ -286,9 +296,14 @@ $auth-backdrop-transition:
     color: $color-on-primary;
     text-decoration: underline;
     cursor: pointer;
+    transition: color $transition-base;
 
-    &:hover {
+    @include hover-only {
       color: $color-on-bg;
+    }
+
+    &:active {
+      opacity: $opacity-hover;
     }
 
     &:focus-visible {
@@ -329,31 +344,40 @@ $auth-backdrop-transition:
       outline: $border-width solid $color-on-primary;
       outline-offset: $outline-offset;
     }
+
+    &:disabled {
+      opacity: $opacity-disabled;
+      cursor: not-allowed;
+    }
   }
 
   &__submit {
     background-color: $color-primary;
     box-shadow: $auth-button-shadow;
 
-    &:hover {
-      background-color: $color-primary-hover;
-    }
+    &:not(:disabled) {
+      @include hover-only {
+        background-color: $color-primary-hover;
+      }
 
-    &:active {
-      background-color: $color-primary-active;
-      transform: translateY($press-offset);
+      &:active {
+        background-color: $color-primary-active;
+        transform: translateY($press-offset);
+      }
     }
   }
 
   &__google {
     background-color: $color-surface;
 
-    &:hover {
-      filter: brightness($brightness-hover);
-    }
+    &:not(:disabled) {
+      @include hover-only {
+        filter: brightness($brightness-hover);
+      }
 
-    &:active {
-      filter: brightness($brightness-active);
+      &:active {
+        filter: brightness($brightness-active);
+      }
     }
   }
 

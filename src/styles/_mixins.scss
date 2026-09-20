@@ -38,18 +38,10 @@
   }
 }
 
-// @use 'tokens' as *;
-
-// @mixin respond-to($breakpoint) {
-//   @if $breakpoint == tablet {
-//     @media (max-width: $breakpoint-tablet-max) {
-//       @content;
-//     }
-//   } @else if $breakpoint == mobile {
-//     @media (max-width: $breakpoint-mobile-max) {
-//       @content;
-//     }
-//   } @else {
-//     @error "Unknown breakpoint: #{$breakpoint}. Use 'tablet' or 'mobile'.";
-//   }
-// }
+@mixin hover-only {
+  @media (hover: hover) {
+    &:hover {
+      @content;
+    }
+  }
+}

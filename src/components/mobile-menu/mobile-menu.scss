@@ -70,14 +70,17 @@ $mobile-menu-close-icon-size: 14px;
     border-radius: $radius-md;
     background-color: $color-white-10;
     cursor: pointer;
-    transition: background-color $transition-base;
+    transition:
+      background-color $transition-base,
+      box-shadow $transition-base;
 
-    &:hover {
-      background-color: $color-white-20;
+    @include hover-only {
+      box-shadow: $shadow-ring-primary;
     }
 
     &:active {
-      background-color: $color-white-30;
+      background-color: $color-white-20;
+      box-shadow: $shadow-ring-primary;
     }
   }
 
@@ -111,14 +114,20 @@ $mobile-menu-close-icon-size: 14px;
     cursor: pointer;
     transition: color $transition-base;
 
-    &:hover {
-      color: $color-white;
+    @include hover-only {
+      color: $color-primary;
+      text-decoration: underline;
+    }
+
+    &:active {
+      color: $color-primary;
     }
 
     &--active,
     &--active:hover {
       color: $color-primary;
       font-weight: $font-weight-bold;
+      text-decoration: none;
     }
   }
 
@@ -141,18 +150,19 @@ $mobile-menu-close-icon-size: 14px;
     cursor: pointer;
     transition:
       background-color $transition-base,
-      filter $transition-base;
+      border-color $transition-base;
 
     &--outline {
       background-color: transparent;
       color: $color-white;
 
-      &:hover {
-        background-color: $color-white-10;
+      @include hover-only {
+        border-color: $color-primary;
       }
 
       &:active {
-        background-color: $color-white-20;
+        border-color: $color-primary;
+        background-color: $color-white-10;
       }
     }
 
@@ -161,12 +171,14 @@ $mobile-menu-close-icon-size: 14px;
       background-color: $color-primary;
       color: $color-on-primary;
 
-      &:hover {
-        filter: brightness($brightness-hover);
+      @include hover-only {
+        border-color: $color-primary-hover;
+        background-color: $color-primary-hover;
       }
 
       &:active {
-        filter: brightness($brightness-active);
+        border-color: $color-primary-active;
+        background-color: $color-primary-active;
       }
     }
   }

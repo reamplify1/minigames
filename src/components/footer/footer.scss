@@ -4,6 +4,7 @@
 $footer-description-max-width: 392px;
 $footer-social-size: space(4);
 $footer-icon-size: space(2);
+$footer-round-icon-size: space(3);
 
 .footer {
   background-color: $color-bg-footer;
@@ -155,12 +156,14 @@ $footer-icon-size: space(2);
       font-size: fluid-tablet($font-size-label-medium, $font-size-body-small);
     }
 
-    &:hover {
-      color: $color-white;
+    @include hover-only {
+      color: $color-primary;
+      text-decoration: underline;
     }
 
     &:active {
       color: $color-primary;
+      text-decoration: underline;
     }
 
     &:focus-visible {
@@ -182,14 +185,17 @@ $footer-icon-size: space(2);
     border-radius: $radius-circle;
     background-color: $color-white-10;
     cursor: pointer;
-    transition: background-color $transition-base;
+    transition:
+      background-color $transition-base,
+      box-shadow $transition-base;
 
-    &:hover {
-      background-color: $color-white-20;
+    @include hover-only {
+      box-shadow: $shadow-ring-primary;
     }
 
     &:active {
-      background-color: $color-white-30;
+      background-color: $color-white-20;
+      box-shadow: $shadow-ring-primary;
     }
 
     &:focus-visible {
@@ -238,12 +244,14 @@ $footer-icon-size: space(2);
     cursor: pointer;
     transition: color $transition-base;
 
-    &:hover {
-      color: $color-white;
+    @include hover-only {
+      color: $color-primary;
+      text-decoration: underline;
     }
 
     &:active {
       color: $color-primary;
+      text-decoration: underline;
     }
 
     &:focus-visible {
@@ -255,5 +263,10 @@ $footer-icon-size: space(2);
   &__bottom-icon {
     width: $footer-icon-size;
     height: $footer-icon-size;
+  }
+
+  &__bottom-icon--round {
+    width: $footer-round-icon-size;
+    height: $footer-round-icon-size;
   }
 }
