@@ -5,8 +5,12 @@ import eyeIcon from '../../assets/icons/eye-icon.svg';
 import userIcon from '../../assets/icons/user-icon.svg';
 import googleIcon from '../../assets/icons/google-icon.svg';
 
-const DEFAULT_MODE = 'login';
+type AuthMode = 'login' | 'register';
+
+const DEFAULT_MODE: AuthMode = 'login';
 const DIALOG_SELECTOR = '.auth-dialog';
+const TAB_SELECTOR = '.auth-dialog__tab';
+const SWITCH_SELECTOR = '[data-switch-to]';
 
 interface FieldOptions {
   id: string;
@@ -18,11 +22,15 @@ interface FieldOptions {
   withToggle?: boolean;
 }
 
+function isAuthMode(value: string | undefined): value is AuthMode {
+  return value === 'login' || value === 'register';
+}
+
 function createField(options: FieldOptions): string {
   const toggle = options.withToggle
     ? `<button class="auth-dialog__toggle" type="button" aria-label="Show password">
-        <img class="auth-dialog__toggle-icon" src="${eyeIcon}" alt="" />
-      </button>`
+         <img class="auth-dialog__toggle-icon" src="${eyeIcon}" alt="" />
+       </button>`
     : '';
 
   return `
@@ -58,6 +66,22 @@ function createActions(submitLabel: string, googleLabel: string): string {
   `;
 }
 
+function switchMode(dialog: HTMLDialogElement, mode: AuthMode): void {
+  if (dialog.dataset.mode === mode) {
+    return;
+  }
+
+  dialog.dataset.mode = mode;
+
+  const tabs = dialog.querySelectorAll<HTMLButtonElement>(TAB_SELECTOR);
+
+  for (const tab of tabs) {
+    tab.setAttribute('aria-selected', String(tab.dataset.switchTo === mode));
+  }
+
+  dialog.querySelector<HTMLButtonElement>(`${TAB_SELECTOR}[aria-selected="true"]`)?.focus();
+}
+
 function createAuthDialog(): HTMLDialogElement {
   const dialog = document.createElement('dialog');
   dialog.className = 'auth-dialog';
@@ -65,12 +89,37 @@ function createAuthDialog(): HTMLDialogElement {
   dialog.setAttribute('aria-label', 'Log in or register');
   dialog.innerHTML = `
     <div class="auth-dialog__content">
-      <div class="auth-dialog__tabs">
-        <button class="auth-dialog__tab auth-dialog__tab--login" type="button">Login</button>
-        <button class="auth-dialog__tab auth-dialog__tab--register" type="button">Register</button>
+      <div class="auth-dialog__tabs" role="tablist" aria-label="Authentication mode">
+        <button
+          class="auth-dialog__tab"
+          id="auth-tab-login"
+          type="button"
+          role="tab"
+          aria-selected="true"
+          aria-controls="auth-panel-login"
+          data-switch-to="login"
+        >
+          Login
+        </button>
+        <button
+          class="auth-dialog__tab"
+          id="auth-tab-register"
+          type="button"
+          role="tab"
+          aria-selected="false"
+          aria-controls="auth-panel-register"
+          data-switch-to="register"
+        >
+          Register
+        </button>
       </div>
 
-      <section class="auth-dialog__panel auth-dialog__panel--login">
+      <section
+        class="auth-dialog__panel auth-dialog__panel--login"
+        id="auth-panel-login"
+        role="tabpanel"
+        aria-labelledby="auth-tab-login"
+      >
         <header class="auth-dialog__header">
           <h2 class="auth-dialog__title">Welcome Back!</h2>
           <p class="auth-dialog__subtitle">Sign in to resume your games and progress.</p>
@@ -102,11 +151,16 @@ function createAuthDialog(): HTMLDialogElement {
         </form>
         <p class="auth-dialog__switch">
           Don't have an account?
-          <button class="auth-dialog__link" type="button">Register</button>
+          <button class="auth-dialog__link" type="button" data-switch-to="register">Register</button>
         </p>
       </section>
 
-      <section class="auth-dialog__panel auth-dialog__panel--register">
+      <section
+        class="auth-dialog__panel auth-dialog__panel--register"
+        id="auth-panel-register"
+        role="tabpanel"
+        aria-labelledby="auth-tab-register"
+      >
         <header class="auth-dialog__header">
           <h2 class="auth-dialog__title">Create Account</h2>
           <p class="auth-dialog__subtitle">Join MiniGames to track your score &amp; streak.</p>
@@ -150,7 +204,7 @@ function createAuthDialog(): HTMLDialogElement {
         </form>
         <p class="auth-dialog__switch">
           Already have an account?
-          <button class="auth-dialog__link" type="button">Login</button>
+          <button class="auth-dialog__link" type="button" data-switch-to="login">Login</button>
         </p>
       </section>
     </div>
@@ -159,6 +213,18 @@ function createAuthDialog(): HTMLDialogElement {
   dialog.addEventListener('click', (event) => {
     if (event.target === dialog) {
       dialog.close();
+      return;
+    }
+
+    if (!(event.target instanceof Element)) {
+      return;
+    }
+
+    const trigger = event.target.closest<HTMLElement>(SWITCH_SELECTOR);
+    const mode = trigger?.dataset.switchTo;
+
+    if (isAuthMode(mode)) {
+      switchMode(dialog, mode);
     }
   });
 
