@@ -1,3 +1,5 @@
+import { getCurrentPath } from '../../app/router';
+
 export interface NavItem {
   label: string;
   href: string;
@@ -12,5 +14,5 @@ export const navItems: NavItem[] = [
 ];
 
 export function getCurrentPage(): NavItem['page'] {
-  return globalThis.location.pathname === '/library' ? 'library' : 'home';
+  return getCurrentPath() === '/library' ? 'library' : 'home';
 }
