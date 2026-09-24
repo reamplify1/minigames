@@ -1,4 +1,5 @@
 import { createHeader } from '../../components/header/header';
+import { createFooter } from '../../components/footer/footer';
 
 export function renderLibraryPage(): void {
   const root = document.createElement('div');
@@ -10,7 +11,7 @@ export function renderLibraryPage(): void {
     <h1 class="library-page__title">Library</h1>
   `;
 
-  root.append(createHeader(), main);
+  root.append(createHeader(), main, createFooter());
 
   document.body.replaceChildren(root);
 }
