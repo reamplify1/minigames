@@ -1,11 +1,19 @@
 import './filter-sort-section.scss';
 import { FILTER_CHIPS, SORT_OPTIONS, DEFAULT_SORT_ID } from './filter-sort-section.data';
 import arrowDropDownIcon from '../../assets/icons/arrow-drop-down-icon.svg';
+import checkIcon from '../../assets/icons/check-icon.svg';
 import { enableDragScroll } from './drag-scroll';
+
+const SORT_LIST_ID = 'sort-options';
 
 export interface FilterSortSectionOptions {
   onFilterChange?: (filterId: string) => void;
   onSortChange?: (sortId: string) => void;
+}
+
+interface SortEntry {
+  item: HTMLLIElement;
+  button: HTMLButtonElement;
 }
 
 export function createFilterSortSection(options: FilterSortSectionOptions = {}): HTMLElement {
@@ -74,13 +82,14 @@ export function createFilterSortSection(options: FilterSortSectionOptions = {}):
   const sortTrigger = document.createElement('button');
   sortTrigger.type = 'button';
   sortTrigger.className = 'sort-trigger';
-  sortTrigger.setAttribute('aria-haspopup', 'listbox');
+  sortTrigger.setAttribute('aria-haspopup', 'true');
   sortTrigger.setAttribute('aria-expanded', 'false');
+  sortTrigger.setAttribute('aria-controls', SORT_LIST_ID);
 
   const sortLabel = document.createElement('span');
   const setSortLabel = (id: string): void => {
     const option = SORT_OPTIONS.find((o) => o.id === id);
-    sortLabel.textContent = `Sort by: ${option?.label ?? ''} ↓`;
+    sortLabel.textContent = `Sort by: ${option?.label ?? ''}`;
   };
   setSortLabel(activeSort);
 
@@ -93,49 +102,80 @@ export function createFilterSortSection(options: FilterSortSectionOptions = {}):
   sortTrigger.append(sortLabel, chevron);
 
   const sortList = document.createElement('ul');
+  sortList.id = SORT_LIST_ID;
   sortList.className = 'sort-dropdown__options';
-  sortList.setAttribute('role', 'listbox');
   sortList.hidden = true;
+
+  const sortEntries = new Map<string, SortEntry>();
+
+  const markSelected = (id: string, isSelected: boolean): void => {
+    const entry = sortEntries.get(id);
+    if (!entry) return;
+    entry.item.classList.toggle('sort-dropdown__item--selected', isSelected);
+    entry.button.classList.toggle('sort-dropdown__option--selected', isSelected);
+    entry.button.setAttribute('aria-current', String(isSelected));
+  };
 
   const handleOutsideClick = (event: MouseEvent): void => {
     if (!sortWrapper.contains(event.target as Node)) closeDropdown();
+  };
+
+  const handleKeydown = (event: KeyboardEvent): void => {
+    if (event.key !== 'Escape') return;
+    closeDropdown();
+    sortTrigger.focus();
   };
 
   const openDropdown = (): void => {
     sortList.hidden = false;
     sortTrigger.setAttribute('aria-expanded', 'true');
     document.addEventListener('click', handleOutsideClick);
+    document.addEventListener('keydown', handleKeydown);
   };
 
   const closeDropdown = (): void => {
     sortList.hidden = true;
     sortTrigger.setAttribute('aria-expanded', 'false');
     document.removeEventListener('click', handleOutsideClick);
+    document.removeEventListener('keydown', handleKeydown);
   };
 
   for (const option of SORT_OPTIONS) {
-    const li = document.createElement('li');
-    li.setAttribute('role', 'option');
-    li.setAttribute('aria-selected', String(option.id === activeSort));
+    const item = document.createElement('li');
+    item.className = 'sort-dropdown__item';
 
-    const optButton = document.createElement('button');
-    optButton.type = 'button';
-    optButton.textContent = option.label;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'sort-dropdown__option';
 
-    optButton.addEventListener('click', () => {
-      activeSort = option.id;
-      setSortLabel(activeSort);
-      for (const item of sortList.querySelectorAll('li')) {
-        item.setAttribute('aria-selected', 'false');
+    const check = document.createElement('img');
+    check.className = 'sort-dropdown__check';
+    check.src = checkIcon;
+    check.alt = '';
+    check.setAttribute('aria-hidden', 'true');
+
+    const label = document.createElement('span');
+    label.textContent = option.label;
+
+    button.append(check, label);
+
+    button.addEventListener('click', () => {
+      if (option.id !== activeSort) {
+        markSelected(activeSort, false);
+        activeSort = option.id;
+        markSelected(activeSort, true);
+        setSortLabel(activeSort);
+        options.onSortChange?.(activeSort);
       }
-      li.setAttribute('aria-selected', 'true');
       closeDropdown();
-      options.onSortChange?.(activeSort);
     });
 
-    li.append(optButton);
-    sortList.append(li);
+    sortEntries.set(option.id, { item, button });
+    item.append(button);
+    sortList.append(item);
   }
+
+  markSelected(activeSort, true);
 
   sortTrigger.addEventListener('click', () => {
     if (sortList.hidden) {

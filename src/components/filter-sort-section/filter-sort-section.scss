@@ -171,6 +171,10 @@
   @include hover-only {
     background: $color-highlight;
   }
+
+  &[aria-expanded='true'] {
+    background: $color-highlight;
+  }
 }
 
 .sort-trigger__chevron {
@@ -184,44 +188,84 @@
   }
 }
 
+// Figma: dropdown-item — Fill 200px, padding size-2, gap size-1
 .sort-dropdown__options {
   position: absolute;
-  top: calc(100% + #{$size-1});
+  top: calc(100% + #{$size-2});
   right: 0;
   z-index: $z-index-menu;
-  min-width: 100%;
+  width: space(25);
   margin: 0;
   padding: 0;
   list-style: none;
   overflow: hidden;
   border: $border-width-btn solid $color-on-primary;
-  border-radius: $radius-lg;
+  border-radius: $radius-md;
   background: $color-surface;
+  box-shadow: $shadow-hard-sm;
 
   @include respond-to(tablet) {
     right: auto;
     left: 0;
   }
 
-  li button {
-    display: block;
+  @include respond-to(mobile) {
+    box-sizing: border-box;
     width: 100%;
-    padding: $size-btn-padding-y-compact $size-btn-padding-x-compact;
-    border: none;
-    background: none;
-    font-family: $font-family-base;
-    font-size: $font-size-body-small;
-    text-align: left;
-    cursor: pointer;
-    transition: background-color $transition-base;
+  }
+}
 
-    @include hover-only {
-      background: $color-highlight;
-    }
+.sort-dropdown__item + .sort-dropdown__item {
+  border-top: $border-width-hairline solid $color-outline;
+}
+
+// у выбранного пункта линии on-primary сверху и снизу
+.sort-dropdown__item.sort-dropdown__item--selected,
+.sort-dropdown__item--selected + .sort-dropdown__item {
+  border-top: $border-width-hairline solid $color-on-primary;
+}
+
+.sort-dropdown__option {
+  display: flex;
+  align-items: center;
+  gap: space(1);
+  box-sizing: border-box;
+  width: 100%;
+  padding: space(2);
+  border: none;
+  background: none;
+  color: $color-on-primary;
+  font-family: $font-family-base;
+  font-size: $font-size-body-small;
+  font-weight: $font-weight-medium;
+  line-height: $line-height-120;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color $transition-base;
+
+  @include hover-only {
+    background: $color-highlight;
   }
 
-  li[aria-selected='true'] button {
-    background: $color-highlight-active;
+  &--selected,
+  &--selected:hover {
+    background: $color-primary-low;
     font-weight: $font-weight-bold;
+  }
+
+  &:focus-visible {
+    outline: $border-width solid $color-text;
+    outline-offset: -$border-width;
+  }
+}
+
+.sort-dropdown__check {
+  flex-shrink: 0;
+  width: space(2);
+  height: space(2);
+  visibility: hidden;
+
+  .sort-dropdown__option--selected & {
+    visibility: visible;
   }
 }
