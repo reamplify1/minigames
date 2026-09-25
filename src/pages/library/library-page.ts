@@ -1,6 +1,7 @@
 import { createHeader } from '../../components/header/header';
 import { createFooter } from '../../components/footer/footer';
 import { createFilterSortSection } from '../../components/filter-sort-section/filter-sort-section';
+import { createGameCardsSection } from '../../components/game-cards-section/game-cards-section';
 
 export function renderLibraryPage(): void {
   const root = document.createElement('div');
@@ -10,17 +11,17 @@ export function renderLibraryPage(): void {
   main.className = 'library-page';
 
   const filterSortSection = createFilterSortSection({
-    onFilterChange: (filterId) => {
-      // TODO: подключить фильтрацию карточек игр, когда будет готова секция Game Cards 
-      console.log('filter changed:', filterId);
+    onFilterChange: () => {
+      // TODO: подключить фильтрацию карточек игр
     },
-    onSortChange: (sortId) => {
+    onSortChange: () => {
       // TODO: подключить сортировку карточек игр
-      console.log('sort changed:', sortId);
     },
   });
 
-  main.append(filterSortSection);
+  const gameCardsSection = createGameCardsSection();
+
+  main.append(filterSortSection, gameCardsSection);
 
   root.append(createHeader(), main, createFooter());
 

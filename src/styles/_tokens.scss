@@ -1,4 +1,5 @@
 @use 'sass:color';
+@use 'sass:math';
 
 $breakpoint-tablet-max: 1919px;
 $breakpoint-burger-max: 768px;
@@ -64,6 +65,16 @@ $color-white-75: rgba($color-white, 0.75);
 $color-scrim: rgba($color-black, 0.85);
 $color-scrim-clear: rgba($color-black, 0);
 
+$color-secondary: #f0eeff;
+$color-price-free: #0ba8af;
+
+$color-primary-low: #fde047;
+$color-bg-footer-low: #2a264f;
+
+$line-height-100: 1;
+
+$aspect-ratio-game-cover-mobile: math.div(343, 160);
+
 $size-1: 4px;
 $size-2: 8px;
 $size-3: 16px;
@@ -122,6 +133,8 @@ $color-avatar-green: #a8e6cf;
 $color-avatar-blue: #bfdbfe;
 $color-avatar-pink: #f5b8f5;
 $color-avatar-lavender: #d4d0f7;
+$color-secondary: #f0eeff;
+$color-price-free: #0ba8af;
 
 $font-size-label-small: 11px;
 $border-width-hairline: 1px;

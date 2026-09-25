@@ -19,10 +19,10 @@ export interface SortOption {
 }
 
 export const SORT_OPTIONS: SortOption[] = [
-  { id: 'rating', label: 'Rating' },
-  { id: 'popularity', label: 'Popularity' },
-  { id: 'newest', label: 'Newest' },
-  { id: 'price', label: 'Price' },
+  { id: 'rating-asc', label: 'Rating ↑' },
+  { id: 'rating-desc', label: 'Rating ↓' },
+  { id: 'name-asc', label: 'Name A→Z' },
+  { id: 'name-desc', label: 'Name Z→A' },
 ];
 
-export const DEFAULT_SORT_ID = 'rating';
+export const DEFAULT_SORT_ID = 'rating-desc';

@@ -50,6 +50,6 @@ export function enableDragScroll(container: HTMLElement): void {
       event.stopPropagation();
       hasDragged = false;
     },
-    {capture: true},
+    { capture: true }
   );
 }

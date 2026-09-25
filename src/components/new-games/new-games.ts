@@ -6,14 +6,38 @@ import tailsideImage from '../../assets/images/games/tailside-cozy-cafe-simcard.
 import islandersImage from '../../assets/images/games/islanders-new-shores-card.jpg';
 import vacationCafeImage from '../../assets/images/games/vacation-cafe-simulator.jpg';
 import winterBurrowImage from '../../assets/images/games/winter-burrow-card.jpg';
-import shelvePotionsImage from '../../assets/images/games/shelve-the-potions.card.jpg';
+import shelvePotionsImage from '../../assets/images/games/shelve-the-potion-card.jpg';
 
 const games: Game[] = [
-  { title: 'Tailside Cozy Cafe Sim', rating: 4.6, likes: '19.8K', image: tailsideImage, size: 'outer' },
-  { title: 'ISLANDERS: New Shores', rating: 4.9, likes: '54.2K', image: islandersImage, size: 'side' },
-  { title: 'Vacation Cafe Simulator', rating: 4.8, likes: '28.7K', image: vacationCafeImage, size: 'main' },
+  {
+    title: 'Tailside Cozy Cafe Sim',
+    rating: 4.6,
+    likes: '19.8K',
+    image: tailsideImage,
+    size: 'outer',
+  },
+  {
+    title: 'ISLANDERS: New Shores',
+    rating: 4.9,
+    likes: '54.2K',
+    image: islandersImage,
+    size: 'side',
+  },
+  {
+    title: 'Vacation Cafe Simulator',
+    rating: 4.8,
+    likes: '28.7K',
+    image: vacationCafeImage,
+    size: 'main',
+  },
   { title: 'Winter Burrow', rating: 4.9, likes: '32.4K', image: winterBurrowImage, size: 'side' },
-  { title: 'Shelve the Potions', rating: 4.5, likes: '12.1K', image: shelvePotionsImage, size: 'outer' },
+  {
+    title: 'Shelve the Potions',
+    rating: 4.5,
+    likes: '12.1K',
+    image: shelvePotionsImage,
+    size: 'outer',
+  },
 ];
 
 export function createNewGames(): HTMLElement {
