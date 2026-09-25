@@ -1,14 +1,16 @@
 @use '../../styles/tokens' as *;
 @use '../../styles/mixins' as *;
 
+// Figma size-N = space(N): size-1 = 8px, size-2 = 16px, size-5 = 40px, size-15 = 120px
+
 .filter-sort-section {
   display: flex;
   flex-direction: column;
-  gap: $size-4;
+  gap: space(5);
   box-sizing: border-box;
   max-width: $viewport-desktop;
   margin-inline: auto;
-  padding: $size-8 $size-7 $size-4;
+  padding: space(5) space(15) 0;
 
   @include respond-to(tablet) {
     gap: $size-3;
@@ -20,12 +22,18 @@
   }
 }
 
+.filter-sort-section__intro {
+  display: flex;
+  flex-direction: column;
+  gap: space(1);
+}
+
 .filter-sort-section__title {
   margin: 0;
   font-family: $font-family-base;
   font-size: $font-size-display-large;
   font-weight: $font-weight-bold;
-  line-height: $line-height-110;
+  line-height: $line-height-120;
   color: $color-text;
 
   @include respond-to(tablet) {
@@ -40,9 +48,14 @@
 .filter-sort-section__subtitle {
   margin: 0;
   font-family: $font-family-base;
-  font-size: $font-size-body-medium;
+  font-size: $font-size-body-large;
   font-weight: $font-weight-medium;
+  line-height: $line-height-120;
   color: $color-on-bg;
+
+  @include respond-to(tablet) {
+    font-size: $font-size-body-medium;
+  }
 
   @include respond-to(mobile) {
     font-size: $font-size-body-small;
@@ -54,15 +67,15 @@
   align-items: center;
   justify-content: space-between;
   gap: $size-3;
+  padding-block: space(2);
 
-  // tablet: сортировка уходит во второй ряд, прижата влево
   @include respond-to(tablet) {
     flex-direction: column;
     align-items: flex-start;
     gap: $size-2;
+    padding-block: 0;
   }
 
-  // mobile: второй ряд на всю ширину
   @include respond-to(mobile) {
     align-items: stretch;
   }
@@ -71,7 +84,7 @@
 .filter-sort-bar__chips {
   display: flex;
   align-items: center;
-  gap: $size-2;
+  gap: space(2);
   width: 100%;
   min-width: 0;
   margin: 0;
@@ -80,15 +93,21 @@
   overflow-x: auto;
   scrollbar-width: none;
 
+  @include respond-to(tablet) {
+    gap: space(1.5);
+  }
+
   &::-webkit-scrollbar {
     display: none;
   }
 
-  // mobile: чипы не влезают — скролл от края до края экрана
-  @include respond-to(mobile) {
-    box-sizing: content-box;
-    margin-inline: calc(-1 * #{$size-3});
-    padding-inline: $size-3;
+  &.is-dragging {
+    cursor: grabbing;
+    user-select: none;
+
+    .chip {
+      cursor: grabbing;
+    }
   }
 }
 
@@ -103,14 +122,11 @@
   background: $color-surface;
   color: $color-on-primary;
   font-family: $font-family-base;
-  font-size: $font-size-body-medium;
+  font-size: $font-size-body-small;
   font-weight: $font-weight-bold;
+  line-height: $line-height-110;
   cursor: pointer;
   transition: background-color $transition-base;
-
-  @include respond-to(tablet) {
-    font-size: $font-size-body-small;
-  }
 
   @include hover-only {
     background: $color-highlight;
@@ -133,21 +149,19 @@
 .sort-trigger {
   display: inline-flex;
   align-items: center;
-  gap: $size-2;
-  padding: $size-btn-padding-y-compact $size-btn-padding-x-compact;
+  gap: space(1);
+  padding: $size-btn-padding-y-compact $size-btn-padding-x;
   border: $border-width-btn solid $color-on-primary;
   border-radius: $radius-3xl;
   background: $color-surface;
   color: $color-on-primary;
   font-family: $font-family-base;
-  font-size: $font-size-body-medium;
+  font-size: $font-size-body-small;
   font-weight: $font-weight-bold;
+  line-height: $line-height-120;
+  white-space: nowrap;
   cursor: pointer;
   transition: background-color $transition-base;
-
-  @include respond-to(tablet) {
-    font-size: $font-size-body-small;
-  }
 
   @include respond-to(mobile) {
     width: 100%;
@@ -161,15 +175,12 @@
 
 .sort-trigger__chevron {
   flex-shrink: 0;
-  width: $size-1;
-  height: $size-1;
-  border-right: $border-width-hairline solid currentColor;
-  border-bottom: $border-width-hairline solid currentColor;
-  transform: rotate(45deg);
+  width: space(3);
+  height: space(3);
   transition: transform $transition-base;
 
   .sort-trigger[aria-expanded='true'] & {
-    transform: rotate(-135deg);
+    transform: rotate(180deg);
   }
 }
 
@@ -187,7 +198,6 @@
   border-radius: $radius-lg;
   background: $color-surface;
 
-  // на tablet/mobile кнопка слева — открываем список вправо от неё
   @include respond-to(tablet) {
     right: auto;
     left: 0;
@@ -200,7 +210,7 @@
     border: none;
     background: none;
     font-family: $font-family-base;
-    font-size: $font-size-body-medium;
+    font-size: $font-size-body-small;
     text-align: left;
     cursor: pointer;
     transition: background-color $transition-base;

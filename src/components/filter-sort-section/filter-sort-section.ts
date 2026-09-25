@@ -1,5 +1,7 @@
 import './filter-sort-section.scss';
 import { FILTER_CHIPS, SORT_OPTIONS, DEFAULT_SORT_ID } from './filter-sort-section.data';
+import arrowDropDownIcon from '../../assets/icons/arrow-drop-down-icon.svg';
+import { enableDragScroll } from './drag-scroll';
 
 export interface FilterSortSectionOptions {
   onFilterChange?: (filterId: string) => void;
@@ -63,6 +65,8 @@ export function createFilterSortSection(options: FilterSortSectionOptions = {}):
     chipsList.append(li);
   }
 
+  enableDragScroll(chipsList);
+
   // --- Sort dropdown ---
   const sortWrapper = document.createElement('div');
   sortWrapper.className = 'filter-sort-bar__sort sort-dropdown';
@@ -74,14 +78,16 @@ export function createFilterSortSection(options: FilterSortSectionOptions = {}):
   sortTrigger.setAttribute('aria-expanded', 'false');
 
   const sortLabel = document.createElement('span');
-  const setSortLabel = (id: string) => {
+  const setSortLabel = (id: string): void => {
     const option = SORT_OPTIONS.find((o) => o.id === id);
-    sortLabel.textContent = `Sort by: ${option?.label ?? ''}`;
+    sortLabel.textContent = `Sort by: ${option?.label ?? ''} ↓`;
   };
   setSortLabel(activeSort);
 
-  const chevron = document.createElement('span');
+  const chevron = document.createElement('img');
   chevron.className = 'sort-trigger__chevron';
+  chevron.src = arrowDropDownIcon;
+  chevron.alt = '';
   chevron.setAttribute('aria-hidden', 'true');
 
   sortTrigger.append(sortLabel, chevron);
@@ -90,6 +96,22 @@ export function createFilterSortSection(options: FilterSortSectionOptions = {}):
   sortList.className = 'sort-dropdown__options';
   sortList.setAttribute('role', 'listbox');
   sortList.hidden = true;
+
+  const handleOutsideClick = (event: MouseEvent): void => {
+    if (!sortWrapper.contains(event.target as Node)) closeDropdown();
+  };
+
+  const openDropdown = (): void => {
+    sortList.hidden = false;
+    sortTrigger.setAttribute('aria-expanded', 'true');
+    document.addEventListener('click', handleOutsideClick);
+  };
+
+  const closeDropdown = (): void => {
+    sortList.hidden = true;
+    sortTrigger.setAttribute('aria-expanded', 'false');
+    document.removeEventListener('click', handleOutsideClick);
+  };
 
   for (const option of SORT_OPTIONS) {
     const li = document.createElement('li');
@@ -114,22 +136,6 @@ export function createFilterSortSection(options: FilterSortSectionOptions = {}):
     li.append(optButton);
     sortList.append(li);
   }
-
-  const handleOutsideClick = (event: MouseEvent) => {
-    if (!sortWrapper.contains(event.target as Node)) closeDropdown();
-  };
-
-  const openDropdown = () => {
-    sortList.hidden = false;
-    sortTrigger.setAttribute('aria-expanded', 'true');
-    document.addEventListener('click', handleOutsideClick);
-  };
-
-  const closeDropdown = () => {
-    sortList.hidden = true;
-    sortTrigger.setAttribute('aria-expanded', 'false');
-    document.removeEventListener('click', handleOutsideClick);
-  };
 
   sortTrigger.addEventListener('click', () => {
     if (sortList.hidden) {
