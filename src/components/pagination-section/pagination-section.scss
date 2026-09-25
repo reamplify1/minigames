@@ -1,0 +1,74 @@
+@use '../../styles/tokens' as *;
+
+.pagination-section {
+  display: flex;
+  justify-content: center;
+  padding: $size-5 $size-3;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: $size-3;
+}
+
+.pagination__pages {
+  display: flex;
+  gap: $size-3;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pagination__page,
+.pagination__arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: $size-8;
+  height: $size-8;
+  padding: 0;
+  border: $border-width-btn solid $color-border-btn;
+  border-radius: $radius-circle;
+  background-color: $color-surface;
+  color: $color-on-primary;
+  font-family: $font-family-base;
+  font-size: $font-size-body-small;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-100;
+  cursor: pointer;
+  transition:
+    background-color $transition-base,
+    color $transition-base,
+    opacity $transition-base;
+
+  &:hover:not(:disabled, .pagination__page--active) {
+    background-color: $color-primary;
+  }
+
+  &:active:not(:disabled, .pagination__page--active) {
+    background-color: $color-primary-active;
+  }
+
+  &:focus-visible {
+    outline: $border-width solid $color-on-primary;
+    outline-offset: $outline-offset;
+  }
+
+  &:disabled {
+    border-color: $color-outline;
+    color: $color-text-muted;
+    cursor: not-allowed;
+  }
+}
+
+.pagination__page--active {
+  background-color: $color-bg-footer-low;
+  color: $color-white;
+  cursor: default;
+}
+
+.pagination__arrow-icon {
+  width: $size-4;
+  height: $size-4;
+}

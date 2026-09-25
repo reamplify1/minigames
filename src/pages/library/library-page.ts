@@ -2,6 +2,7 @@ import { createHeader } from '../../components/header/header';
 import { createFooter } from '../../components/footer/footer';
 import { createFilterSortSection } from '../../components/filter-sort-section/filter-sort-section';
 import { createGameCardsSection } from '../../components/game-cards-section/game-cards-section';
+import { createPaginationSection } from '../../components/pagination-section/pagination-section';
 
 export function renderLibraryPage(): void {
   const root = document.createElement('div');
@@ -20,8 +21,9 @@ export function renderLibraryPage(): void {
   });
 
   const gameCardsSection = createGameCardsSection();
+  const paginationSection = createPaginationSection();
 
-  main.append(filterSortSection, gameCardsSection);
+  main.append(filterSortSection, gameCardsSection, paginationSection);
 
   root.append(createHeader(), main, createFooter());
 
