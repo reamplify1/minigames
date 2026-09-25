@@ -1,0 +1,217 @@
+@use '../../styles/tokens' as *;
+@use '../../styles/mixins' as *;
+
+.filter-sort-section {
+  display: flex;
+  flex-direction: column;
+  gap: $size-4;
+  box-sizing: border-box;
+  max-width: $viewport-desktop;
+  margin-inline: auto;
+  padding: $size-8 $size-7 $size-4;
+
+  @include respond-to(tablet) {
+    gap: $size-3;
+    padding: $size-4 $size-8 $size-3;
+  }
+
+  @include respond-to(mobile) {
+    padding: $size-3;
+  }
+}
+
+.filter-sort-section__title {
+  margin: 0;
+  font-family: $font-family-base;
+  font-size: $font-size-display-large;
+  font-weight: $font-weight-bold;
+  line-height: $line-height-110;
+  color: $color-text;
+
+  @include respond-to(tablet) {
+    font-size: $font-size-display-medium;
+  }
+
+  @include respond-to(mobile) {
+    font-size: $font-size-display-small;
+  }
+}
+
+.filter-sort-section__subtitle {
+  margin: 0;
+  font-family: $font-family-base;
+  font-size: $font-size-body-medium;
+  font-weight: $font-weight-medium;
+  color: $color-on-bg;
+
+  @include respond-to(mobile) {
+    font-size: $font-size-body-small;
+  }
+}
+
+.filter-sort-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $size-3;
+
+  // tablet: сортировка уходит во второй ряд, прижата влево
+  @include respond-to(tablet) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $size-2;
+  }
+
+  // mobile: второй ряд на всю ширину
+  @include respond-to(mobile) {
+    align-items: stretch;
+  }
+}
+
+.filter-sort-bar__chips {
+  display: flex;
+  align-items: center;
+  gap: $size-2;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  // mobile: чипы не влезают — скролл от края до края экрана
+  @include respond-to(mobile) {
+    box-sizing: content-box;
+    margin-inline: calc(-1 * #{$size-3});
+    padding-inline: $size-3;
+  }
+}
+
+.chip {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  white-space: nowrap;
+  padding: $size-btn-padding-y-compact $size-btn-padding-x-compact;
+  border: $border-width-btn solid $color-on-primary;
+  border-radius: $radius-3xl;
+  background: $color-surface;
+  color: $color-on-primary;
+  font-family: $font-family-base;
+  font-size: $font-size-body-medium;
+  font-weight: $font-weight-bold;
+  cursor: pointer;
+  transition: background-color $transition-base;
+
+  @include respond-to(tablet) {
+    font-size: $font-size-body-small;
+  }
+
+  @include hover-only {
+    background: $color-highlight;
+  }
+
+  &--active {
+    background: $color-primary;
+
+    @include hover-only {
+      background: $color-primary-hover;
+    }
+  }
+}
+
+.sort-dropdown {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.sort-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: $size-2;
+  padding: $size-btn-padding-y-compact $size-btn-padding-x-compact;
+  border: $border-width-btn solid $color-on-primary;
+  border-radius: $radius-3xl;
+  background: $color-surface;
+  color: $color-on-primary;
+  font-family: $font-family-base;
+  font-size: $font-size-body-medium;
+  font-weight: $font-weight-bold;
+  cursor: pointer;
+  transition: background-color $transition-base;
+
+  @include respond-to(tablet) {
+    font-size: $font-size-body-small;
+  }
+
+  @include respond-to(mobile) {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  @include hover-only {
+    background: $color-highlight;
+  }
+}
+
+.sort-trigger__chevron {
+  flex-shrink: 0;
+  width: $size-1;
+  height: $size-1;
+  border-right: $border-width-hairline solid currentColor;
+  border-bottom: $border-width-hairline solid currentColor;
+  transform: rotate(45deg);
+  transition: transform $transition-base;
+
+  .sort-trigger[aria-expanded='true'] & {
+    transform: rotate(-135deg);
+  }
+}
+
+.sort-dropdown__options {
+  position: absolute;
+  top: calc(100% + #{$size-1});
+  right: 0;
+  z-index: $z-index-menu;
+  min-width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+  border: $border-width-btn solid $color-on-primary;
+  border-radius: $radius-lg;
+  background: $color-surface;
+
+  // на tablet/mobile кнопка слева — открываем список вправо от неё
+  @include respond-to(tablet) {
+    right: auto;
+    left: 0;
+  }
+
+  li button {
+    display: block;
+    width: 100%;
+    padding: $size-btn-padding-y-compact $size-btn-padding-x-compact;
+    border: none;
+    background: none;
+    font-family: $font-family-base;
+    font-size: $font-size-body-medium;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color $transition-base;
+
+    @include hover-only {
+      background: $color-highlight;
+    }
+  }
+
+  li[aria-selected='true'] button {
+    background: $color-highlight-active;
+    font-weight: $font-weight-bold;
+  }
+}
