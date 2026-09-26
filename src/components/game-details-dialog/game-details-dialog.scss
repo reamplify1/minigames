@@ -1,40 +1,51 @@
 @use '../../styles/tokens' as *;
 @use '../../styles/mixins' as *;
 
-.game-details-dialog-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: $z-index-menu;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: $color-scrim;
-}
+$game-details-width: 600px;
 
 .game-details-dialog {
-  position: relative;
-  padding: $size-8;
-  border-radius: $radius-lg;
-  background: $color-surface;
+  box-sizing: border-box;
+  width: calc(100% - #{space(4)});
+  max-width: $game-details-width;
+  max-height: calc(100dvh - #{space(4)});
+  margin: auto;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  font-family: $font-family-base;
+  color: $color-on-primary;
 
-  &__close {
-    position: absolute;
-    top: $size-3;
-    right: $size-3;
-    width: $size-5;
-    height: $size-5;
-    border: none;
-    background: none;
-    font-size: $font-size-headline-medium;
-    line-height: 1;
-    cursor: pointer;
+  &[open] {
+    display: flex;
+    flex-direction: column;
   }
 
-  &__placeholder {
+  &::backdrop {
+    background-color: $color-backdrop;
+  }
+
+  &__content {
+    box-sizing: border-box;
+    flex: 0 1 auto;
+    min-height: 0;
+    padding: space(3);
+    overflow-y: auto;
+    border: $border-width-heavy solid $color-on-primary;
+    border-radius: $radius-3xl;
+    background-color: $color-background;
+    box-shadow: $shadow-dialog;
+  }
+
+  &__title {
     margin: 0;
-    font-family: $font-family-base;
-    font-size: $font-size-headline-medium;
+    font-size: $font-size-headline-large;
     font-weight: $font-weight-bold;
-    color: $color-text;
+    line-height: $line-height-125;
   }
+}
+
+html:has(.game-details-dialog[open]) {
+  overflow: hidden;
+  scrollbar-gutter: stable;
 }
