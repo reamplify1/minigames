@@ -4,15 +4,18 @@ import closeIcon from '../../assets/icons/close-blue-icon.svg';
 import starIcon from '../../assets/icons/star-icon.svg';
 import favoriteIcon from '../../assets/icons/favorite-icon.svg';
 import heartOutlineIcon from '../../assets/icons/fav-icon.svg';
-import { MOCK_GAME_DETAILS, type GameInfoItem } from './game-details-dialog.data';
+import { MOCK_GAME_DETAILS, type GameInfoItem, type GameRecord } from './game-details-dialog.data';
 
 const DIALOG_SELECTOR = '.game-details-dialog';
 const CLOSE_SELECTOR = '[data-dialog-close]';
 const FAVORITE_SELECTOR = '[data-favorite-toggle]';
 const TITLE_ID = 'game-details-title';
+const RECORDS_TITLE_ID = 'game-details-records-title';
 
 const FAVORITE_LABEL_ADD = 'Add to Favorites';
 const FAVORITE_LABEL_REMOVE = 'Remove from Favorites';
+
+const RECORD_MEDALS = ['🥇', '🥈', '🥉'] as const;
 
 function createInfoItem({ label, value }: GameInfoItem): string {
   return `
@@ -20,6 +23,37 @@ function createInfoItem({ label, value }: GameInfoItem): string {
       <span class="game-details-dialog__info-label">${label}</span>
       <span class="game-details-dialog__info-value">${value}</span>
     </li>
+  `;
+}
+
+function createRecordItem({ player, score, date }: GameRecord, index: number): string {
+  const medal = RECORD_MEDALS[index] ?? '';
+
+  return `
+    <li class="game-details-dialog__record">
+      <span class="game-details-dialog__record-player">
+        <span class="game-details-dialog__record-medal" aria-hidden="true">${medal}</span>
+        <span class="game-details-dialog__record-name">${player}</span>
+      </span>
+      <span class="game-details-dialog__record-result">
+        <span class="game-details-dialog__record-score">${score}</span>
+        <span class="game-details-dialog__record-date">${date}</span>
+      </span>
+    </li>
+  `;
+}
+
+function createRecordsSection(records: GameRecord[]): string {
+  return `
+    <section class="game-details-dialog__records" aria-labelledby="${RECORDS_TITLE_ID}">
+      <h3 class="game-details-dialog__records-title" id="${RECORDS_TITLE_ID}">
+        <span class="game-details-dialog__records-icon" aria-hidden="true">🏆</span>
+        Top Records
+      </h3>
+      <ol class="game-details-dialog__records-list">
+        ${records.map((record, index) => createRecordItem(record, index)).join('')}
+      </ol>
+    </section>
   `;
 }
 
@@ -78,6 +112,8 @@ function createDialogContent(): string {
             <span class="game-details-dialog__favorite-label">${FAVORITE_LABEL_ADD}</span>
           </button>
         </div>
+
+        ${createRecordsSection(game.records)}
       </div>
     </div>
   `;

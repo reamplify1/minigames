@@ -321,6 +321,98 @@ $game-details-backdrop-transition:
   &__favorite[aria-pressed='true'] &__heart {
     filter: $game-details-heart-active-filter;
   }
+
+  &__records {
+    display: flex;
+    flex-direction: column;
+    gap: space(1);
+  }
+
+  &__records-title {
+    display: flex;
+    align-items: center;
+    gap: space(1);
+    margin: 0;
+    font-size: $font-size-body-medium;
+    font-weight: $font-weight-bold;
+    line-height: $line-height-120;
+  }
+
+  &__records-icon {
+    flex: none;
+  }
+
+  &__records-list {
+    display: flex;
+    flex-direction: column;
+    gap: space(1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__record {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: space(2);
+    padding: space(2);
+    border-radius: $radius-md;
+    background-color: $color-white;
+
+    @include respond-to(mobile) {
+      gap: space(1);
+    }
+  }
+
+  &__record-player {
+    display: flex;
+    align-items: center;
+    gap: space(2);
+    min-width: 0;
+    font-size: $font-size-body-small;
+    font-weight: $font-weight-bold;
+    line-height: $line-height-120;
+
+    @include respond-to(mobile) {
+      gap: space(1);
+    }
+  }
+
+  &__record-medal {
+    flex: none;
+  }
+
+  &__record-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__record-result {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: space(2);
+
+    @include respond-to(mobile) {
+      gap: space(1);
+    }
+  }
+
+  &__record-score {
+    font-size: $font-size-body-small;
+    font-weight: $font-weight-bold;
+    line-height: $line-height-120;
+    white-space: nowrap;
+  }
+
+  &__record-date {
+    font-size: $font-size-label-medium;
+    line-height: $line-height-120;
+    color: $color-on-bg;
+    white-space: nowrap;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
