@@ -4,7 +4,12 @@
 $game-details-width: 600px;
 $game-details-shift: space(2);
 $game-details-hero-height: 220px;
-$game-details-close-shadow: $border-width $border-width 0 $color-shadow-dark;
+$game-details-action-height: space(6);
+$game-details-action-radius: space(1.5);
+$game-details-icon-size: space(3);
+$game-details-widget-shadow: $border-width-heavy $border-width-heavy 0 $color-on-primary;
+$game-details-heart-active-filter: brightness(0) saturate(100%) invert(46%) sepia(73%)
+  saturate(3207%) hue-rotate(335deg) brightness(96%) contrast(92%);
 $game-details-transition:
   opacity $transition-dialog,
   transform $transition-dialog,
@@ -30,6 +35,11 @@ $game-details-backdrop-transition:
   opacity: 0;
   transform: translateY($game-details-shift) scale($dialog-scale-from);
   transition: $game-details-transition;
+
+  @include respond-to(mobile) {
+    width: calc(100% - #{space(2)});
+    max-width: calc(100% - #{space(2)});
+  }
 
   &[open] {
     display: flex;
@@ -60,6 +70,7 @@ $game-details-backdrop-transition:
     box-sizing: border-box;
     flex: 0 1 auto;
     min-height: 0;
+    overflow-x: hidden;
     overflow-y: auto;
     border: $border-width-heavy solid $color-on-primary;
     border-radius: $radius-3xl;
@@ -94,7 +105,6 @@ $game-details-backdrop-transition:
     border-radius: $radius-circle;
     background-color: $color-white;
     color: $color-on-primary;
-    box-shadow: $game-details-close-shadow;
     cursor: pointer;
     transition:
       filter $transition-base,
@@ -115,16 +125,201 @@ $game-details-backdrop-transition:
   }
 
   &__close-icon {
-    width: space(3);
-    height: space(3);
-    fill: currentColor;
+    display: block;
+    width: $size-3;
+    height: $size-3;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: space(3);
+    padding: space(3);
+  }
+
+  &__title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: space(3);
+
+    @include respond-to(mobile) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: space(1);
+    }
   }
 
   &__title {
-    margin: space(3) space(3) 0;
+    margin: 0;
     font-size: $font-size-headline-large;
     font-weight: $font-weight-bold;
+    line-height: $line-height-140;
+  }
+
+  &__stats {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: space(2);
+  }
+
+  &__stat {
+    display: inline-flex;
+    align-items: center;
+    gap: $size-1;
+    font-size: $font-size-body-small;
+    font-weight: $font-weight-bold;
+    line-height: $line-height-100;
+  }
+
+  &__stat-icon {
+    flex: none;
+    width: $game-details-icon-size;
+    height: $game-details-icon-size;
+  }
+
+  &__description {
+    margin: 0;
+    font-size: $font-size-body-medium;
     line-height: $line-height-125;
+    color: $color-on-bg;
+  }
+
+  &__info {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: space(2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    @include respond-to(mobile) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  &__info-item {
+    display: flex;
+    flex-direction: column;
+    gap: space(1);
+    padding: space(1) space(2);
+    border: $border-width-hairline solid $color-outline-variant;
+    border-radius: $radius-md;
+    background-color: $color-surface;
+    box-shadow: $game-details-widget-shadow;
+  }
+
+  &__info-label {
+    font-size: $font-size-label-medium;
+    line-height: $line-height-120;
+    color: $color-on-bg;
+  }
+
+  &__info-value {
+    font-size: $font-size-body-small;
+    font-weight: $font-weight-bold;
+    line-height: $line-height-120;
+  }
+
+  &__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: space(2);
+
+    @include respond-to(mobile) {
+      grid-template-columns: 1fr auto;
+    }
+  }
+
+  &__play,
+  &__favorite {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: $game-details-action-height;
+    padding: $size-btn-padding-y-large $size-btn-padding-x-large;
+    border-radius: $game-details-action-radius;
+    box-shadow: $shadow-hard-sm;
+    font-family: inherit;
+    font-size: $font-size-body-medium;
+    font-weight: $font-weight-bold;
+    line-height: $line-height-120;
+    color: $color-on-primary;
+    cursor: pointer;
+    transition:
+      background-color $transition-base,
+      transform $transition-press;
+
+    &:active {
+      transform: translate($press-offset, $press-offset);
+    }
+
+    &:focus-visible {
+      outline: $border-width solid $color-on-primary;
+      outline-offset: $outline-offset;
+    }
+  }
+
+  &__play {
+    gap: space(1);
+    border: $border-width-btn solid $color-on-primary;
+    background-color: $color-primary;
+
+    @include hover-only {
+      background-color: $color-primary-hover;
+    }
+
+    &:active {
+      background-color: $color-primary-active;
+    }
+  }
+
+  &__favorite {
+    gap: $size-1;
+    border: $border-width-hairline solid $color-outline-variant;
+    background-color: $color-surface;
+
+    @include hover-only {
+      background-color: $color-favorite-hover;
+    }
+
+    &:active {
+      background-color: $color-favorite-active;
+    }
+
+    &[aria-pressed='true'] {
+      background-color: $color-favorite-hover;
+    }
+
+    @include respond-to(mobile) {
+      width: $game-details-action-height;
+      padding: 0;
+    }
+  }
+
+  &__favorite-label {
+    @include respond-to(mobile) {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
+
+  &__heart {
+    display: block;
+    flex: none;
+    width: $game-details-icon-size;
+    height: $game-details-icon-size;
+    transition: filter $transition-base;
+  }
+
+  &__favorite[aria-pressed='true'] &__heart {
+    filter: $game-details-heart-active-filter;
   }
 }
 
