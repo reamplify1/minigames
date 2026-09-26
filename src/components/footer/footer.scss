@@ -1,8 +1,8 @@
 @use '../../styles/tokens' as *;
 @use '../../styles/mixins' as *;
 
-$footer-description-max-width: 392px;
-$footer-social-size: space(4);
+$footer-description-max-width: space(49);
+$footer-social-size: space(5);
 $footer-icon-size: space(2);
 $footer-round-icon-size: space(3);
 
@@ -173,7 +173,7 @@ $footer-round-icon-size: space(3);
   }
 
   &__socials {
-    gap: space(1);
+    gap: space(2);
   }
 
   &__social {
@@ -183,7 +183,7 @@ $footer-round-icon-size: space(3);
     width: $footer-social-size;
     height: $footer-social-size;
     border-radius: $radius-circle;
-    background-color: $color-white-10;
+    background-color: $color-bg-footer-low;
     cursor: pointer;
     transition:
       background-color $transition-base,

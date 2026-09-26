@@ -18,7 +18,6 @@ $hero-overlay-opacity: 0.65;
   max-width: $viewport-desktop;
   margin-inline: auto;
   padding: (space(14) - $border-width) space(15) space(14);
-  border-top: $border-width solid $color-on-primary;
   background-color: rgba($color-hero-overlay, $hero-overlay-opacity);
   overflow: hidden;
 

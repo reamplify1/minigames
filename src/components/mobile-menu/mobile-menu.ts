@@ -2,9 +2,23 @@ import './mobile-menu.scss';
 import logoIcon from '../../assets/icons/minigames-icon.svg';
 import closeIcon from '../../assets/icons/close-button-icon.svg';
 import { openAuthDialog } from '../auth-dialog/auth-dialog';
+import { navigateTo } from '../../app/router';
+import { navItems, getCurrentPage } from '../header/nav-items';
 
 const OPEN_CLASS = 'mobile-menu--open';
 const NO_SCROLL_CLASS = 'no-scroll';
+
+function renderNavLinks(): string {
+  const currentPage = getCurrentPage();
+  return navItems
+    .map((item) => {
+      const isActive = item.page !== undefined && item.page === currentPage;
+      const activeClass = isActive ? ' mobile-menu__link--active' : '';
+      const ariaCurrent = isActive ? ' aria-current="page"' : '';
+      return `<li><a class="mobile-menu__link${activeClass}" href="${item.href}"${ariaCurrent}>${item.label}</a></li>`;
+    })
+    .join('');
+}
 
 export function createMobileMenu(trigger: HTMLElement): HTMLElement {
   const menu = document.createElement('div');
@@ -16,20 +30,17 @@ export function createMobileMenu(trigger: HTMLElement): HTMLElement {
   menu.innerHTML = `
     <div class="mobile-menu__top">
       <a class="mobile-menu__logo" href="/">
-        <img class="mobile-menu__logo-icon" src="${logoIcon}" alt="logo icon" />
+        <img class="mobile-menu__logo-icon" src="${logoIcon}" alt="" />
         <span>MiniGames</span>
       </a>
       <button class="mobile-menu__close" type="button" aria-label="Close menu">
-        <img class="mobile-menu__close-icon" src="${closeIcon}" alt="close button" />
+        <img class="mobile-menu__close-icon" src="${closeIcon}" alt="" />
       </button>
     </div>
 
     <nav class="mobile-menu__nav" aria-label="Mobile navigation">
       <ul class="mobile-menu__list">
-        <li><a class="mobile-menu__link mobile-menu__link--active" href="/">Home</a></li>
-        <li><a class="mobile-menu__link" href="/">Library</a></li>
-        <li><a class="mobile-menu__link" href="/">Tournaments</a></li>
-        <li><a class="mobile-menu__link" href="/">Community</a></li>
+        ${renderNavLinks()}
       </ul>
     </nav>
 
@@ -86,12 +97,20 @@ export function createMobileMenu(trigger: HTMLElement): HTMLElement {
     openAuthDialog();
   }
 
+  function handleNavLinkClick(event: MouseEvent): void {
+    event.preventDefault();
+    const link = event.currentTarget as HTMLAnchorElement;
+    const href = link.getAttribute('href') ?? '/';
+    closeMenu();
+    navigateTo(href);
+  }
+
   trigger.addEventListener('click', openMenu);
   closeButton?.addEventListener('click', closeMenu);
 
-  const links = menu.querySelectorAll('.mobile-menu__logo, .mobile-menu__link');
+  const links = menu.querySelectorAll<HTMLAnchorElement>('.mobile-menu__logo, .mobile-menu__link');
   for (const link of links) {
-    link.addEventListener('click', closeMenu);
+    link.addEventListener('click', handleNavLinkClick);
   }
 
   const authButtons = menu.querySelectorAll('.mobile-menu__btn');

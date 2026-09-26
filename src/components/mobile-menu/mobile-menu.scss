@@ -10,7 +10,7 @@ $mobile-menu-close-icon-size: 14px;
 .mobile-menu {
   display: none;
 
-  @include respond-to(burger) {
+  @include respond-to(tablet) {
     position: fixed;
     inset: 0;
     z-index: $z-index-menu;

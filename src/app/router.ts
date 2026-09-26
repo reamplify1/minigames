@@ -1,23 +1,26 @@
 type RouteHandler = () => void;
 
 const routes: Record<string, RouteHandler> = {};
+const routerState = { currentPath: '/' };
 
 export function registerRoute(path: string, handler: RouteHandler): void {
   routes[path] = handler;
 }
 
 export function navigateTo(path: string): void {
-  globalThis.history.pushState({}, '', path);
+  routerState.currentPath = path;
   render();
 }
 
+export function getCurrentPath(): string {
+  return routerState.currentPath;
+}
+
 function render(): void {
-  const path = globalThis.location.pathname;
-  const handler = routes[path] ?? routes['/'];
+  const handler = routes[routerState.currentPath] ?? routes['/'];
   handler();
 }
 
 export function initRouter(): void {
-  globalThis.addEventListener('popstate', render);
   render();
 }

@@ -3,6 +3,7 @@
 
 .header {
   background-color: $color-background;
+  border-bottom: $border-width solid $color-on-primary;
 
   &__inner {
     display: flex;
