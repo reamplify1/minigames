@@ -1,40 +1,113 @@
 @use '../../styles/tokens' as *;
 @use '../../styles/mixins' as *;
 
-.game-details-dialog-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: $z-index-menu;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: $color-scrim;
-}
+$game-details-width: 600px;
+$game-details-shift: space(2);
+$game-details-transition:
+  opacity $transition-dialog,
+  transform $transition-dialog,
+  overlay $transition-dialog allow-discrete,
+  display $transition-dialog allow-discrete;
+$game-details-backdrop-transition:
+  background-color $transition-dialog,
+  overlay $transition-dialog allow-discrete,
+  display $transition-dialog allow-discrete;
 
 .game-details-dialog {
-  position: relative;
-  padding: $size-8;
-  border-radius: $radius-lg;
-  background: $color-surface;
+  box-sizing: border-box;
+  width: calc(100% - #{space(4)});
+  max-width: $game-details-width;
+  max-height: calc(100dvh - #{space(4)});
+  margin: auto;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  font-family: $font-family-base;
+  color: $color-on-primary;
+  opacity: 0;
+  transform: translateY($game-details-shift) scale($dialog-scale-from);
+  transition: $game-details-transition;
+
+  &[open] {
+    display: flex;
+    flex-direction: column;
+    opacity: 1;
+    transform: none;
+
+    @starting-style {
+      opacity: 0;
+      transform: translateY($game-details-shift) scale($dialog-scale-from);
+    }
+  }
+
+  &::backdrop {
+    background-color: transparent;
+    transition: $game-details-backdrop-transition;
+  }
+
+  &[open]::backdrop {
+    background-color: $color-backdrop;
+
+    @starting-style {
+      background-color: transparent;
+    }
+  }
+
+  &__content {
+    position: relative;
+    box-sizing: border-box;
+    flex: 0 1 auto;
+    min-height: 0;
+    padding: space(3);
+    overflow-y: auto;
+    border: $border-width-heavy solid $color-on-primary;
+    border-radius: $radius-3xl;
+    background-color: $color-background;
+    box-shadow: $shadow-dialog;
+  }
 
   &__close {
     position: absolute;
-    top: $size-3;
-    right: $size-3;
-    width: $size-5;
-    height: $size-5;
-    border: none;
-    background: none;
+    top: space(2);
+    right: space(2);
+    width: $size-8;
+    height: $size-8;
+    border: $border-width solid $color-on-primary;
+    border-radius: $radius-circle;
+    background-color: $color-white;
     font-size: $font-size-headline-medium;
     line-height: 1;
+    color: $color-on-primary;
     cursor: pointer;
+    transition: filter $transition-base;
+
+    @include hover-only {
+      filter: brightness($brightness-hover);
+    }
+
+    &:focus-visible {
+      outline: $border-width solid $color-primary;
+      outline-offset: $outline-offset;
+    }
   }
 
-  &__placeholder {
+  &__title {
     margin: 0;
-    font-family: $font-family-base;
-    font-size: $font-size-headline-medium;
+    font-size: $font-size-headline-large;
     font-weight: $font-weight-bold;
-    color: $color-text;
+    line-height: $line-height-125;
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-details-dialog,
+  .game-details-dialog::backdrop {
+    transition: none;
+  }
+}
+
+html:has(.game-details-dialog[open]) {
+  overflow: hidden;
+  scrollbar-gutter: stable;
 }
