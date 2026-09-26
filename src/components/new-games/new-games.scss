@@ -2,6 +2,15 @@
 @use '../../styles/mixins' as *;
 
 $new-games-arrow-icon-size: 20px;
+$new-games-track-height: space(48);
+$new-games-card-small-desktop: space(15);
+$new-games-card-small-tablet: space(13);
+$new-games-card-small-mobile: space(6);
+$new-games-card-medium: space(36);
+$new-games-card-gap: space(1);
+$new-games-overlay-padding-top: space(5);
+$new-games-card-hover-scale: 1.03;
+$new-games-slide-duration: 0.5s;
 
 .new-games {
   display: flex;
@@ -112,17 +121,156 @@ $new-games-arrow-icon-size: 20px;
   }
 
   &__track {
-    display: flex;
-    gap: space(1);
-    justify-content: center;
-    box-sizing: border-box;
+    --slider-card-small: #{$new-games-card-small-desktop};
+    --slider-card-medium: #{$new-games-card-medium};
+    --slider-gap: #{$new-games-card-gap};
+
+    position: relative;
+    height: $new-games-track-height;
     margin: 0;
-    padding: 0 space(1) $size-1;
-    list-style: none;
+    padding: 0;
     overflow: hidden;
+    list-style: none;
+    touch-action: pan-y;
+    user-select: none;
+
+    @include respond-to(tablet) {
+      --slider-card-small: #{$new-games-card-small-tablet};
+      --slider-card-medium: 0px;
+
+      height: fluid-tablet(space(35), space(48));
+    }
 
     @include respond-to(mobile) {
-      padding-inline: fluid-mobile($size-1, space(1));
+      --slider-card-small: #{$new-games-card-small-mobile};
+
+      height: fluid-mobile(space(26), space(35));
     }
+  }
+
+  &__slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    transition:
+      width $new-games-slide-duration ease,
+      transform $new-games-slide-duration ease,
+      visibility $new-games-slide-duration;
+
+    &--hidden {
+      visibility: hidden;
+    }
+  }
+
+  &__card {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: $radius-lg;
+    background-color: $color-bg-footer;
+    font-family: $font-family-base;
+    text-align: left;
+    cursor: pointer;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border: $border-width-thick solid $color-on-primary;
+      border-radius: inherit;
+      pointer-events: none;
+    }
+
+    @include hover-only {
+      .new-games__card-image {
+        transform: scale($new-games-card-hover-scale);
+      }
+    }
+
+    &:focus-visible {
+      outline: $border-width solid $color-primary;
+      outline-offset: -$size-2;
+    }
+  }
+
+  &__card-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+    transition: transform $transition-base;
+  }
+
+  &__card-overlay {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: space(1);
+    padding: $new-games-overlay-padding-top space(2) space(2);
+    background: linear-gradient(to bottom, $color-scrim-clear, $color-scrim);
+    color: $color-white;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity $transition-base,
+      visibility $transition-base;
+  }
+
+  &__slide--info &__card-overlay {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  &__card-title {
+    overflow: hidden;
+    font-size: $font-size-body-medium;
+    font-weight: $font-weight-bold;
+    line-height: $line-height-120;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    @include respond-to(tablet) {
+      font-size: $font-size-body-small;
+    }
+  }
+
+  &__card-stats {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: space(1);
+  }
+
+  &__card-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: $size-1;
+    font-size: $font-size-label-medium;
+    font-weight: $font-weight-bold;
+    line-height: $line-height-100;
+  }
+
+  &__card-stat-icon {
+    flex: none;
+    width: $size-3;
+    height: $size-3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .new-games__slide,
+  .new-games__card-image,
+  .new-games__card-overlay {
+    transition: none;
   }
 }
