@@ -3,6 +3,8 @@
 
 $game-details-width: 600px;
 $game-details-shift: space(2);
+$game-details-hero-height: 220px;
+$game-details-close-shadow: $border-width $border-width 0 $color-shadow-dark;
 $game-details-transition:
   opacity $transition-dialog,
   transform $transition-dialog,
@@ -55,11 +57,9 @@ $game-details-backdrop-transition:
   }
 
   &__content {
-    position: relative;
     box-sizing: border-box;
     flex: 0 1 auto;
     min-height: 0;
-    padding: space(3);
     overflow-y: auto;
     border: $border-width-heavy solid $color-on-primary;
     border-radius: $radius-3xl;
@@ -67,23 +67,45 @@ $game-details-backdrop-transition:
     box-shadow: $shadow-dialog;
   }
 
+  &__hero {
+    position: relative;
+    height: $game-details-hero-height;
+    overflow: hidden;
+  }
+
+  &__hero-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
   &__close {
     position: absolute;
     top: space(2);
     right: space(2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: $size-8;
     height: $size-8;
+    padding: 0;
     border: $border-width solid $color-on-primary;
     border-radius: $radius-circle;
     background-color: $color-white;
-    font-size: $font-size-headline-medium;
-    line-height: 1;
     color: $color-on-primary;
+    box-shadow: $game-details-close-shadow;
     cursor: pointer;
-    transition: filter $transition-base;
+    transition:
+      filter $transition-base,
+      transform $transition-press;
 
     @include hover-only {
       filter: brightness($brightness-hover);
+    }
+
+    &:active {
+      transform: translate($press-offset, $press-offset);
     }
 
     &:focus-visible {
@@ -92,8 +114,14 @@ $game-details-backdrop-transition:
     }
   }
 
+  &__close-icon {
+    width: space(3);
+    height: space(3);
+    fill: currentColor;
+  }
+
   &__title {
-    margin: 0;
+    margin: space(3) space(3) 0;
     font-size: $font-size-headline-large;
     font-weight: $font-weight-bold;
     line-height: $line-height-125;
