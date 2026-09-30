@@ -1,12 +1,14 @@
-import vacationCafeImage from '../../assets/images/games/vacation-cafe-simulator.jpg';
-import winterBurrowImage from '../../assets/images/games/winter-burrow-card.jpg';
-import shelvePotionsImage from '../../assets/images/games/shelve-the-potion-card.jpg';
+import { fetchJson } from '../../utils/api';
+
+import catMailCoImage from '../../assets/images/games/cat-mail-co-card.png';
 import heartopiaImage from '../../assets/images/games/heartopia-card.png';
+import islandersNewShoresImage from '../../assets/images/games/islanders-new-shores-card.jpg';
 import paliaImage from '../../assets/images/games/palia-card.png';
-import catMailImage from '../../assets/images/games/cat-mail-card.png';
+import shelveThePotionsImage from '../../assets/images/games/shelve-the-potions-card.jpg';
+import tailsideCozyCafeSimImage from '../../assets/images/games/tailside-cozy-cafe-sim-card.jpg';
 import tinyGladeImage from '../../assets/images/games/tiny-glade-card.jpg';
-import tailsideImage from '../../assets/images/games/tailside-cozy-cafe-simcard.jpg';
-import islandersImage from '../../assets/images/games/islanders-new-shores-card.jpg';
+import vacationCafeSimulatorImage from '../../assets/images/games/vacation-cafe-simulator-card.jpg';
+import winterBurrowImage from '../../assets/images/games/winter-burrow-card.jpg';
 
 export interface FeaturedGame {
   title: string;
@@ -15,14 +17,47 @@ export interface FeaturedGame {
   image: string;
 }
 
-export const FEATURED_GAMES: FeaturedGame[] = [
-  { title: 'Vacation Cafe Simulator', rating: 4.8, likes: '28.7K', image: vacationCafeImage },
-  { title: 'Winter Burrow', rating: 4.9, likes: '32.4K', image: winterBurrowImage },
-  { title: 'Shelve the Potions!', rating: 4.7, likes: '21.3K', image: shelvePotionsImage },
-  { title: 'Heartopia', rating: 4.6, likes: '46.8K', image: heartopiaImage },
-  { title: 'Palia', rating: 4.8, likes: '89.5K', image: paliaImage },
-  { title: 'Cat Mail Co.', rating: 4.9, likes: '38.2K', image: catMailImage },
-  { title: 'Tiny Glade', rating: 4.9, likes: '67.3K', image: tinyGladeImage },
-  { title: 'Tailside: Cozy Cafe Sim', rating: 4.8, likes: '35.6K', image: tailsideImage },
-  { title: 'ISLANDERS: New Shores', rating: 4.9, likes: '54.2K', image: islandersImage },
-];
+interface ApiGame {
+  slug: string;
+  name: string;
+  rating: number;
+  likesCount: number;
+}
+
+interface GamesResponse {
+  data: ApiGame[];
+}
+
+// The API's cardImage path does not resolve to a real hosted file, so featured
+// games are matched by slug to the local assets from tasks/assets instead.
+const IMAGE_BY_SLUG: Record<string, string> = {
+  'cat-mail-co': catMailCoImage,
+  heartopia: heartopiaImage,
+  'islanders-new-shores': islandersNewShoresImage,
+  palia: paliaImage,
+  'shelve-the-potions': shelveThePotionsImage,
+  'tailside-cozy-cafe-sim': tailsideCozyCafeSimImage,
+  'tiny-glade': tinyGladeImage,
+  'vacation-cafe-simulator': vacationCafeSimulatorImage,
+  'winter-burrow': winterBurrowImage,
+};
+
+const FALLBACK_IMAGE = vacationCafeSimulatorImage;
+
+function formatLikes(count: number): string {
+  return count >= 1000 ? `${(count / 1000).toFixed(1)}K` : String(count);
+}
+
+function mapGame(game: ApiGame): FeaturedGame {
+  return {
+    title: game.name,
+    rating: game.rating,
+    likes: formatLikes(game.likesCount),
+    image: IMAGE_BY_SLUG[game.slug] ?? FALLBACK_IMAGE,
+  };
+}
+
+export async function fetchFeaturedGames(): Promise<FeaturedGame[]> {
+  const response = await fetchJson<GamesResponse>('/games?featured=true');
+  return response.data.map((game) => mapGame(game));
+}
