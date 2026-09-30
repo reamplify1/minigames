@@ -1,8 +1,11 @@
 import './leaderboard.scss';
-import { players } from './leaderboard-data';
-import type { Player } from './leaderboard-data';
+import { fetchLeaderboard } from './leaderboard-data';
+import type { Player } from './leaderboard.types';
+import { createSkeletonRows, createErrorBanner, createEmptyState } from './leaderboard.states';
+import { showSnackbar } from '../snackbar/snackbar';
 
 const COMPACT_VISIBLE_ROWS = 3;
+const SKELETON_ROW_COUNT = 5;
 
 const headerRow = `
   <tr>
@@ -48,22 +51,54 @@ function createRow(player: Player, index: number): string {
   `;
 }
 
-export function createLeaderboard(): HTMLElement {
-  const section = document.createElement('section');
-  section.className = 'leaderboard';
-  section.setAttribute('aria-labelledby', 'leaderboard-title');
-  section.innerHTML = `
+function createHeaderMarkup(): string {
+  return `
     <div class="leaderboard__header">
       <span class="leaderboard__marker" aria-hidden="true"></span>
       <h2 class="leaderboard__title" id="leaderboard-title">Top Players<span class="leaderboard__text-full"> This Week</span></h2>
     </div>
-    <div class="leaderboard__table-wrap">
-      <table class="leaderboard__table" aria-labelledby="leaderboard-title">
-        <thead>${headerRow}</thead>
-        <tbody>${players.map((player, index) => createRow(player, index)).join('')}</tbody>
-      </table>
-    </div>
   `;
+}
 
+export function createLeaderboard(): HTMLElement {
+  const section = document.createElement('section');
+  section.className = 'leaderboard';
+  section.setAttribute('aria-labelledby', 'leaderboard-title');
+
+  const load = async (): Promise<void> => {
+    section.innerHTML = `
+      ${createHeaderMarkup()}
+      <div class="leaderboard__table-wrap">
+        <table class="leaderboard__table" aria-labelledby="leaderboard-title">
+          <thead>${headerRow}</thead>
+          <tbody>${createSkeletonRows(SKELETON_ROW_COUNT)}</tbody>
+        </table>
+      </div>
+    `;
+
+    try {
+      const players = await fetchLeaderboard();
+
+      if (players.length === 0) {
+        section.querySelector('.leaderboard__table-wrap')?.replaceWith(createEmptyState());
+        return;
+      }
+
+      section.innerHTML = `
+        ${createHeaderMarkup()}
+        <div class="leaderboard__table-wrap">
+          <table class="leaderboard__table" aria-labelledby="leaderboard-title">
+            <thead>${headerRow}</thead>
+            <tbody>${players.map((player, index) => createRow(player, index)).join('')}</tbody>
+          </table>
+        </div>
+      `;
+    } catch {
+      section.querySelector('.leaderboard__table-wrap')?.replaceWith(createErrorBanner(load));
+      showSnackbar('Could not load the leaderboard.', 'error');
+    }
+  };
+
+  void load();
   return section;
 }
