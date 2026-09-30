@@ -1,71 +1,55 @@
-export type AvatarColor = 'yellow' | 'green' | 'blue' | 'pink' | 'lavender';
+import { fetchJson } from '../../utils/api';
+import type { AvatarColor, Player } from './leaderboard.types';
 
-export interface Player {
-  initials: string;
-  name: string;
-  compactName: string;
-  avatarColor: AvatarColor;
+interface ApiPlayer {
+  rank: number;
+  playerName: string;
   gamesPlayed: number;
-  score: string;
-  compactScore: string;
+  totalScore: number;
   streakDays: number;
-  favoriteGame: string;
+  favoriteGameName: string;
 }
 
-export const players: Player[] = [
-  {
-    initials: 'AP',
-    name: 'Alex_Pro99',
-    compactName: 'Alex_Pro99',
-    avatarColor: 'yellow',
-    gamesPlayed: 142,
-    score: '94,250',
-    compactScore: '94.2K',
-    streakDays: 12,
-    favoriteGame: 'Heartopia',
-  },
-  {
-    initials: 'CG',
-    name: 'CozyGamer_x',
-    compactName: 'CozyGamer',
-    avatarColor: 'green',
-    gamesPlayed: 118,
-    score: '81,400',
-    compactScore: '81.4K',
-    streakDays: 8,
-    favoriteGame: 'Cat Mail Co.',
-  },
-  {
-    initials: 'MM',
-    name: 'MatchMaster',
-    compactName: 'MatchMaster',
-    avatarColor: 'blue',
-    gamesPlayed: 98,
-    score: '72,110',
-    compactScore: '72.1K',
-    streakDays: 5,
-    favoriteGame: 'Tiny Glade',
-  },
-  {
-    initials: 'BP',
-    name: 'BubblePop',
-    compactName: 'BubblePop',
-    avatarColor: 'pink',
-    gamesPlayed: 87,
-    score: '65,900',
-    compactScore: '65.9K',
-    streakDays: 3,
-    favoriteGame: 'Whisper of the House',
-  },
-  {
-    initials: 'SG',
-    name: 'SudokuGod',
-    compactName: 'SudokuGod',
-    avatarColor: 'lavender',
-    gamesPlayed: 74,
-    score: '59,320',
-    compactScore: '59.3K',
-    streakDays: 2,
-    favoriteGame: 'Cat Chess',
-  },
-];
+interface LeaderboardResponse {
+  data: ApiPlayer[];
+}
+
+const AVATAR_COLORS: AvatarColor[] = ['yellow', 'green', 'blue', 'pink', 'lavender'];
+
+function splitIntoWords(name: string): string[] {
+  return name.split('_').flatMap((part) => part.match(/[A-Z][a-z0-9]*|[a-z0-9]+/g) ?? [part]);
+}
+
+function getInitials(name: string): string {
+  return splitIntoWords(name)
+    .slice(0, 2)
+    .map((word) => word.charAt(0).toUpperCase())
+    .join('');
+}
+
+function formatScore(score: number): string {
+  return score.toLocaleString('en-US');
+}
+
+function formatCompactScore(score: number): string {
+  return score >= 1000 ? `${(score / 1000).toFixed(1)}K` : String(score);
+}
+
+function mapPlayer(player: ApiPlayer): Player {
+  return {
+    initials: getInitials(player.playerName),
+    name: player.playerName,
+    compactName: player.playerName,
+    avatarColor: AVATAR_COLORS[(player.rank - 1) % AVATAR_COLORS.length] ?? 'yellow',
+    gamesPlayed: player.gamesPlayed,
+    score: formatScore(player.totalScore),
+    compactScore: formatCompactScore(player.totalScore),
+    streakDays: player.streakDays,
+    favoriteGame: player.favoriteGameName,
+  };
+}
+
+export async function fetchLeaderboard(): Promise<Player[]> {
+  const response = await fetchJson<LeaderboardResponse>('/leaderboard');
+  return response.data.map((player) => mapPlayer(player));
+}
