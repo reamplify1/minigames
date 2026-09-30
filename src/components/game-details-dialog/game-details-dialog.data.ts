@@ -12,17 +12,6 @@ export interface GameRecord {
   date: string;
 }
 
-export type CommentAvatarColor = 'blue' | 'yellow' | 'white';
-
-export interface GameComment {
-  author: string;
-  date: string;
-  text: string;
-  likes: number;
-  isLiked: boolean;
-  avatarColor: CommentAvatarColor;
-}
-
 export interface GameDetails {
   title: string;
   heroImage: string;
@@ -31,7 +20,6 @@ export interface GameDetails {
   description: string;
   info: GameInfoItem[];
   records: GameRecord[];
-  comments: GameComment[];
 }
 
 interface ApiGameSpecs {
@@ -63,37 +51,6 @@ interface ApiGameDetails {
 interface GameDetailsResponse {
   data: ApiGameDetails;
 }
-
-// The task's hint and acceptance criteria only cover the game's own details
-// (hero, info, records), not the /comments endpoint, so comments stay static
-// for now. Wiring them up to the API is left for a later, separately scored
-// task, the same way sorting and filtering were split before.
-const STATIC_COMMENTS: GameComment[] = [
-  {
-    author: 'ForestDweller',
-    date: '3 hours ago',
-    text: 'The hand-drawn art is absolutely magical 🍄 Every location feels like a page from a children’s storybook.',
-    likes: 12,
-    isLiked: false,
-    avatarColor: 'blue',
-  },
-  {
-    author: 'HerbalTeaLover',
-    date: '1 day ago',
-    text: 'Perfect cozy evening game — brew a cup of chamomile, wrap in a blanket and help prepare for winter.',
-    likes: 5,
-    isLiked: false,
-    avatarColor: 'yellow',
-  },
-  {
-    author: 'CottageCoreMia',
-    date: '3 days ago',
-    text: 'I want to live inside this game forever 🌿 The NPCs are so charming and the atmosphere is pure warmth.',
-    likes: 8,
-    isLiked: true,
-    avatarColor: 'white',
-  },
-];
 
 function formatLikes(count: number): string {
   return count >= 1000 ? `${(count / 1000).toFixed(1)}K` : String(count);
@@ -142,7 +99,6 @@ function mapGame(game: ApiGameDetails): GameDetails {
       { label: 'Price', value: game.specs.price },
     ],
     records: game.topRecords.map((record) => mapRecord(record)),
-    comments: STATIC_COMMENTS,
   };
 }
 

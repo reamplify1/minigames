@@ -13,17 +13,13 @@ import { showSnackbar } from '../snackbar/snackbar';
 
 const DIALOG_CLASS = 'game-details-dialog';
 
-function createDialogContent(game: GameDetails, onClose: () => void): HTMLElement {
+function createDialogContent(slug: string, game: GameDetails, onClose: () => void): HTMLElement {
   const content = document.createElement('div');
   content.className = 'game-details-dialog__content';
 
   const body = document.createElement('div');
   body.className = 'game-details-dialog__body';
-  body.append(
-    createGameInfo(game),
-    createGameRecords(game.records),
-    createGameComments(game.comments)
-  );
+  body.append(createGameInfo(game), createGameRecords(game.records), createGameComments(slug));
 
   content.append(createGameHero(game.title, game.heroImage, onClose), body);
 
@@ -57,6 +53,12 @@ function getGameDetailsDialog(): HTMLDialogElement {
 
   return dialog;
 }
+
+// Guards against an older, slower request overwriting a newer response when
+// the user closes one game's dialog and opens another before the first
+// request finishes. Held in an object (rather than a top-level `let`) so
+// updating it from inside openGameDetailsDialog doesn't reassign a
+// top-level binding.
 const requestTracker = { requestId: 0 };
 
 export function openGameDetailsDialog(slug: string): void {
@@ -86,7 +88,7 @@ export function openGameDetailsDialog(slug: string): void {
         return;
       }
 
-      dialog.replaceChildren(createDialogContent(game, onClose));
+      dialog.replaceChildren(createDialogContent(slug, game, onClose));
       dialog.scrollTop = 0;
     } catch {
       if (currentRequestId !== requestTracker.requestId) return;
