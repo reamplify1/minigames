@@ -28,8 +28,14 @@ interface ApiGame {
   likesCount: number;
 }
 
+interface ApiGamesMeta {
+  page: number;
+  totalPages: number;
+}
+
 interface GamesResponse {
   data: ApiGame[];
+  meta: ApiGamesMeta;
 }
 
 const IMAGE_BY_SLUG: Record<string, string> = {
@@ -67,14 +73,33 @@ function mapGame(game: ApiGame): Game {
 export interface GameFilters {
   category: string;
   sort: string;
+  page: number;
 }
 
-export async function fetchLibraryGames(filters: GameFilters): Promise<Game[]> {
+export interface GamesMeta {
+  page: number;
+  totalPages: number;
+}
+
+export interface LibraryGamesResult {
+  games: Game[];
+  meta: GamesMeta;
+}
+
+export async function fetchLibraryGames(filters: GameFilters): Promise<LibraryGamesResult> {
   const queryParameters = new URLSearchParams({
     category: filters.category,
     sort: filters.sort,
+    page: String(filters.page),
     limit: '6',
   });
   const response = await fetchJson<GamesResponse>(`/games?${queryParameters.toString()}`);
-  return response.data.map((game) => mapGame(game));
+
+  return {
+    games: response.data.map((game) => mapGame(game)),
+    meta: {
+      page: response.meta.page,
+      totalPages: response.meta.totalPages,
+    },
+  };
 }

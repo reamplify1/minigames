@@ -9,10 +9,21 @@ const CHEVRON_RIGHT = 'M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z';
 
 type ArrowDirection = 'previous' | 'next';
 
+export interface PaginationMeta {
+  page: number;
+  totalPages: number;
+}
+
 interface PaginationOptions {
-  totalPages?: number;
-  initialPage?: number;
   onPageChange?: (page: number) => void;
+}
+
+export interface PaginationSection {
+  element: HTMLElement;
+  // Syncs the control with the API response's own page/totalPages, so the
+  // component stays "built dynamically from the backend response" rather
+  // than tracking its own guess of how many pages exist.
+  setPagination: (meta: PaginationMeta) => void;
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -52,10 +63,8 @@ function createPageItem(page: number, isActive: boolean): HTMLLIElement {
 }
 
 export function createPaginationSection({
-  totalPages = 4,
-  initialPage = 1,
   onPageChange,
-}: PaginationOptions = {}): HTMLElement {
+}: PaginationOptions = {}): PaginationSection {
   const section = document.createElement('section');
   section.className = 'pagination-section';
 
@@ -72,7 +81,9 @@ export function createPaginationSection({
   section.append(nav);
 
   const mobileQuery = globalThis.matchMedia(MOBILE_QUERY);
-  let currentPage = clamp(initialPage, 1, totalPages);
+
+  let totalPages = 1;
+  let currentPage = 1;
 
   const getVisiblePages = (): number[] => {
     const maxVisible = mobileQuery.matches ? MAX_VISIBLE_MOBILE : MAX_VISIBLE_DESKTOP;
@@ -118,6 +129,13 @@ export function createPaginationSection({
 
   mobileQuery.addEventListener('change', render);
 
+  const setPagination = ({ page, totalPages: newTotalPages }: PaginationMeta): void => {
+    totalPages = Math.max(1, newTotalPages);
+    currentPage = clamp(page, 1, totalPages);
+    render();
+  };
+
   render();
-  return section;
+
+  return { element: section, setPagination };
 }
