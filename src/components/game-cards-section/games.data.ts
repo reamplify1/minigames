@@ -1,9 +1,9 @@
-import vacationCafeCover from '../../assets/images/games/vacation-cafe-simulator.jpg';
+import vacationCafeCover from '../../assets/images/games/vacation-cafe-simulator-card.jpg';
 import winterBurrowCover from '../../assets/images/games/winter-burrow-card.jpg';
-import shelvePotionsCover from '../../assets/images/games/shelve-the-potion-card.jpg';
+import shelvePotionsCover from '../../assets/images/games/shelve-the-potions-card.jpg';
 import heartopiaCover from '../../assets/images/games/heartopia-card.png';
 import paliaCover from '../../assets/images/games/palia-card.png';
-import catMailCover from '../../assets/images/games/cat-mail-card.png';
+import catMailCover from '../../assets/images/games/cat-mail-co-card.png';
 
 export interface Game {
   id: string;
