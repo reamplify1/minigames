@@ -1,10 +1,17 @@
 import './game-cards-section.scss';
-import { GAMES, type Game } from './games.data';
+import { fetchLibraryGames, type Game } from './games.data';
 import { openGameDetailsDialog } from '../game-details-dialog/game-details-dialog';
+import {
+  createSkeletonList,
+  createErrorBanner,
+  createEmptyState,
+} from './game-cards-section.states';
+import { showSnackbar } from '../snackbar/snackbar';
 import starIcon from '../../assets/icons/star-icon.svg';
 import heartIcon from '../../assets/icons/favorite-icon.svg';
 
 const FREE_PRICE = 'Free';
+const SKELETON_COUNT = 6;
 
 function createStat(icon: string, label: string, value: string): HTMLElement {
   const stat = document.createElement('span');
@@ -76,21 +83,45 @@ function createGameCard(game: Game): HTMLElement {
   return card;
 }
 
-export function createGameCardsSection(): HTMLElement {
-  const section = document.createElement('section');
-  section.className = 'library-games';
-  section.setAttribute('aria-label', 'Games');
-
+function createGameList(games: Game[]): HTMLElement {
   const list = document.createElement('ul');
   list.className = 'library-games__list';
   list.setAttribute('role', 'list');
 
-  for (const game of GAMES) {
+  for (const game of games) {
     const item = document.createElement('li');
     item.append(createGameCard(game));
     list.append(item);
   }
 
-  section.append(list);
+  return list;
+}
+
+export function createGameCardsSection(): HTMLElement {
+  const section = document.createElement('section');
+  section.className = 'library-games';
+  section.setAttribute('aria-label', 'Games');
+
+  const load = async (): Promise<void> => {
+    section.innerHTML = `
+      <ul class="library-games__list">${createSkeletonList(SKELETON_COUNT)}</ul>
+    `;
+
+    try {
+      const games = await fetchLibraryGames();
+
+      if (games.length === 0) {
+        section.querySelector('.library-games__list')?.replaceWith(createEmptyState());
+        return;
+      }
+
+      section.replaceChildren(createGameList(games));
+    } catch {
+      section.querySelector('.library-games__list')?.replaceWith(createErrorBanner(load));
+      showSnackbar('Could not load games.', 'error');
+    }
+  };
+
+  void load();
   return section;
 }
