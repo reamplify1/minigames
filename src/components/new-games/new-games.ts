@@ -45,6 +45,7 @@ function createSlide(game: FeaturedGame, index: number, total: number): string {
         type="button"
         aria-label="${game.title}, rating ${game.rating}, ${game.likes} likes. Open details"
         data-slider-card
+        data-game-slug="${game.slug}"
       >
         <img class="new-games__card-image" src="${game.image}" alt="" draggable="false" />
         <span class="new-games__card-overlay" aria-hidden="true">
@@ -316,8 +317,14 @@ class NewGamesSlider {
       return;
     }
 
-    if (event.target instanceof Element && event.target.closest(CARD_SELECTOR)) {
-      openGameDetailsDialog();
+    const card =
+      event.target instanceof Element
+        ? event.target.closest<HTMLElement>(CARD_SELECTOR)
+        : undefined;
+    const slug = card?.dataset.gameSlug;
+
+    if (slug) {
+      openGameDetailsDialog(slug);
     }
   }
 
