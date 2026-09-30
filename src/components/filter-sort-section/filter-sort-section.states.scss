@@ -1,0 +1,70 @@
+@use '../../styles/tokens' as *;
+@use '../../styles/mixins' as *;
+
+$skeleton-color-base: $color-outline;
+$skeleton-color-highlight: $color-surface;
+$skeleton-animation-duration: 1.4s;
+
+.filter-sort-bar__chip-skeleton {
+  flex-shrink: 0;
+  width: space(13);
+  height: space(5);
+  border-radius: $radius-3xl;
+  background: linear-gradient(
+    90deg,
+    $skeleton-color-base 25%,
+    $skeleton-color-highlight 50%,
+    $skeleton-color-base 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading $skeleton-animation-duration ease-in-out infinite;
+
+  &:nth-child(2) {
+    width: space(18);
+  }
+
+  &:nth-child(4) {
+    width: space(15);
+  }
+}
+
+.filter-sort-bar__error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: space(2);
+  color: $color-on-bg;
+
+  button {
+    padding: space(1) space(3);
+    border: $border-width solid $color-on-primary;
+    border-radius: $radius-md;
+    background-color: $color-primary;
+    font-family: $font-family-base;
+    font-weight: $font-weight-bold;
+    cursor: pointer;
+
+    &:hover {
+      filter: brightness($brightness-hover);
+    }
+  }
+}
+
+.filter-sort-bar__empty {
+  color: $color-on-bg;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .filter-sort-bar__chip-skeleton {
+    animation: none;
+  }
+}
