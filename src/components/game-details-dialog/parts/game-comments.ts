@@ -1,10 +1,17 @@
 import heartOutlineIcon from '../../../assets/icons/fav-icon.svg';
 import sendIcon from '../../../assets/icons/send-icon.svg';
-import type { GameComment } from '../game-details-dialog.data';
+import { fetchGameComments, type GameComment } from './game-comments.data';
+import {
+  createCommentsSkeleton,
+  createCommentsErrorBanner,
+  createCommentsEmptyState,
+} from './game-comments.states';
+import { showSnackbar } from '../../snackbar/snackbar';
 
 const COMMENTS_TITLE_ID = 'game-details-comments-title';
 const COMMENT_INPUT_ID = 'game-details-comment-input';
 const COMMENT_INPUT_MAX_HEIGHT = 88;
+const SKELETON_COUNT = 3;
 
 function createCommentItem({
   author,
@@ -66,14 +73,20 @@ function toggleLike(button: HTMLButtonElement): void {
   button.setAttribute('aria-pressed', String(isPressed));
 }
 
-export function createGameComments(comments: GameComment[]): HTMLElement {
+function renderCommentsList(list: HTMLElement, comments: GameComment[]): void {
+  list.innerHTML = comments.map((comment) => createCommentItem(comment)).join('');
+}
+
+function setCommentsTitle(title: HTMLElement, total: number): void {
+  title.textContent = `Comments (${total})`;
+}
+
+export function createGameComments(slug: string): HTMLElement {
   const section = document.createElement('section');
   section.className = 'game-details-dialog__comments';
   section.setAttribute('aria-labelledby', COMMENTS_TITLE_ID);
   section.innerHTML = `
-    <h3 class="game-details-dialog__comments-title" id="${COMMENTS_TITLE_ID}">
-      Comments (${comments.length})
-    </h3>
+    <h3 class="game-details-dialog__comments-title" id="${COMMENTS_TITLE_ID}">Comments</h3>
 
     <form class="game-details-dialog__comment-form">
       <span class="game-details-dialog__user-avatar" aria-hidden="true">U</span>
@@ -97,17 +110,16 @@ export function createGameComments(comments: GameComment[]): HTMLElement {
       </button>
     </form>
 
-    <ul class="game-details-dialog__comments-list">
-      ${comments.map((comment) => createCommentItem(comment)).join('')}
-    </ul>
+    <ul class="game-details-dialog__comments-list">${createCommentsSkeleton(SKELETON_COUNT)}</ul>
   `;
 
+  const title = section.querySelector<HTMLElement>('.game-details-dialog__comments-title');
   const form = section.querySelector('form');
   const textarea = section.querySelector('textarea');
   const submitButton = section.querySelector<HTMLButtonElement>(
     '.game-details-dialog__comment-submit'
   );
-  const list = section.querySelector('.game-details-dialog__comments-list');
+  const list = section.querySelector<HTMLElement>('.game-details-dialog__comments-list');
 
   // Sending comments comes in a later story, so the form does nothing for now.
   form?.addEventListener('submit', (event) => {
@@ -134,6 +146,35 @@ export function createGameComments(comments: GameComment[]): HTMLElement {
       toggleLike(likeButton);
     }
   });
+
+  const load = async (): Promise<void> => {
+    if (!list) return;
+
+    list.innerHTML = createCommentsSkeleton(SKELETON_COUNT);
+
+    try {
+      const { comments, total } = await fetchGameComments(slug);
+
+      // The dialog may already be closed (and its content replaced) by the
+      // time this resolves — skip touching detached DOM.
+      if (!section.isConnected) return;
+
+      if (title) setCommentsTitle(title, total);
+
+      if (comments.length === 0) {
+        list.replaceChildren(createCommentsEmptyState());
+        return;
+      }
+
+      renderCommentsList(list, comments);
+    } catch {
+      if (!section.isConnected) return;
+      list.replaceChildren(createCommentsErrorBanner(() => void load()));
+      showSnackbar('Could not load comments.', 'error');
+    }
+  };
+
+  void load();
 
   return section;
 }
