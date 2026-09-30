@@ -1,14 +1,32 @@
 import './filter-sort-section.scss';
-import { FILTER_CHIPS, SORT_OPTIONS, DEFAULT_SORT_ID } from './filter-sort-section.data';
+import {
+  fetchFilterChips,
+  FALLBACK_CATEGORY_ID,
+  SORT_OPTIONS,
+  DEFAULT_SORT_ID,
+  type FilterChip,
+} from './filter-sort-section.data';
 import arrowDropDownIcon from '../../assets/icons/arrow-drop-down-icon.svg';
 import checkIcon from '../../assets/icons/check-icon.svg';
 import { enableDragScroll } from './drag-scroll';
+import {
+  createChipsSkeleton,
+  createChipsErrorBanner,
+  createChipsEmptyState,
+  createChipsList,
+  CHIPS_SLOT_SELECTOR,
+} from './filter-sort-section.states';
+import { showSnackbar } from '../snackbar/snackbar';
 
 const SORT_LIST_ID = 'sort-options';
+const CHIPS_SKELETON_COUNT = 6;
 
 export interface FilterSortSectionOptions {
   onFilterChange?: (filterId: string) => void;
   onSortChange?: (sortId: string) => void;
+  // Called once the categories load and the real default category is known
+  // (it may differ from the FALLBACK_CATEGORY_ID guess used before that).
+  onDefaultCategoryChange?: (filterId: string) => void;
 }
 
 interface SortEntry {
@@ -17,7 +35,7 @@ interface SortEntry {
 }
 
 export function createFilterSortSection(options: FilterSortSectionOptions = {}): HTMLElement {
-  let activeFilter = 'all';
+  let activeFilter = FALLBACK_CATEGORY_ID;
   let activeSort = DEFAULT_SORT_ID;
 
   const section = document.createElement('section');
@@ -43,13 +61,9 @@ export function createFilterSortSection(options: FilterSortSectionOptions = {}):
   const bar = document.createElement('div');
   bar.className = 'filter-sort-bar';
 
-  const chipsList = document.createElement('ul');
-  chipsList.className = 'filter-sort-bar__chips';
-  chipsList.setAttribute('role', 'list');
-
   const chipButtons = new Map<string, HTMLButtonElement>();
 
-  for (const chip of FILTER_CHIPS) {
+  function createChipItem(chip: FilterChip): HTMLLIElement {
     const li = document.createElement('li');
     const button = document.createElement('button');
     button.type = 'button';
@@ -70,10 +84,39 @@ export function createFilterSortSection(options: FilterSortSectionOptions = {}):
 
     chipButtons.set(chip.id, button);
     li.append(button);
-    chipsList.append(li);
+    return li;
   }
 
-  enableDragScroll(chipsList);
+  const loadChips = async (): Promise<void> => {
+    bar.querySelector(CHIPS_SLOT_SELECTOR)?.replaceWith(createChipsSkeleton(CHIPS_SKELETON_COUNT));
+
+    try {
+      const chips = await fetchFilterChips();
+
+      if (chips.length === 0) {
+        bar.querySelector(CHIPS_SLOT_SELECTOR)?.replaceWith(createChipsEmptyState());
+        return;
+      }
+
+      chipButtons.clear();
+      activeFilter = chips.find((chip) => chip.isDefault)?.id ?? chips[0].id;
+
+      const list = createChipsList();
+      for (const chip of chips) {
+        list.append(createChipItem(chip));
+      }
+
+      bar.querySelector(CHIPS_SLOT_SELECTOR)?.replaceWith(list);
+      enableDragScroll(list);
+      options.onDefaultCategoryChange?.(activeFilter);
+    } catch {
+      bar.querySelector(CHIPS_SLOT_SELECTOR)?.replaceWith(createChipsErrorBanner(loadChips));
+      showSnackbar('Could not load categories.', 'error');
+    }
+  };
+
+  bar.append(createChipsSkeleton(CHIPS_SKELETON_COUNT));
+  void loadChips();
 
   // --- Sort dropdown ---
   const sortWrapper = document.createElement('div');
@@ -186,7 +229,7 @@ export function createFilterSortSection(options: FilterSortSectionOptions = {}):
   });
 
   sortWrapper.append(sortTrigger, sortList);
-  bar.append(chipsList, sortWrapper);
+  bar.append(sortWrapper);
   section.append(intro, bar);
 
   return section;

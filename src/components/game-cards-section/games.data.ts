@@ -32,8 +32,6 @@ interface GamesResponse {
   data: ApiGame[];
 }
 
-// The API's cardImage path does not resolve to a real hosted file, so cards are
-// matched by slug to the local assets from tasks/assets instead.
 const IMAGE_BY_SLUG: Record<string, string> = {
   'cat-mail-co': catMailCoImage,
   'islanders-new-shores': islandersNewShoresImage,
@@ -66,7 +64,17 @@ function mapGame(game: ApiGame): Game {
   };
 }
 
-export async function fetchLibraryGames(): Promise<Game[]> {
-  const response = await fetchJson<GamesResponse>('/games?limit=6');
+export interface GameFilters {
+  category: string;
+  sort: string;
+}
+
+export async function fetchLibraryGames(filters: GameFilters): Promise<Game[]> {
+  const queryParameters = new URLSearchParams({
+    category: filters.category,
+    sort: filters.sort,
+    limit: '6',
+  });
+  const response = await fetchJson<GamesResponse>(`/games?${queryParameters.toString()}`);
   return response.data.map((game) => mapGame(game));
 }

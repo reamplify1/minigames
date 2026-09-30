@@ -1,5 +1,5 @@
 import './game-cards-section.scss';
-import { fetchLibraryGames, type Game } from './games.data';
+import { fetchLibraryGames, type Game, type GameFilters } from './games.data';
 import { openGameDetailsDialog } from '../game-details-dialog/game-details-dialog';
 import {
   createSkeletonList,
@@ -97,18 +97,32 @@ function createGameList(games: Game[]): HTMLElement {
   return list;
 }
 
-export function createGameCardsSection(): HTMLElement {
+export interface GameCardsSection {
+  element: HTMLElement;
+  // Re-fetches the library games with the given category/sort and re-renders
+  // the section (skeleton while loading, then cards/empty/error).
+  setFilters: (filters: GameFilters) => void;
+}
+
+export function createGameCardsSection(): GameCardsSection {
   const section = document.createElement('section');
   section.className = 'library-games';
   section.setAttribute('aria-label', 'Games');
 
-  const load = async (): Promise<void> => {
+  // Guards against an older, slower request overwriting a newer response
+  // when the user switches category/sort quickly.
+  let requestId = 0;
+
+  const load = async (filters: GameFilters): Promise<void> => {
+    const currentRequestId = ++requestId;
+
     section.innerHTML = `
       <ul class="library-games__list">${createSkeletonList(SKELETON_COUNT)}</ul>
     `;
 
     try {
-      const games = await fetchLibraryGames();
+      const games = await fetchLibraryGames(filters);
+      if (currentRequestId !== requestId) return;
 
       if (games.length === 0) {
         section.querySelector('.library-games__list')?.replaceWith(createEmptyState());
@@ -117,11 +131,16 @@ export function createGameCardsSection(): HTMLElement {
 
       section.replaceChildren(createGameList(games));
     } catch {
-      section.querySelector('.library-games__list')?.replaceWith(createErrorBanner(load));
+      if (currentRequestId !== requestId) return;
+      section
+        .querySelector('.library-games__list')
+        ?.replaceWith(createErrorBanner(() => load(filters)));
       showSnackbar('Could not load games.', 'error');
     }
   };
 
-  void load();
-  return section;
+  return {
+    element: section,
+    setFilters: (filters) => void load(filters),
+  };
 }
