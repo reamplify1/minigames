@@ -11,6 +11,7 @@ import vacationCafeSimulatorImage from '../../assets/images/games/vacation-cafe-
 import winterBurrowImage from '../../assets/images/games/winter-burrow-card.jpg';
 
 export interface FeaturedGame {
+  slug: string;
   title: string;
   rating: number;
   likes: string;
@@ -50,6 +51,7 @@ function formatLikes(count: number): string {
 
 function mapGame(game: ApiGame): FeaturedGame {
   return {
+    slug: game.slug,
     title: game.name,
     rating: game.rating,
     likes: formatLikes(game.likesCount),

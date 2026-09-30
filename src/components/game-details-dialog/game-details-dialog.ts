@@ -1,15 +1,19 @@
 import './game-details-dialog.scss';
-import { MOCK_GAME_DETAILS } from './game-details-dialog.data';
+import { fetchGameDetails, type GameDetails } from './game-details-dialog.data';
 import { createGameHero } from './parts/game-hero';
 import { createGameInfo, GAME_TITLE_ID } from './parts/game-info';
 import { createGameRecords } from './parts/game-records';
 import { createGameComments } from './parts/game-comments';
+import {
+  createDialogSkeleton,
+  createDialogErrorBanner,
+  createDialogEmptyState,
+} from './game-details-dialog.states';
+import { showSnackbar } from '../snackbar/snackbar';
 
 const DIALOG_CLASS = 'game-details-dialog';
 
-function createDialogContent(onClose: () => void): HTMLElement {
-  const game = MOCK_GAME_DETAILS;
-
+function createDialogContent(game: GameDetails, onClose: () => void): HTMLElement {
   const content = document.createElement('div');
   content.className = 'game-details-dialog__content';
 
@@ -21,7 +25,7 @@ function createDialogContent(onClose: () => void): HTMLElement {
     createGameComments(game.comments)
   );
 
-  content.append(createGameHero(game.title, onClose), body);
+  content.append(createGameHero(game.title, game.heroImage, onClose), body);
 
   return content;
 }
@@ -53,20 +57,43 @@ function getGameDetailsDialog(): HTMLDialogElement {
 
   return dialog;
 }
+const requestTracker = { requestId: 0 };
 
-export function openGameDetailsDialog(): void {
+export function openGameDetailsDialog(slug: string): void {
   const dialog = getGameDetailsDialog();
 
   if (dialog.open) {
     return;
   }
 
-  // Fresh content on every open, so favorites, likes and the comment text are reset.
-  dialog.replaceChildren(
-    createDialogContent(() => {
-      dialog.close();
-    })
-  );
-  dialog.showModal();
-  dialog.scrollTop = 0;
+  const onClose = (): void => {
+    dialog.close();
+  };
+
+  const load = async (): Promise<void> => {
+    const currentRequestId = ++requestTracker.requestId;
+
+    dialog.replaceChildren(createDialogSkeleton(onClose));
+    dialog.showModal();
+    dialog.scrollTop = 0;
+
+    try {
+      const game = await fetchGameDetails(slug);
+      if (currentRequestId !== requestTracker.requestId) return;
+
+      if (!game) {
+        dialog.replaceChildren(createDialogEmptyState(onClose));
+        return;
+      }
+
+      dialog.replaceChildren(createDialogContent(game, onClose));
+      dialog.scrollTop = 0;
+    } catch {
+      if (currentRequestId !== requestTracker.requestId) return;
+      dialog.replaceChildren(createDialogErrorBanner(() => void load(), onClose));
+      showSnackbar('Could not load game details.', 'error');
+    }
+  };
+
+  void load();
 }

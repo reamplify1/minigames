@@ -56,7 +56,7 @@ interface GamesResponse {
   meta: ApiGamesMeta;
 }
 
-const IMAGE_BY_SLUG: Record<string, string> = {
+export const IMAGE_BY_SLUG: Record<string, string> = {
   'camper-van-make-it-home': camperVanMakeItHomeImage,
   'cast-n-chill': castNChillImage,
   'cat-chess': catChessImage,
@@ -83,7 +83,7 @@ const IMAGE_BY_SLUG: Record<string, string> = {
   wytchwood: wytchwoodImage,
 };
 
-const FALLBACK_IMAGE = vacationCafeSimulatorImage;
+export const FALLBACK_IMAGE = vacationCafeSimulatorImage;
 
 function formatLikes(count: number): string {
   return count >= 1000 ? `${(count / 1000).toFixed(1)}K` : String(count);

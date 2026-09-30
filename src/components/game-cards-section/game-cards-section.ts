@@ -75,7 +75,7 @@ function createGameCard(game: Game): HTMLElement {
   detailsButton.type = 'button';
   detailsButton.className = 'library-card__details';
   detailsButton.textContent = 'Details';
-  detailsButton.addEventListener('click', () => openGameDetailsDialog());
+  detailsButton.addEventListener('click', () => openGameDetailsDialog(game.id));
 
   content.append(info, price, description, stats, detailsButton);
   card.append(cover, content);
