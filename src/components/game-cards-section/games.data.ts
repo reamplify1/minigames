@@ -1,11 +1,29 @@
 import { fetchJson } from '../../utils/api';
 
+import camperVanMakeItHomeImage from '../../assets/images/games/camper-van-make-it-home-card.jpg';
+import castNChillImage from '../../assets/images/games/cast-n-chill-card.jpg';
+import catChessImage from '../../assets/images/games/cat-chess-card.jpg';
 import catMailCoImage from '../../assets/images/games/cat-mail-co-card.png';
+import cozySolitaireImage from '../../assets/images/games/cozy-solitaire-card.jpg';
+import cozySudokuImage from '../../assets/images/games/cozy-sudoku-card.jpg';
+import grimshireImage from '../../assets/images/games/grimshire-card.jpg';
+import heartopiaImage from '../../assets/images/games/heartopia-card.png';
 import islandersNewShoresImage from '../../assets/images/games/islanders-new-shores-card.jpg';
+import koronekoImage from '../../assets/images/games/koroneko-card.jpg';
+import leafItAloneImage from '../../assets/images/games/leaf-it-alone-card.jpg';
+import leafyCornerImage from '../../assets/images/games/leafy-corner-card.jpg';
+import littleCornersImage from '../../assets/images/games/little-corners-card.jpg';
+import organizedInsideImage from '../../assets/images/games/organized-inside-card.jpg';
+import paliaImage from '../../assets/images/games/palia-card.png';
+import shelveThePotionsImage from '../../assets/images/games/shelve-the-potions-card.jpg';
+import tailsideCozyCafeSimImage from '../../assets/images/games/tailside-cozy-cafe-sim-card.jpg';
+import theWildAtHeartImage from '../../assets/images/games/the-wild-at-heart-card.jpg';
 import tinyGladeImage from '../../assets/images/games/tiny-glade-card.jpg';
 import tukoniForestKeepersImage from '../../assets/images/games/tukoni-forest-keepers.jpg';
 import vacationCafeSimulatorImage from '../../assets/images/games/vacation-cafe-simulator-card.jpg';
+import whisperOfTheHouseImage from '../../assets/images/games/whisper-of-the-house-card.jpg';
 import winterBurrowImage from '../../assets/images/games/winter-burrow-card.jpg';
+import wytchwoodImage from '../../assets/images/games/wytchwood-card.jpg';
 
 export interface Game {
   id: string;
@@ -39,12 +57,30 @@ interface GamesResponse {
 }
 
 const IMAGE_BY_SLUG: Record<string, string> = {
+  'camper-van-make-it-home': camperVanMakeItHomeImage,
+  'cast-n-chill': castNChillImage,
+  'cat-chess': catChessImage,
   'cat-mail-co': catMailCoImage,
+  'cozy-solitaire': cozySolitaireImage,
+  'cozy-sudoku': cozySudokuImage,
+  grimshire: grimshireImage,
+  heartopia: heartopiaImage,
   'islanders-new-shores': islandersNewShoresImage,
+  koroneko: koronekoImage,
+  'leaf-it-alone': leafItAloneImage,
+  'leafy-corner': leafyCornerImage,
+  'little-corners': littleCornersImage,
+  'organized-inside': organizedInsideImage,
+  palia: paliaImage,
+  'shelve-the-potions': shelveThePotionsImage,
+  'tailside-cozy-cafe-sim': tailsideCozyCafeSimImage,
+  'the-wild-at-heart': theWildAtHeartImage,
   'tiny-glade': tinyGladeImage,
   'tukoni-forest-keepers': tukoniForestKeepersImage,
   'vacation-cafe-simulator': vacationCafeSimulatorImage,
+  'whisper-of-the-house': whisperOfTheHouseImage,
   'winter-burrow': winterBurrowImage,
+  wytchwood: wytchwoodImage,
 };
 
 const FALLBACK_IMAGE = vacationCafeSimulatorImage;
