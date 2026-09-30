@@ -35,22 +35,27 @@ export function renderLibraryPage(): void {
     onMetaChange: (meta) => paginationSection.setPagination(meta),
   });
 
+  // Category and sort are separate controls, but they are never sent to the
+  // API on their own: every change carries the *other* value along too, and
+  // resets pagination back to page 1 (RSS-QS-3-2-2 / RSS-QS-3-2-3).
+  const applyCategoryAndSort = (patch: Pick<GameFilters, 'category' | 'sort'>): void => {
+    filters.category = patch.category;
+    filters.sort = patch.sort;
+    filters.page = FIRST_PAGE;
+    gameCardsSection.setFilters(filters);
+  };
+
   const filterSortSection = createFilterSortSection({
     onFilterChange: (categoryId) => {
-      filters.category = categoryId;
-      filters.page = FIRST_PAGE;
-      gameCardsSection.setFilters(filters);
+      applyCategoryAndSort({ category: categoryId, sort: filters.sort });
     },
     onSortChange: (sortId) => {
-      filters.sort = sortId;
-      filters.page = FIRST_PAGE;
-      gameCardsSection.setFilters(filters);
+      applyCategoryAndSort({ category: filters.category, sort: sortId });
     },
     onDefaultCategoryChange: (categoryId) => {
+      // the optimistic guess above.
       if (filters.category === categoryId) return;
-      filters.category = categoryId;
-      filters.page = FIRST_PAGE;
-      gameCardsSection.setFilters(filters);
+      applyCategoryAndSort({ category: categoryId, sort: filters.sort });
     },
   });
 
