@@ -2,8 +2,8 @@ import './header.scss';
 import logoIcon from '../../assets/icons/minigames-icon.svg';
 import burgerIcon from '../../assets/icons/burger-icon.svg';
 import { createMobileMenu } from '../mobile-menu/mobile-menu';
-import { openAuthDialog } from '../auth-dialog/auth-dialog';
-import { navigateTo } from '../../app/router';
+import { navigate } from '../../app/router';
+import { withAuthParameter } from '../../app/dialog-urls';
 import { navItems, getCurrentPage } from './nav-items';
 
 function renderNavLinks(): string {
@@ -51,10 +51,12 @@ export function createHeader(): HTMLElement {
     link.addEventListener('click', handleNavClick);
   }
 
-  const signInButtons = header.querySelectorAll('.header__btn--outline, .header__btn--accent');
-  for (const button of signInButtons) {
-    button.addEventListener('click', handleAuthTrigger);
-  }
+  header
+    .querySelector('.header__btn--outline')
+    ?.addEventListener('click', () => handleAuthTrigger('login'));
+  header
+    .querySelector('.header__btn--accent')
+    ?.addEventListener('click', () => handleAuthTrigger('register'));
 
   const burger = header.querySelector<HTMLButtonElement>('.header__burger');
   if (burger) {
@@ -68,9 +70,9 @@ function handleNavClick(event: MouseEvent): void {
   event.preventDefault();
   const link = event.currentTarget as HTMLAnchorElement;
   const href = link.getAttribute('href') ?? '/';
-  navigateTo(href);
+  navigate(href);
 }
 
-function handleAuthTrigger(): void {
-  openAuthDialog();
+function handleAuthTrigger(mode: 'login' | 'register'): void {
+  navigate(withAuthParameter(mode));
 }

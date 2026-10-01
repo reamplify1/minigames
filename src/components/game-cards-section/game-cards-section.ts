@@ -1,6 +1,7 @@
 import './game-cards-section.scss';
 import { fetchLibraryGames, type Game, type GameFilters, type GamesMeta } from './games.data';
-import { openGameDetailsDialog } from '../game-details-dialog/game-details-dialog';
+import { navigate } from '../../app/router';
+import { withGameParameter } from '../../app/dialog-urls';
 import {
   createSkeletonList,
   createErrorBanner,
@@ -75,7 +76,7 @@ function createGameCard(game: Game): HTMLElement {
   detailsButton.type = 'button';
   detailsButton.className = 'library-card__details';
   detailsButton.textContent = 'Details';
-  detailsButton.addEventListener('click', () => openGameDetailsDialog(game.id));
+  detailsButton.addEventListener('click', () => navigate(withGameParameter(game.id)));
 
   content.append(info, price, description, stats, detailsButton);
   card.append(cover, content);

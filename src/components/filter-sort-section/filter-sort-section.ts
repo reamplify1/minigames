@@ -22,11 +22,26 @@ const SORT_LIST_ID = 'sort-options';
 const CHIPS_SKELETON_COUNT = 6;
 
 export interface FilterSortSectionOptions {
+  // Category/sort the URL already asked for when the section is created
+  // (a deep link or a Back/Forward move) — used instead of the API's own
+  // default so a restored page doesn't flash the wrong chip.
+  initialFilter?: string;
+  initialSort?: string;
   onFilterChange?: (filterId: string) => void;
   onSortChange?: (sortId: string) => void;
   // Called once the categories load and the real default category is known
-  // (it may differ from the FALLBACK_CATEGORY_ID guess used before that).
+  // (it may differ from the FALLBACK_CATEGORY_ID guess used before that, or
+  // from an initialFilter that turned out not to exist).
   onDefaultCategoryChange?: (filterId: string) => void;
+}
+
+export interface FilterSortSection {
+  element: HTMLElement;
+  // Re-syncs the visible chip/sort selection with external state (the URL),
+  // without re-triggering onFilterChange/onSortChange — used when History
+  // navigation restores a different category/sort than what's on screen.
+  setActiveFilter: (filterId: string) => void;
+  setActiveSort: (sortId: string) => void;
 }
 
 interface SortEntry {
@@ -34,9 +49,13 @@ interface SortEntry {
   button: HTMLButtonElement;
 }
 
-export function createFilterSortSection(options: FilterSortSectionOptions = {}): HTMLElement {
-  let activeFilter = FALLBACK_CATEGORY_ID;
-  let activeSort = DEFAULT_SORT_ID;
+function isKnownSort(sortId: string | undefined): sortId is string {
+  return sortId !== undefined && SORT_OPTIONS.some((option) => option.id === sortId);
+}
+
+export function createFilterSortSection(options: FilterSortSectionOptions = {}): FilterSortSection {
+  let activeFilter = options.initialFilter ?? FALLBACK_CATEGORY_ID;
+  let activeSort = isKnownSort(options.initialSort) ? options.initialSort : DEFAULT_SORT_ID;
 
   const section = document.createElement('section');
   section.className = 'filter-sort-section';
@@ -63,6 +82,15 @@ export function createFilterSortSection(options: FilterSortSectionOptions = {}):
 
   const chipButtons = new Map<string, HTMLButtonElement>();
 
+  function setActiveFilter(filterId: string): void {
+    if (activeFilter === filterId) return;
+    chipButtons.get(activeFilter)?.classList.remove('chip--active');
+    chipButtons.get(activeFilter)?.setAttribute('aria-pressed', 'false');
+    activeFilter = filterId;
+    chipButtons.get(activeFilter)?.classList.add('chip--active');
+    chipButtons.get(activeFilter)?.setAttribute('aria-pressed', 'true');
+  }
+
   function createChipItem(chip: FilterChip): HTMLLIElement {
     const li = document.createElement('li');
     const button = document.createElement('button');
@@ -74,11 +102,7 @@ export function createFilterSortSection(options: FilterSortSectionOptions = {}):
 
     button.addEventListener('click', () => {
       if (activeFilter === chip.id) return;
-      chipButtons.get(activeFilter)?.classList.remove('chip--active');
-      chipButtons.get(activeFilter)?.setAttribute('aria-pressed', 'false');
-      activeFilter = chip.id;
-      button.classList.add('chip--active');
-      button.setAttribute('aria-pressed', 'true');
+      setActiveFilter(chip.id);
       options.onFilterChange?.(activeFilter);
     });
 
@@ -99,7 +123,13 @@ export function createFilterSortSection(options: FilterSortSectionOptions = {}):
       }
 
       chipButtons.clear();
-      activeFilter = chips.find((chip) => chip.isDefault)?.id ?? chips[0].id;
+
+      const requestedFilter = options.initialFilter;
+      const isRequestedFilterKnown =
+        requestedFilter !== undefined && chips.some((chip) => chip.id === requestedFilter);
+      activeFilter = isRequestedFilterKnown
+        ? requestedFilter
+        : (chips.find((chip) => chip.isDefault)?.id ?? chips[0].id);
 
       const list = createChipsList();
       for (const chip of chips) {
@@ -159,6 +189,14 @@ export function createFilterSortSection(options: FilterSortSectionOptions = {}):
     entry.button.setAttribute('aria-current', String(isSelected));
   };
 
+  function setActiveSort(sortId: string): void {
+    if (activeSort === sortId || !isKnownSort(sortId)) return;
+    markSelected(activeSort, false);
+    activeSort = sortId;
+    markSelected(activeSort, true);
+    setSortLabel(activeSort);
+  }
+
   const handleOutsideClick = (event: MouseEvent): void => {
     if (!sortWrapper.contains(event.target as Node)) closeDropdown();
   };
@@ -204,10 +242,7 @@ export function createFilterSortSection(options: FilterSortSectionOptions = {}):
 
     button.addEventListener('click', () => {
       if (option.id !== activeSort) {
-        markSelected(activeSort, false);
-        activeSort = option.id;
-        markSelected(activeSort, true);
-        setSortLabel(activeSort);
+        setActiveSort(option.id);
         options.onSortChange?.(activeSort);
       }
       closeDropdown();
@@ -232,5 +267,5 @@ export function createFilterSortSection(options: FilterSortSectionOptions = {}):
   bar.append(sortWrapper);
   section.append(intro, bar);
 
-  return section;
+  return { element: section, setActiveFilter, setActiveSort };
 }
