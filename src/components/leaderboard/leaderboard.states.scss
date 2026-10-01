@@ -1,0 +1,64 @@
+@use '../../styles/tokens' as *;
+@use '../../styles/mixins' as *;
+
+$skeleton-color-base: $color-outline;
+$skeleton-color-highlight: $color-surface;
+$skeleton-animation-duration: 1.4s;
+$states-block-height: space(20);
+
+.leaderboard__skeleton-line {
+  height: space(3);
+  border-radius: $radius-md;
+  background: linear-gradient(
+    90deg,
+    $skeleton-color-base 25%,
+    $skeleton-color-highlight 50%,
+    $skeleton-color-base 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading $skeleton-animation-duration ease-in-out infinite;
+}
+
+.leaderboard__error,
+.leaderboard__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: space(2);
+  width: 100%;
+  height: $states-block-height;
+  border: $border-width solid $color-outline;
+  border-radius: $radius-lg;
+  color: $color-on-bg;
+  text-align: center;
+}
+
+.leaderboard__error button {
+  padding: space(1) space(3);
+  border: $border-width solid $color-on-primary;
+  border-radius: $radius-md;
+  background-color: $color-primary;
+  font-family: $font-family-base;
+  font-weight: $font-weight-bold;
+  cursor: pointer;
+
+  &:hover {
+    filter: brightness($brightness-hover);
+  }
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .leaderboard__skeleton-line {
+    animation: none;
+  }
+}

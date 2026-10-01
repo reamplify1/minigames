@@ -1,8 +1,8 @@
 import './mobile-menu.scss';
 import logoIcon from '../../assets/icons/minigames-icon.svg';
 import closeIcon from '../../assets/icons/close-button-icon.svg';
-import { openAuthDialog } from '../auth-dialog/auth-dialog';
-import { navigateTo } from '../../app/router';
+import { navigate } from '../../app/router';
+import { withAuthParameter } from '../../app/dialog-urls';
 import { navItems, getCurrentPage } from '../header/nav-items';
 
 const OPEN_CLASS = 'mobile-menu--open';
@@ -92,9 +92,9 @@ export function createMobileMenu(trigger: HTMLElement): HTMLElement {
     }
   }
 
-  function handleAuthTrigger(): void {
+  function handleAuthTrigger(mode: 'login' | 'register'): void {
     closeMenu();
-    openAuthDialog();
+    navigate(withAuthParameter(mode));
   }
 
   function handleNavLinkClick(event: MouseEvent): void {
@@ -102,7 +102,7 @@ export function createMobileMenu(trigger: HTMLElement): HTMLElement {
     const link = event.currentTarget as HTMLAnchorElement;
     const href = link.getAttribute('href') ?? '/';
     closeMenu();
-    navigateTo(href);
+    navigate(href);
   }
 
   trigger.addEventListener('click', openMenu);
@@ -113,10 +113,12 @@ export function createMobileMenu(trigger: HTMLElement): HTMLElement {
     link.addEventListener('click', handleNavLinkClick);
   }
 
-  const authButtons = menu.querySelectorAll('.mobile-menu__btn');
-  for (const button of authButtons) {
-    button.addEventListener('click', handleAuthTrigger);
-  }
+  menu.querySelector('.mobile-menu__btn--outline')?.addEventListener('click', () => {
+    handleAuthTrigger('login');
+  });
+  menu.querySelector('.mobile-menu__btn--accent')?.addEventListener('click', () => {
+    handleAuthTrigger('register');
+  });
 
   return menu;
 }

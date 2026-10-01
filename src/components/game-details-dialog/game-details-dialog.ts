@@ -1,27 +1,29 @@
 import './game-details-dialog.scss';
-import { MOCK_GAME_DETAILS } from './game-details-dialog.data';
+import { fetchGameDetails, type GameDetails } from './game-details-dialog.data';
 import { createGameHero } from './parts/game-hero';
 import { createGameInfo, GAME_TITLE_ID } from './parts/game-info';
 import { createGameRecords } from './parts/game-records';
 import { createGameComments } from './parts/game-comments';
+import {
+  createDialogSkeleton,
+  createDialogErrorBanner,
+  createDialogEmptyState,
+} from './game-details-dialog.states';
+import { showSnackbar } from '../snackbar/snackbar';
+import { navigate } from '../../app/router';
+import { withoutGameParameter } from '../../app/dialog-urls';
 
 const DIALOG_CLASS = 'game-details-dialog';
 
-function createDialogContent(onClose: () => void): HTMLElement {
-  const game = MOCK_GAME_DETAILS;
-
+function createDialogContent(slug: string, game: GameDetails, onClose: () => void): HTMLElement {
   const content = document.createElement('div');
   content.className = 'game-details-dialog__content';
 
   const body = document.createElement('div');
   body.className = 'game-details-dialog__body';
-  body.append(
-    createGameInfo(game),
-    createGameRecords(game.records),
-    createGameComments(game.comments)
-  );
+  body.append(createGameInfo(game), createGameRecords(game.records), createGameComments(slug));
 
-  content.append(createGameHero(game.title, onClose), body);
+  content.append(createGameHero(game.title, game.heroImage, onClose), body);
 
   return content;
 }
@@ -36,6 +38,11 @@ function createGameDetailsDialog(): HTMLDialogElement {
     if (event.target === dialog) {
       dialog.close();
     }
+  });
+
+  dialog.addEventListener('close', () => {
+    openState.slug = undefined;
+    navigate(withoutGameParameter(), { replace: true });
   });
 
   return dialog;
@@ -54,19 +61,54 @@ function getGameDetailsDialog(): HTMLDialogElement {
   return dialog;
 }
 
-export function openGameDetailsDialog(): void {
+const requestTracker = { requestId: 0 };
+const openState: { slug: string | undefined } = { slug: undefined };
+
+export function closeGameDetailsDialog(): void {
+  const dialog = document.querySelector<HTMLDialogElement>(`.${DIALOG_CLASS}`);
+
+  if (dialog?.open) {
+    dialog.close();
+  }
+}
+
+export function openGameDetailsDialog(slug: string): void {
   const dialog = getGameDetailsDialog();
 
-  if (dialog.open) {
+  if (dialog.open && openState.slug === slug) {
     return;
   }
 
-  // Fresh content on every open, so favorites, likes and the comment text are reset.
-  dialog.replaceChildren(
-    createDialogContent(() => {
-      dialog.close();
-    })
-  );
-  dialog.showModal();
-  dialog.scrollTop = 0;
+  openState.slug = slug;
+
+  const onClose = (): void => {
+    dialog.close();
+  };
+
+  const load = async (): Promise<void> => {
+    const currentRequestId = ++requestTracker.requestId;
+
+    dialog.replaceChildren(createDialogSkeleton(onClose));
+    if (!dialog.open) dialog.showModal();
+    dialog.scrollTop = 0;
+
+    try {
+      const game = await fetchGameDetails(slug);
+      if (currentRequestId !== requestTracker.requestId) return;
+
+      if (!game) {
+        dialog.replaceChildren(createDialogEmptyState(onClose));
+        return;
+      }
+
+      dialog.replaceChildren(createDialogContent(slug, game, onClose));
+      dialog.scrollTop = 0;
+    } catch {
+      if (currentRequestId !== requestTracker.requestId) return;
+      dialog.replaceChildren(createDialogErrorBanner(() => void load(), onClose));
+      showSnackbar('Could not load game details.', 'error');
+    }
+  };
+
+  void load();
 }

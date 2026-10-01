@@ -1,7 +1,6 @@
-import heroImage from '../../../assets/images/games/tukoni-forest-keepers.jpg';
 import closeIcon from '../../../assets/icons/close-blue-icon.svg';
 
-export function createGameHero(title: string, onClose: () => void): HTMLElement {
+export function createGameHero(title: string, heroImage: string, onClose: () => void): HTMLElement {
   const hero = document.createElement('header');
   hero.className = 'game-details-dialog__hero';
   hero.innerHTML = `

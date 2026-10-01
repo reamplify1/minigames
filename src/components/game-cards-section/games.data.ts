@@ -1,9 +1,29 @@
-import vacationCafeCover from '../../assets/images/games/vacation-cafe-simulator.jpg';
-import winterBurrowCover from '../../assets/images/games/winter-burrow-card.jpg';
-import shelvePotionsCover from '../../assets/images/games/shelve-the-potion-card.jpg';
-import heartopiaCover from '../../assets/images/games/heartopia-card.png';
-import paliaCover from '../../assets/images/games/palia-card.png';
-import catMailCover from '../../assets/images/games/cat-mail-card.png';
+import { fetchJson } from '../../utils/api';
+
+import camperVanMakeItHomeImage from '../../assets/images/games/camper-van-make-it-home-card.jpg';
+import castNChillImage from '../../assets/images/games/cast-n-chill-card.jpg';
+import catChessImage from '../../assets/images/games/cat-chess-card.jpg';
+import catMailCoImage from '../../assets/images/games/cat-mail-co-card.png';
+import cozySolitaireImage from '../../assets/images/games/cozy-solitaire-card.jpg';
+import cozySudokuImage from '../../assets/images/games/cozy-sudoku-card.jpg';
+import grimshireImage from '../../assets/images/games/grimshire-card.jpg';
+import heartopiaImage from '../../assets/images/games/heartopia-card.png';
+import islandersNewShoresImage from '../../assets/images/games/islanders-new-shores-card.jpg';
+import koronekoImage from '../../assets/images/games/koroneko-card.jpg';
+import leafItAloneImage from '../../assets/images/games/leaf-it-alone-card.jpg';
+import leafyCornerImage from '../../assets/images/games/leafy-corner-card.jpg';
+import littleCornersImage from '../../assets/images/games/little-corners-card.jpg';
+import organizedInsideImage from '../../assets/images/games/organized-inside-card.jpg';
+import paliaImage from '../../assets/images/games/palia-card.png';
+import shelveThePotionsImage from '../../assets/images/games/shelve-the-potions-card.jpg';
+import tailsideCozyCafeSimImage from '../../assets/images/games/tailside-cozy-cafe-sim-card.jpg';
+import theWildAtHeartImage from '../../assets/images/games/the-wild-at-heart-card.jpg';
+import tinyGladeImage from '../../assets/images/games/tiny-glade-card.jpg';
+import tukoniForestKeepersImage from '../../assets/images/games/tukoni-forest-keepers.jpg';
+import vacationCafeSimulatorImage from '../../assets/images/games/vacation-cafe-simulator-card.jpg';
+import whisperOfTheHouseImage from '../../assets/images/games/whisper-of-the-house-card.jpg';
+import winterBurrowImage from '../../assets/images/games/winter-burrow-card.jpg';
+import wytchwoodImage from '../../assets/images/games/wytchwood-card.jpg';
 
 export interface Game {
   id: string;
@@ -16,71 +36,106 @@ export interface Game {
   cover: string;
 }
 
-export const GAMES: Game[] = [
-  {
-    id: 'vacation-cafe-simulator',
-    title: 'Vacation Cafe Simulator',
-    genre: 'Strategy',
-    price: 'Free',
-    description:
-      'Cozy Italian Vacation Cafe 🏖️ No timers, No stress 😌 cook traditional dishes 🍝 upgrade and customize 🏠 just drink Prosecco 🥂 relax and grow your dream cafe ✨',
-    rating: 4.8,
-    likes: '28.7K',
-    cover: vacationCafeCover,
-  },
-  {
-    id: 'winter-burrow',
-    title: 'Winter Burrow',
-    genre: 'Farm',
-    price: 'Free',
-    description:
-      'A cozy woodland survival game about a mouse restoring their childhood burrow. Explore, gather resources, craft, knit warm sweaters, bake pies and meet the locals.',
-    rating: 4.9,
-    likes: '32.4K',
-    cover: winterBurrowCover,
-  },
-  {
-    id: 'shelve-the-potions',
-    title: 'Shelve the Potions!',
-    genre: 'Puzzle',
-    price: 'Free',
-    description:
-      "Organize 2000+ potions on shelves after the witch's cats have knocked them over, using clues around an enchanted cellar. Learn strange symbols and decipher cryptic notes.",
-    rating: 4.7,
-    likes: '21.3K',
-    cover: shelvePotionsCover,
-  },
-  {
-    id: 'heartopia',
-    title: 'Heartopia',
-    genre: 'Strategy',
-    price: '$1.99',
-    description:
-      'A multiplayer life simulation game crafted for creativity, freedom, and peace. Build your dream home, explore hobbies, and forge warm connections with friends in a cozy town.',
-    rating: 4.6,
-    likes: '46.8K',
-    cover: heartopiaCover,
-  },
-  {
-    id: 'palia',
-    title: 'Palia',
-    genre: 'Strategy',
-    price: 'Free',
-    description:
-      'A free-to-play fantasy life sim adventure where you can craft, explore, and create the life and home of your dreams in a vibrant, cozy open world full of neighbors to meet.',
-    rating: 4.8,
-    likes: '89.5K',
-    cover: paliaCover,
-  },
-  {
-    id: 'cat-mail-co',
-    title: 'Cat Mail Co.',
-    genre: 'Puzzle',
-    price: 'Free',
-    description:
-      'Run a cozy cat post office. Sort and deliver parcels from the daily boat. At night, the moon reveals hidden truths about packages. Clear a strange backlog and unlock new destinations.',
-    rating: 4.9,
-    likes: '38.2K',
-    cover: catMailCover,
-  },
-];
+interface ApiGame {
+  slug: string;
+  name: string;
+  category: string;
+  price: string;
+  shortDescription: string;
+  rating: number;
+  likesCount: number;
+}
+
+interface ApiGamesMeta {
+  page: number;
+  totalPages: number;
+}
+
+interface GamesResponse {
+  data: ApiGame[];
+  meta: ApiGamesMeta;
+}
+
+export const IMAGE_BY_SLUG: Record<string, string> = {
+  'camper-van-make-it-home': camperVanMakeItHomeImage,
+  'cast-n-chill': castNChillImage,
+  'cat-chess': catChessImage,
+  'cat-mail-co': catMailCoImage,
+  'cozy-solitaire': cozySolitaireImage,
+  'cozy-sudoku': cozySudokuImage,
+  grimshire: grimshireImage,
+  heartopia: heartopiaImage,
+  'islanders-new-shores': islandersNewShoresImage,
+  koroneko: koronekoImage,
+  'leaf-it-alone': leafItAloneImage,
+  'leafy-corner': leafyCornerImage,
+  'little-corners': littleCornersImage,
+  'organized-inside': organizedInsideImage,
+  palia: paliaImage,
+  'shelve-the-potions': shelveThePotionsImage,
+  'tailside-cozy-cafe-sim': tailsideCozyCafeSimImage,
+  'the-wild-at-heart': theWildAtHeartImage,
+  'tiny-glade': tinyGladeImage,
+  'tukoni-forest-keepers': tukoniForestKeepersImage,
+  'vacation-cafe-simulator': vacationCafeSimulatorImage,
+  'whisper-of-the-house': whisperOfTheHouseImage,
+  'winter-burrow': winterBurrowImage,
+  wytchwood: wytchwoodImage,
+};
+
+export const FALLBACK_IMAGE = vacationCafeSimulatorImage;
+
+function formatLikes(count: number): string {
+  return count >= 1000 ? `${(count / 1000).toFixed(1)}K` : String(count);
+}
+
+function formatGenre(category: string): string {
+  return category.charAt(0).toUpperCase() + category.slice(1);
+}
+
+function mapGame(game: ApiGame): Game {
+  return {
+    id: game.slug,
+    title: game.name,
+    genre: formatGenre(game.category),
+    price: game.price,
+    description: game.shortDescription,
+    rating: game.rating,
+    likes: formatLikes(game.likesCount),
+    cover: IMAGE_BY_SLUG[game.slug] ?? FALLBACK_IMAGE,
+  };
+}
+
+export interface GameFilters {
+  category: string;
+  sort: string;
+  page: number;
+}
+
+export interface GamesMeta {
+  page: number;
+  totalPages: number;
+}
+
+export interface LibraryGamesResult {
+  games: Game[];
+  meta: GamesMeta;
+}
+
+export async function fetchLibraryGames(filters: GameFilters): Promise<LibraryGamesResult> {
+  const queryParameters = new URLSearchParams({
+    category: filters.category,
+    sort: filters.sort,
+    page: String(filters.page),
+    limit: '6',
+  });
+  const response = await fetchJson<GamesResponse>(`/games?${queryParameters.toString()}`);
+
+  return {
+    games: response.data.map((game) => mapGame(game)),
+    meta: {
+      page: response.meta.page,
+      totalPages: response.meta.totalPages,
+    },
+  };
+}

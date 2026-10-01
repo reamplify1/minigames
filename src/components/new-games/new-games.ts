@@ -3,12 +3,16 @@ import arrowLeftIcon from '../../assets/icons/arrow-left-icon.svg';
 import arrowRightIcon from '../../assets/icons/arrow-right-icon.svg';
 import starIcon from '../../assets/icons/star-icon.svg';
 import heartIcon from '../../assets/icons/favorite-icon.svg';
-import { openGameDetailsDialog } from '../game-details-dialog/game-details-dialog';
-import { FEATURED_GAMES, type FeaturedGame } from './new-games.data';
+import { navigate } from '../../app/router';
+import { withGameParameter } from '../../app/dialog-urls';
+import { fetchFeaturedGames, type FeaturedGame } from './new-games.data';
+import { createSkeleton, createErrorBanner, createEmptyState } from './new-games.states';
+import { showSnackbar } from '../snackbar/snackbar';
 
 const AUTOPLAY_DELAY = 4000;
 const SWIPE_THRESHOLD = 40;
 const INFO_MIN_WIDTH = 288;
+const SKELETON_COUNT = 5;
 
 const TITLE_ID = 'new-games-title';
 
@@ -42,6 +46,7 @@ function createSlide(game: FeaturedGame, index: number, total: number): string {
         type="button"
         aria-label="${game.title}, rating ${game.rating}, ${game.likes} likes. Open details"
         data-slider-card
+        data-game-slug="${game.slug}"
       >
         <img class="new-games__card-image" src="${game.image}" alt="" draggable="false" />
         <span class="new-games__card-overlay" aria-hidden="true">
@@ -62,7 +67,7 @@ function createSlide(game: FeaturedGame, index: number, total: number): string {
   `;
 }
 
-function createSectionMarkup(games: FeaturedGame[]): string {
+function createHeaderMarkup(): string {
   return `
     <div class="new-games__header">
       <div class="new-games__heading">
@@ -88,6 +93,12 @@ function createSectionMarkup(games: FeaturedGame[]): string {
         </button>
       </div>
     </div>
+  `;
+}
+
+function createSectionMarkup(games: FeaturedGame[]): string {
+  return `
+    ${createHeaderMarkup()}
     <ul class="new-games__track" role="list" data-slider-track>
       ${games.map((game, index) => createSlide(game, index, games.length)).join('')}
     </ul>
@@ -307,8 +318,14 @@ class NewGamesSlider {
       return;
     }
 
-    if (event.target instanceof Element && event.target.closest(CARD_SELECTOR)) {
-      openGameDetailsDialog();
+    const card =
+      event.target instanceof Element
+        ? event.target.closest<HTMLElement>(CARD_SELECTOR)
+        : undefined;
+    const slug = card?.dataset.gameSlug;
+
+    if (slug) {
+      navigate(withGameParameter(slug));
     }
   }
 
@@ -349,14 +366,32 @@ export function createNewGames(): HTMLElement {
   section.className = 'new-games';
   section.setAttribute('aria-labelledby', TITLE_ID);
   section.setAttribute('aria-roledescription', 'carousel');
-  section.innerHTML = createSectionMarkup(FEATURED_GAMES);
 
-  const track = section.querySelector<HTMLElement>(TRACK_SELECTOR);
+  const load = async (): Promise<void> => {
+    section.innerHTML = `
+      ${createHeaderMarkup()}
+      <ul class="new-games__track">${createSkeleton(SKELETON_COUNT)}</ul>
+    `;
 
-  if (track) {
-    const slider = new NewGamesSlider(section, track);
-    slider.start();
-  }
+    try {
+      const games = await fetchFeaturedGames();
 
+      if (games.length === 0) {
+        section.querySelector('.new-games__track')?.replaceWith(createEmptyState());
+        return;
+      }
+
+      section.innerHTML = createSectionMarkup(games);
+      const track = section.querySelector<HTMLElement>(TRACK_SELECTOR);
+      if (track) {
+        new NewGamesSlider(section, track).start();
+      }
+    } catch {
+      section.querySelector('.new-games__track')?.replaceWith(createErrorBanner(load));
+      showSnackbar('Could not load featured games.', 'error');
+    }
+  };
+
+  void load();
   return section;
 }

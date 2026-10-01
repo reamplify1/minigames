@@ -1,3 +1,6 @@
+import { fetchJson, ApiError } from '../../utils/api';
+import { IMAGE_BY_SLUG, FALLBACK_IMAGE } from '../game-cards-section/games.data';
+
 export interface GameInfoItem {
   label: string;
   value: string;
@@ -9,68 +12,107 @@ export interface GameRecord {
   date: string;
 }
 
-export type CommentAvatarColor = 'blue' | 'yellow' | 'white';
-
-export interface GameComment {
-  author: string;
-  date: string;
-  text: string;
-  likes: number;
-  isLiked: boolean;
-  avatarColor: CommentAvatarColor;
-}
-
 export interface GameDetails {
   title: string;
+  heroImage: string;
   rating: string;
   likes: string;
   description: string;
   info: GameInfoItem[];
   records: GameRecord[];
-  comments: GameComment[];
 }
 
-export const MOCK_GAME_DETAILS: GameDetails = {
-  title: 'Tukoni: Forest Keepers',
-  rating: '4.9',
-  likes: '31.2K',
-  description:
-    'Tukoni: Forest Keepers — a cozy hand-drawn puzzle-adventure. You are Traveller, a little forest spirit on an important mission. Wander storybook meadows, visit mushroom villages, meet adorable inhabitants, solve gentle hand-crafted puzzles, brew herbal teas and help the Tukoni forest prepare peacefully for the coming winter.',
-  info: [
-    { label: 'Genre', value: 'Puzzle' },
-    { label: 'Players', value: 'Solo' },
-    { label: 'Duration', value: '40-90 min' },
-    { label: 'Price', value: 'Free' },
-  ],
-  records: [
-    { player: 'ForestSpirit', score: '356,700 pts', date: '2 days ago' },
-    { player: 'TeaBrewer', score: '332,400pts', date: '5 days ago' },
-    { player: 'HerbalistPath', score: '308,900 pts', date: '1 week ago' },
-  ],
-  comments: [
-    {
-      author: 'ForestDweller',
-      date: '3 hours ago',
-      text: 'The hand-drawn art is absolutely magical 🍄 Every location feels like a page from a children’s storybook. The mushroom village made me cry happy tears!',
-      likes: 12,
-      isLiked: false,
-      avatarColor: 'blue',
-    },
-    {
-      author: 'HerbalTeaLover',
-      date: '1 day ago',
-      text: 'Perfect cozy evening game — brew a cup of chamomile, wrap in a blanket and help the little Tukoni prepare for winter. The puzzles are gentle but satisfying.',
-      likes: 5,
-      isLiked: false,
-      avatarColor: 'yellow',
-    },
-    {
-      author: 'CottageCoreMia',
-      date: '3 days ago',
-      text: 'I want to live inside this game forever 🌿 The NPCs are so charming, the tea recipes are real, and the atmosphere is pure warmth and calm.',
-      likes: 8,
-      isLiked: true,
-      avatarColor: 'white',
-    },
-  ],
-};
+interface ApiGameSpecs {
+  genre: string;
+  players: string;
+  duration: string;
+  price: string;
+}
+
+interface ApiGameRecord {
+  position: number;
+  playerName: string;
+  score: number;
+  achievedAt: string;
+}
+
+interface ApiGameDetails {
+  slug: string;
+  name: string;
+  heroImage: string;
+  rating: number;
+  likesCount: number;
+  isLikedByCurrentUser: boolean;
+  fullDescription: string;
+  specs: ApiGameSpecs;
+  topRecords: ApiGameRecord[];
+}
+
+interface GameDetailsResponse {
+  data: ApiGameDetails;
+}
+
+function formatLikes(count: number): string {
+  return count >= 1000 ? `${(count / 1000).toFixed(1)}K` : String(count);
+}
+
+function formatScore(score: number): string {
+  return `${score.toLocaleString('en-US')} pts`;
+}
+
+const MINUTE_IN_MS = 60_000;
+const HOUR_IN_MS = 60 * MINUTE_IN_MS;
+const DAY_IN_MS = 24 * HOUR_IN_MS;
+const WEEK_IN_MS = 7 * DAY_IN_MS;
+
+function formatRelativeTime(isoDate: string): string {
+  const elapsedMs = Date.now() - new Date(isoDate).getTime();
+
+  if (elapsedMs < MINUTE_IN_MS) return 'just now';
+  if (elapsedMs < HOUR_IN_MS) return `${Math.floor(elapsedMs / MINUTE_IN_MS)} min ago`;
+  if (elapsedMs < DAY_IN_MS) return `${Math.floor(elapsedMs / HOUR_IN_MS)} hours ago`;
+
+  return elapsedMs < WEEK_IN_MS
+    ? `${Math.floor(elapsedMs / DAY_IN_MS)} days ago`
+    : `${Math.floor(elapsedMs / WEEK_IN_MS)} weeks ago`;
+}
+
+function mapRecord(record: ApiGameRecord): GameRecord {
+  return {
+    player: record.playerName,
+    score: formatScore(record.score),
+    date: formatRelativeTime(record.achievedAt),
+  };
+}
+
+function mapGame(game: ApiGameDetails): GameDetails {
+  return {
+    title: game.name,
+    heroImage: IMAGE_BY_SLUG[game.slug] ?? FALLBACK_IMAGE,
+    rating: String(game.rating),
+    likes: formatLikes(game.likesCount),
+    description: game.fullDescription,
+    info: [
+      { label: 'Genre', value: game.specs.genre },
+      { label: 'Players', value: game.specs.players },
+      { label: 'Duration', value: game.specs.duration },
+      { label: 'Price', value: game.specs.price },
+    ],
+    records: game.topRecords.map((record) => mapRecord(record)),
+  };
+}
+
+// Returns undefined when the game slug does not exist (a 404 from the API),
+// so the dialog can show its empty state instead of the error banner.
+export async function fetchGameDetails(slug: string): Promise<GameDetails | undefined> {
+  try {
+    const response = await fetchJson<GameDetailsResponse>(`/games/${slug}`);
+    return mapGame(response.data);
+  } catch (error) {
+    if (error instanceof ApiError && error.message.includes('404')) {
+      return undefined;
+    }
+
+    throw error;
+  }
+}
