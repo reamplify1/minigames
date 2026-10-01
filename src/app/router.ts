@@ -14,6 +14,8 @@ interface NavigateOptions {
 
 type LocationListener = (context: RouteContext) => void;
 
+export const NOT_FOUND_ROUTE = '*';
+
 const routes = new Map<string, RouteDefinition>();
 const locationListeners: LocationListener[] = [];
 const routerState = { currentRouteKey: undefined as string | undefined };
@@ -24,7 +26,7 @@ function normalizePath(pathname: string): string {
 
 function resolveRouteKey(pathname: string): string {
   const normalized = normalizePath(pathname);
-  return routes.has(normalized) ? normalized : '/';
+  return routes.has(normalized) ? normalized : NOT_FOUND_ROUTE;
 }
 
 function getContext(): RouteContext {
