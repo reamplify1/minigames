@@ -3,7 +3,8 @@ import arrowLeftIcon from '../../assets/icons/arrow-left-icon.svg';
 import arrowRightIcon from '../../assets/icons/arrow-right-icon.svg';
 import starIcon from '../../assets/icons/star-icon.svg';
 import heartIcon from '../../assets/icons/favorite-icon.svg';
-import { openGameDetailsDialog } from '../game-details-dialog/game-details-dialog';
+import { navigate } from '../../app/router';
+import { withGameParameter } from '../../app/dialog-urls';
 import { fetchFeaturedGames, type FeaturedGame } from './new-games.data';
 import { createSkeleton, createErrorBanner, createEmptyState } from './new-games.states';
 import { showSnackbar } from '../snackbar/snackbar';
@@ -324,7 +325,7 @@ class NewGamesSlider {
     const slug = card?.dataset.gameSlug;
 
     if (slug) {
-      openGameDetailsDialog(slug);
+      navigate(withGameParameter(slug));
     }
   }
 

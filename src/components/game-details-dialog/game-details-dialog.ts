@@ -10,6 +10,8 @@ import {
   createDialogEmptyState,
 } from './game-details-dialog.states';
 import { showSnackbar } from '../snackbar/snackbar';
+import { navigate } from '../../app/router';
+import { withoutGameParameter } from '../../app/dialog-urls';
 
 const DIALOG_CLASS = 'game-details-dialog';
 
@@ -38,6 +40,11 @@ function createGameDetailsDialog(): HTMLDialogElement {
     }
   });
 
+  dialog.addEventListener('close', () => {
+    openState.slug = undefined;
+    navigate(withoutGameParameter(), { replace: true });
+  });
+
   return dialog;
 }
 
@@ -54,19 +61,25 @@ function getGameDetailsDialog(): HTMLDialogElement {
   return dialog;
 }
 
-// Guards against an older, slower request overwriting a newer response when
-// the user closes one game's dialog and opens another before the first
-// request finishes. Held in an object (rather than a top-level `let`) so
-// updating it from inside openGameDetailsDialog doesn't reassign a
-// top-level binding.
 const requestTracker = { requestId: 0 };
+const openState: { slug: string | undefined } = { slug: undefined };
+
+export function closeGameDetailsDialog(): void {
+  const dialog = document.querySelector<HTMLDialogElement>(`.${DIALOG_CLASS}`);
+
+  if (dialog?.open) {
+    dialog.close();
+  }
+}
 
 export function openGameDetailsDialog(slug: string): void {
   const dialog = getGameDetailsDialog();
 
-  if (dialog.open) {
+  if (dialog.open && openState.slug === slug) {
     return;
   }
+
+  openState.slug = slug;
 
   const onClose = (): void => {
     dialog.close();
@@ -76,7 +89,7 @@ export function openGameDetailsDialog(slug: string): void {
     const currentRequestId = ++requestTracker.requestId;
 
     dialog.replaceChildren(createDialogSkeleton(onClose));
-    dialog.showModal();
+    if (!dialog.open) dialog.showModal();
     dialog.scrollTop = 0;
 
     try {

@@ -4,8 +4,10 @@ import lockIcon from '../../assets/icons/lock-icon.svg';
 import eyeIcon from '../../assets/icons/eye-icon.svg';
 import userIcon from '../../assets/icons/user-icon.svg';
 import googleIcon from '../../assets/icons/google-icon.svg';
+import { navigate } from '../../app/router';
+import { withAuthParameter, withoutAuthParameter } from '../../app/dialog-urls';
 
-type AuthMode = 'login' | 'register';
+export type AuthMode = 'login' | 'register';
 
 const DEFAULT_MODE: AuthMode = 'login';
 const DIALOG_SELECTOR = '.auth-dialog';
@@ -28,7 +30,7 @@ interface FieldOptions {
   withToggle?: boolean;
 }
 
-function isAuthMode(value: string | undefined): value is AuthMode {
+export function isAuthMode(value: string | null | undefined): value is AuthMode {
   return value === 'login' || value === 'register';
 }
 
@@ -268,13 +270,20 @@ function createAuthDialog(): HTMLDialogElement {
     const trigger = event.target.closest<HTMLElement>(SWITCH_SELECTOR);
     const mode = trigger?.dataset.switchTo;
 
-    if (isAuthMode(mode)) {
-      switchMode(dialog, mode);
+    if (!isAuthMode(mode)) {
+      return;
     }
+
+    switchMode(dialog, mode);
+    navigate(withAuthParameter(mode), { replace: true });
   });
 
   dialog.addEventListener('submit', (event) => {
     event.preventDefault();
+  });
+
+  dialog.addEventListener('close', () => {
+    navigate(withoutAuthParameter(), { replace: true });
   });
 
   return dialog;
@@ -293,8 +302,18 @@ function getAuthDialog(): HTMLDialogElement {
   return dialog;
 }
 
-export function openAuthDialog(): void {
+export function closeAuthDialog(): void {
+  const dialog = document.querySelector<HTMLDialogElement>(DIALOG_SELECTOR);
+
+  if (dialog?.open) {
+    dialog.close();
+  }
+}
+
+export function openAuthDialog(mode: AuthMode): void {
   const dialog = getAuthDialog();
+
+  switchMode(dialog, mode);
 
   if (!dialog.open) {
     dialog.showModal();
