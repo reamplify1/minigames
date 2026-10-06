@@ -6,6 +6,14 @@ import userIcon from '../../assets/icons/user-icon.svg';
 import googleIcon from '../../assets/icons/google-icon.svg';
 import { navigate } from '../../app/router';
 import { withAuthParameter, withoutAuthParameter } from '../../app/dialog-urls';
+import { createFieldController, setupFormValidation } from './auth-form-validation';
+import {
+  validateConfirmPassword,
+  validateEmail,
+  validateLoginPassword,
+  validateRegisterPassword,
+  validateUsername,
+} from './auth-validation';
 
 export type AuthMode = 'login' | 'register';
 
@@ -16,7 +24,7 @@ const SWITCH_SELECTOR = '[data-switch-to]';
 const PASSWORD_TOGGLE_SELECTOR = '[data-password-toggle]';
 const CONTROL_SELECTOR = '.auth-dialog__control';
 const INPUT_SELECTOR = '.auth-dialog__input';
-const PASSWORD_MIN_LENGTH = 8;
+const PASSWORD_MIN_LENGTH = 6;
 
 interface FieldOptions {
   id: string;
@@ -50,6 +58,8 @@ function createField(options: FieldOptions): string {
        </button>`
     : '';
 
+  const errorId = `${options.id}-error`;
+
   return `
     <div class="auth-dialog__field">
       <label class="auth-dialog__label" for="${options.id}">${options.label}</label>
@@ -64,10 +74,13 @@ function createField(options: FieldOptions): string {
           autocomplete="${options.autocomplete}"
           ${minLength}
           ${textAttributes}
+          aria-describedby="${errorId}"
+          aria-invalid="false"
           required
         />
         ${toggle}
       </div>
+      <p class="auth-dialog__error" id="${errorId}" aria-live="polite"></p>
     </div>
   `;
 }
@@ -85,24 +98,27 @@ function createActions(submitLabel: string, googleLabel: string): string {
   `;
 }
 
-function switchMode(dialog: HTMLDialogElement, mode: AuthMode): void {
+function switchMode(dialog: HTMLDialogElement, mode: AuthMode, onSwitch?: () => void): void {
   if (dialog.dataset.mode === mode) {
     return;
   }
 
   dialog.dataset.mode = mode;
+  onSwitch?.();
 
-  const tabs = dialog.querySelectorAll<HTMLButtonElement>(TAB_SELECTOR);
+  const tabs = dialog.querySelectorAll<HTMLButtonElement>(`:scope ${TAB_SELECTOR}`);
 
   for (const tab of tabs) {
     tab.setAttribute('aria-selected', String(tab.dataset.switchTo === mode));
   }
 
-  dialog.querySelector<HTMLButtonElement>(`${TAB_SELECTOR}[aria-selected="true"]`)?.focus();
+  dialog.querySelector<HTMLButtonElement>(`:scope ${TAB_SELECTOR}[aria-selected="true"]`)?.focus();
 }
 
 function togglePassword(button: HTMLButtonElement): void {
-  const input = button.closest(CONTROL_SELECTOR)?.querySelector<HTMLInputElement>(INPUT_SELECTOR);
+  const input = button
+    .closest(CONTROL_SELECTOR)
+    ?.querySelector<HTMLInputElement>(`:scope ${INPUT_SELECTOR}`);
 
   if (!input) {
     return;
@@ -225,7 +241,7 @@ function createAuthDialog(): HTMLDialogElement {
               name: 'password',
               label: 'Password',
               type: 'password',
-              placeholder: 'Min. 8 characters',
+              placeholder: `Min. ${PASSWORD_MIN_LENGTH} characters`,
               icon: lockIcon,
               autocomplete: 'new-password',
               minLength: PASSWORD_MIN_LENGTH,
@@ -249,6 +265,70 @@ function createAuthDialog(): HTMLDialogElement {
       </section>
     </div>
   `;
+
+  const loginFormOrNull = dialog.querySelector<HTMLFormElement>(
+    ':scope #auth-panel-login .auth-dialog__form'
+  );
+  const registerFormOrNull = dialog.querySelector<HTMLFormElement>(
+    ':scope #auth-panel-register .auth-dialog__form'
+  );
+
+  if (!loginFormOrNull || !registerFormOrNull) {
+    throw new Error('Auth dialog is missing the login or register form.');
+  }
+
+  const loginForm: HTMLFormElement = loginFormOrNull;
+  const registerForm: HTMLFormElement = registerFormOrNull;
+
+  loginForm.noValidate = true;
+  registerForm.noValidate = true;
+
+  const loginSubmit = loginForm.querySelector<HTMLButtonElement>(':scope .auth-dialog__submit');
+  const registerSubmit = registerForm.querySelector<HTMLButtonElement>(
+    ':scope .auth-dialog__submit'
+  );
+
+  if (!loginSubmit || !registerSubmit) {
+    throw new Error('Auth dialog is missing a submit button.');
+  }
+
+  const loginEmailField = createFieldController(loginForm, 'login-email', (input) =>
+    validateEmail(input.value)
+  );
+  const loginPasswordField = createFieldController(loginForm, 'login-password', (input) =>
+    validateLoginPassword(input.value)
+  );
+  const resetLoginValidation = setupFormValidation(loginSubmit, [
+    loginEmailField,
+    loginPasswordField,
+  ]);
+
+  const usernameField = createFieldController(registerForm, 'register-username', (input) =>
+    validateUsername(input.value)
+  );
+  const registerEmailField = createFieldController(registerForm, 'register-email', (input) =>
+    validateEmail(input.value)
+  );
+  const registerPasswordField = createFieldController(registerForm, 'register-password', (input) =>
+    validateRegisterPassword(input.value)
+  );
+  const confirmPasswordField = createFieldController(
+    registerForm,
+    'register-confirm-password',
+    (input) => validateConfirmPassword(input.value, registerPasswordField.input.value)
+  );
+  const resetRegisterValidation = setupFormValidation(
+    registerSubmit,
+    [usernameField, registerEmailField, registerPasswordField, confirmPasswordField],
+    [[registerPasswordField.input, [confirmPasswordField]]]
+  );
+
+  function resetAllValidation(): void {
+    loginForm.reset();
+    registerForm.reset();
+    resetLoginValidation();
+    resetRegisterValidation();
+  }
 
   dialog.addEventListener('click', (event) => {
     if (event.target === dialog) {
@@ -274,7 +354,7 @@ function createAuthDialog(): HTMLDialogElement {
       return;
     }
 
-    switchMode(dialog, mode);
+    switchMode(dialog, mode, resetAllValidation);
     navigate(withAuthParameter(mode), { replace: true });
   });
 
