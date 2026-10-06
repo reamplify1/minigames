@@ -1,6 +1,8 @@
 @use '../../styles/tokens' as *;
 @use '../../styles/mixins' as *;
 
+$auth-field-error: $color-heart-active;
+
 $auth-dialog-width: 420px;
 $auth-dialog-shift: space(2);
 $auth-panel-shift: space(1);
@@ -216,6 +218,24 @@ $auth-backdrop-transition:
       background-color: $color-background;
       opacity: $opacity-disabled;
     }
+  }
+
+  &__field--invalid &__control {
+    border-color: $auth-field-error;
+
+    &:focus-within {
+      border-color: $auth-field-error;
+      box-shadow: 0 0 0 $border-width $auth-field-error;
+    }
+  }
+
+  &__error {
+    min-height: $line-height-120 * $font-size-label-medium;
+    margin: 0;
+    font-size: $font-size-label-medium;
+    font-weight: $font-weight-medium;
+    line-height: $line-height-120;
+    color: $auth-field-error;
   }
 
   &__control-icon,
