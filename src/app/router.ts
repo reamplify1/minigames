@@ -16,12 +16,24 @@ type LocationListener = (context: RouteContext) => void;
 
 export const NOT_FOUND_ROUTE = '*';
 
+const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, '');
+
 const routes = new Map<string, RouteDefinition>();
 const locationListeners: LocationListener[] = [];
 const routerState = { currentRouteKey: undefined as string | undefined };
 
+function stripBasePath(pathname: string): string {
+  if (BASE_PATH && pathname.startsWith(BASE_PATH)) {
+    const rest = pathname.slice(BASE_PATH.length);
+    return rest === '' ? '/' : rest;
+  }
+
+  return pathname;
+}
+
 function normalizePath(pathname: string): string {
-  return pathname === '/home' ? '/' : pathname;
+  const withoutBase = stripBasePath(pathname);
+  return withoutBase === '/home' ? '/' : withoutBase;
 }
 
 function resolveRouteKey(pathname: string): string {
