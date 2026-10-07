@@ -137,6 +137,12 @@ $mobile-menu-close-icon-size: 14px;
     gap: $size-3;
   }
 
+  &__user {
+    color: $color-white-75;
+    font-size: $font-size-body-large;
+    font-weight: $font-weight-medium;
+  }
+
   &__btn {
     box-sizing: border-box;
     width: 100%;

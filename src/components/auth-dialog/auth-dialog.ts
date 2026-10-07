@@ -4,8 +4,18 @@ import lockIcon from '../../assets/icons/lock-icon.svg';
 import eyeIcon from '../../assets/icons/eye-icon.svg';
 import userIcon from '../../assets/icons/user-icon.svg';
 import googleIcon from '../../assets/icons/google-icon.svg';
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
+  type User,
+} from 'firebase/auth';
+import { firebaseAuth } from '../../firebase/firebase-config';
 import { navigate } from '../../app/router';
 import { withAuthParameter, withoutAuthParameter } from '../../app/dialog-urls';
+import { saveSession, type AppSession } from '../../app/session';
+import { setCurrentSession } from '../../app/auth-state';
+import { showSnackbar } from '../snackbar/snackbar';
 import { createFieldController, setupFormValidation } from './auth-form-validation';
 import {
   validateConfirmPassword,
@@ -26,6 +36,24 @@ const CONTROL_SELECTOR = '.auth-dialog__control';
 const INPUT_SELECTOR = '.auth-dialog__input';
 const PASSWORD_MIN_LENGTH = 6;
 
+const LOGIN_SUBMIT_LABEL = 'Login';
+const LOGIN_PENDING_LABEL = 'Logging in…';
+const REGISTER_SUBMIT_LABEL = 'Create Account';
+const REGISTER_PENDING_LABEL = 'Creating account…';
+
+const DEFAULT_AUTH_ERROR_MESSAGE = 'Something went wrong. Please try again.';
+const AUTH_ERROR_MESSAGES: Record<string, string> = {
+  'auth/invalid-credential': 'Incorrect email or password.',
+  'auth/invalid-email': 'Enter a valid email address.',
+  'auth/user-disabled': 'This account has been disabled.',
+  'auth/user-not-found': 'No account found with this email.',
+  'auth/wrong-password': 'Incorrect email or password.',
+  'auth/email-already-in-use': 'An account with this email already exists.',
+  'auth/weak-password': 'Password is too weak.',
+  'auth/too-many-requests': 'Too many attempts. Please try again later.',
+  'auth/network-request-failed': 'Network error. Check your connection and try again.',
+};
+
 interface FieldOptions {
   id: string;
   name: string;
@@ -40,6 +68,21 @@ interface FieldOptions {
 
 export function isAuthMode(value: string | null | undefined): value is AuthMode {
   return value === 'login' || value === 'register';
+}
+
+function hasErrorCode(error: unknown): error is { code: string } {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    typeof (error as { code: unknown }).code === 'string'
+  );
+}
+
+function getAuthErrorMessage(error: unknown): string {
+  return hasErrorCode(error)
+    ? (AUTH_ERROR_MESSAGES[error.code] ?? DEFAULT_AUTH_ERROR_MESSAGE)
+    : DEFAULT_AUTH_ERROR_MESSAGE;
 }
 
 function createField(options: FieldOptions): string {
@@ -131,6 +174,17 @@ function togglePassword(button: HTMLButtonElement): void {
   button.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
 }
 
+function buildSession(user: User, displayNameOverride?: string): AppSession {
+  const displayName = displayNameOverride ?? user.displayName ?? user.email ?? 'Player';
+
+  return {
+    displayName,
+    email: user.email ?? '',
+    authenticatedAt: Date.now(),
+    ...(user.photoURL && { avatarUrl: user.photoURL }),
+  };
+}
+
 function createAuthDialog(): HTMLDialogElement {
   const dialog = document.createElement('dialog');
   dialog.className = 'auth-dialog';
@@ -198,7 +252,7 @@ function createAuthDialog(): HTMLDialogElement {
           <div class="auth-dialog__links-row">
             <button class="auth-dialog__link" type="button">Forgot Password?</button>
           </div>
-          ${createActions('Login', 'Continue with Google')}
+          ${createActions(LOGIN_SUBMIT_LABEL, 'Continue with Google')}
         </form>
         <p class="auth-dialog__switch">
           Don't have an account?
@@ -256,7 +310,7 @@ function createAuthDialog(): HTMLDialogElement {
               autocomplete: 'new-password',
             })}
           </div>
-          ${createActions('Create Account', 'Sign up with Google')}
+          ${createActions(REGISTER_SUBMIT_LABEL, 'Sign up with Google')}
         </form>
         <p class="auth-dialog__switch">
           Already have an account?
@@ -283,14 +337,24 @@ function createAuthDialog(): HTMLDialogElement {
   loginForm.noValidate = true;
   registerForm.noValidate = true;
 
-  const loginSubmit = loginForm.querySelector<HTMLButtonElement>(':scope .auth-dialog__submit');
-  const registerSubmit = registerForm.querySelector<HTMLButtonElement>(
+  const loginSubmitOrNull = loginForm.querySelector<HTMLButtonElement>(
+    ':scope .auth-dialog__submit'
+  );
+  const registerSubmitOrNull = registerForm.querySelector<HTMLButtonElement>(
     ':scope .auth-dialog__submit'
   );
 
-  if (!loginSubmit || !registerSubmit) {
+  if (!loginSubmitOrNull || !registerSubmitOrNull) {
     throw new Error('Auth dialog is missing a submit button.');
   }
+
+  const loginSubmit: HTMLButtonElement = loginSubmitOrNull;
+  const registerSubmit: HTMLButtonElement = registerSubmitOrNull;
+
+  const loginGoogle = loginForm.querySelector<HTMLButtonElement>(':scope .auth-dialog__google');
+  const registerGoogle = registerForm.querySelector<HTMLButtonElement>(
+    ':scope .auth-dialog__google'
+  );
 
   const loginEmailField = createFieldController(loginForm, 'login-email', (input) =>
     validateEmail(input.value)
@@ -330,9 +394,110 @@ function createAuthDialog(): HTMLDialogElement {
     resetRegisterValidation();
   }
 
+  let isAuthPending = false;
+
+  function setPendingState(isPending: boolean): void {
+    isAuthPending = isPending;
+    dialog.dataset.pending = String(isPending);
+
+    for (const control of dialog.querySelectorAll<HTMLButtonElement>(`:scope ${SWITCH_SELECTOR}`)) {
+      control.disabled = isPending;
+    }
+
+    for (const field of [
+      loginEmailField,
+      loginPasswordField,
+      usernameField,
+      registerEmailField,
+      registerPasswordField,
+      confirmPasswordField,
+    ]) {
+      field.input.disabled = isPending;
+    }
+
+    for (const button of [loginGoogle, registerGoogle]) {
+      if (button) {
+        button.disabled = isPending;
+      }
+    }
+
+    loginSubmit.disabled =
+      isPending || [loginEmailField, loginPasswordField].some((field) => field.validate());
+    registerSubmit.disabled =
+      isPending ||
+      [usernameField, registerEmailField, registerPasswordField, confirmPasswordField].some(
+        (field) => field.validate()
+      );
+
+    loginSubmit.textContent = isPending ? LOGIN_PENDING_LABEL : LOGIN_SUBMIT_LABEL;
+    registerSubmit.textContent = isPending ? REGISTER_PENDING_LABEL : REGISTER_SUBMIT_LABEL;
+  }
+
+  function completeAuthSuccess(user: User, displayNameOverride?: string): void {
+    const session = buildSession(user, displayNameOverride);
+
+    saveSession(session);
+    setCurrentSession(session);
+    setPendingState(false);
+    resetAllValidation();
+    dialog.close();
+    showSnackbar(`Welcome, ${session.displayName}!`, 'success');
+  }
+
+  async function handleLoginSubmit(): Promise<void> {
+    if (loginEmailField.validate() || loginPasswordField.validate()) {
+      return;
+    }
+
+    setPendingState(true);
+
+    try {
+      const credential = await signInWithEmailAndPassword(
+        firebaseAuth,
+        loginEmailField.input.value.trim(),
+        loginPasswordField.input.value
+      );
+
+      completeAuthSuccess(credential.user);
+    } catch (error) {
+      setPendingState(false);
+      showSnackbar(getAuthErrorMessage(error), 'error');
+    }
+  }
+
+  async function handleRegisterSubmit(): Promise<void> {
+    if (
+      usernameField.validate() ||
+      registerEmailField.validate() ||
+      registerPasswordField.validate() ||
+      confirmPasswordField.validate()
+    ) {
+      return;
+    }
+
+    setPendingState(true);
+
+    try {
+      const username = usernameField.input.value.trim();
+      const credential = await createUserWithEmailAndPassword(
+        firebaseAuth,
+        registerEmailField.input.value.trim(),
+        registerPasswordField.input.value
+      );
+
+      await updateProfile(credential.user, { displayName: username });
+      completeAuthSuccess(credential.user, username);
+    } catch (error) {
+      setPendingState(false);
+      showSnackbar(getAuthErrorMessage(error), 'error');
+    }
+  }
+
   dialog.addEventListener('click', (event) => {
     if (event.target === dialog) {
-      dialog.close();
+      if (!isAuthPending) {
+        dialog.close();
+      }
       return;
     }
 
@@ -358,8 +523,24 @@ function createAuthDialog(): HTMLDialogElement {
     navigate(withAuthParameter(mode), { replace: true });
   });
 
+  dialog.addEventListener('cancel', (event) => {
+    if (isAuthPending) {
+      event.preventDefault();
+    }
+  });
+
   dialog.addEventListener('submit', (event) => {
     event.preventDefault();
+
+    if (isAuthPending) {
+      return;
+    }
+
+    if (event.target === loginForm) {
+      void handleLoginSubmit();
+    } else if (event.target === registerForm) {
+      void handleRegisterSubmit();
+    }
   });
 
   dialog.addEventListener('close', () => {
@@ -385,7 +566,7 @@ function getAuthDialog(): HTMLDialogElement {
 export function closeAuthDialog(): void {
   const dialog = document.querySelector<HTMLDialogElement>(DIALOG_SELECTOR);
 
-  if (dialog?.open) {
+  if (dialog?.open && dialog.dataset.pending !== 'true') {
     dialog.close();
   }
 }
