@@ -1,9 +1,14 @@
 import './mobile-menu.scss';
 import logoIcon from '../../assets/icons/minigames-icon.svg';
 import closeIcon from '../../assets/icons/close-button-icon.svg';
+import { signOut } from 'firebase/auth';
 import { navigate } from '../../app/router';
 import { withAuthParameter } from '../../app/dialog-urls';
 import { navItems, getCurrentPage } from '../header/nav-items';
+import { firebaseAuth } from '../../firebase/firebase-config';
+import { clearSession } from '../../app/session';
+import { getCurrentSession, onAuthStateChange, setCurrentSession } from '../../app/auth-state';
+import { showSnackbar } from '../snackbar/snackbar';
 
 const OPEN_CLASS = 'mobile-menu--open';
 const NO_SCROLL_CLASS = 'no-scroll';
@@ -18,6 +23,20 @@ function renderNavLinks(): string {
       return `<li><a class="mobile-menu__link${activeClass}" href="${item.href}"${ariaCurrent}>${item.label}</a></li>`;
     })
     .join('');
+}
+
+function renderAuthActions(): string {
+  const session = getCurrentSession();
+
+  return session
+    ? `
+      <span class="mobile-menu__user">Hi, ${session.displayName}</span>
+      <button class="mobile-menu__btn mobile-menu__btn--outline" type="button" data-logout>Log Out</button>
+    `
+    : `
+      <button class="mobile-menu__btn mobile-menu__btn--outline" type="button" data-auth-trigger="login">Log In</button>
+      <button class="mobile-menu__btn mobile-menu__btn--accent" type="button" data-auth-trigger="register">Sign Up</button>
+    `;
 }
 
 export function createMobileMenu(trigger: HTMLElement): HTMLElement {
@@ -45,15 +64,15 @@ export function createMobileMenu(trigger: HTMLElement): HTMLElement {
     </nav>
 
     <div class="mobile-menu__actions">
-      <button class="mobile-menu__btn mobile-menu__btn--outline" type="button">Log In</button>
-      <button class="mobile-menu__btn mobile-menu__btn--accent" type="button">Sign Up</button>
+      ${renderAuthActions()}
     </div>
   `;
 
   trigger.setAttribute('aria-controls', menu.id);
   trigger.setAttribute('aria-expanded', 'false');
 
-  const closeButton = menu.querySelector<HTMLButtonElement>('.mobile-menu__close');
+  const closeButton = menu.querySelector<HTMLButtonElement>(':scope .mobile-menu__close');
+  const actions = menu.querySelector<HTMLElement>(':scope .mobile-menu__actions');
 
   function isMenuAvailable(): boolean {
     return getComputedStyle(menu).display !== 'none';
@@ -97,6 +116,34 @@ export function createMobileMenu(trigger: HTMLElement): HTMLElement {
     navigate(withAuthParameter(mode));
   }
 
+  async function handleLogout(): Promise<void> {
+    closeMenu();
+
+    try {
+      await signOut(firebaseAuth);
+    } catch {
+      // Local session is cleared regardless of whether the Firebase call succeeds.
+    }
+
+    clearSession();
+    setCurrentSession(undefined);
+    showSnackbar("You've been logged out.", 'success');
+  }
+
+  function bindAuthActions(container: HTMLElement): void {
+    container
+      .querySelector<HTMLButtonElement>(':scope [data-auth-trigger="login"]')
+      ?.addEventListener('click', () => handleAuthTrigger('login'));
+    container
+      .querySelector<HTMLButtonElement>(':scope [data-auth-trigger="register"]')
+      ?.addEventListener('click', () => handleAuthTrigger('register'));
+    container
+      .querySelector<HTMLButtonElement>(':scope [data-logout]')
+      ?.addEventListener('click', () => {
+        void handleLogout();
+      });
+  }
+
   function handleNavLinkClick(event: MouseEvent): void {
     event.preventDefault();
     const link = event.currentTarget as HTMLAnchorElement;
@@ -108,16 +155,24 @@ export function createMobileMenu(trigger: HTMLElement): HTMLElement {
   trigger.addEventListener('click', openMenu);
   closeButton?.addEventListener('click', closeMenu);
 
-  const links = menu.querySelectorAll<HTMLAnchorElement>('.mobile-menu__logo, .mobile-menu__link');
+  const links = menu.querySelectorAll<HTMLAnchorElement>(
+    ':scope .mobile-menu__logo, :scope .mobile-menu__link'
+  );
   for (const link of links) {
     link.addEventListener('click', handleNavLinkClick);
   }
 
-  menu.querySelector('.mobile-menu__btn--outline')?.addEventListener('click', () => {
-    handleAuthTrigger('login');
-  });
-  menu.querySelector('.mobile-menu__btn--accent')?.addEventListener('click', () => {
-    handleAuthTrigger('register');
+  if (actions) {
+    bindAuthActions(actions);
+  }
+
+  onAuthStateChange(() => {
+    if (!actions) {
+      return;
+    }
+
+    actions.innerHTML = renderAuthActions();
+    bindAuthActions(actions);
   });
 
   return menu;

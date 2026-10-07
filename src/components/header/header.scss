@@ -90,6 +90,21 @@
     gap: $size-3;
   }
 
+  &__auth-actions {
+    display: flex;
+    align-items: center;
+    gap: $size-3;
+  }
+
+  &__user {
+    color: $color-text-muted;
+    font-weight: $font-weight-semibold;
+
+    @include respond-to(tablet) {
+      display: none;
+    }
+  }
+
   &__btn {
     display: inline-flex;
     align-items: center;

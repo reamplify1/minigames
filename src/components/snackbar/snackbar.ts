@@ -4,6 +4,11 @@ type SnackbarVariant = 'success' | 'error';
 
 const AUTO_DISMISS_MS = 4000;
 
+function resolveContainerParent(): HTMLElement {
+  const openDialog = document.querySelector<HTMLDialogElement>('dialog[open]');
+  return openDialog ?? document.body;
+}
+
 const getContainer = (() => {
   let container: HTMLElement | undefined;
 
@@ -12,8 +17,14 @@ const getContainer = (() => {
       container = document.createElement('div');
       container.className = 'snackbar-container';
       container.setAttribute('aria-live', 'polite');
-      document.body.append(container);
     }
+
+    const parent = resolveContainerParent();
+
+    if (container.parentElement !== parent) {
+      parent.append(container);
+    }
+
     return container;
   };
 })();
