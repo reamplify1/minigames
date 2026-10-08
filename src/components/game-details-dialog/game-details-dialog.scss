@@ -302,6 +302,11 @@ $game-details-backdrop-transition:
       background-color: $color-favorite-hover;
     }
 
+    &:disabled {
+      opacity: $opacity-disabled;
+      cursor: not-allowed;
+    }
+
     @include respond-to(mobile) {
       width: $game-details-action-height;
       padding: 0;

@@ -2,14 +2,19 @@ import starIcon from '../../../assets/icons/star-icon.svg';
 import favoriteIcon from '../../../assets/icons/favorite-icon.svg';
 import heartOutlineIcon from '../../../assets/icons/fav-icon.svg';
 import { runProtectedAction } from '../../../app/protected-action';
-import { onAuthStateChange } from '../../../app/auth-state';
+import { onAuthStateChange, getCurrentSession } from '../../../app/auth-state';
+import { showSnackbar } from '../../snackbar/snackbar';
+import { toggleGameFavorite, formatLikes } from '../game-details-dialog.data';
 import type { GameDetails, GameInfoItem } from '../game-details-dialog.data';
 
 export const GAME_TITLE_ID = 'game-details-title';
 
 const FAVORITE_BUTTON_SELECTOR = '.game-details-dialog__favorite';
+const LIKES_STAT_SELECTOR = '.game-details-dialog__stat-likes';
 const FAVORITE_LABEL_ADD = 'Add to Favorites';
 const FAVORITE_LABEL_REMOVE = 'Remove from Favorites';
+const GUEST_FAVORITE_MESSAGE = 'Log in to add games to your favorites.';
+const FAVORITE_ERROR_MESSAGE = 'Could not update favorites. Please try again.';
 
 function createInfoItem({ label, value }: GameInfoItem): string {
   return `
@@ -33,9 +38,38 @@ function setFavoriteState(button: HTMLButtonElement, isPressed: boolean): void {
   }
 }
 
-function toggleFavorite(button: HTMLButtonElement): void {
-  const isPressed = button.getAttribute('aria-pressed') !== 'true';
-  setFavoriteState(button, isPressed);
+function setLikesCount(likesStat: HTMLElement | null, likesCount: number): void {
+  if (likesStat) {
+    likesStat.textContent = formatLikes(likesCount);
+  }
+}
+
+async function toggleFavorite(
+  button: HTMLButtonElement,
+  likesStat: HTMLElement | null,
+  slug: string
+): Promise<void> {
+  if (button.disabled) {
+    return;
+  }
+
+  const userEmail = getCurrentSession()?.email;
+
+  if (!userEmail) {
+    return;
+  }
+
+  button.disabled = true;
+
+  try {
+    const result = await toggleGameFavorite(slug, userEmail);
+    setFavoriteState(button, result.isFavorited);
+    setLikesCount(likesStat, result.likesCount);
+  } catch {
+    showSnackbar(FAVORITE_ERROR_MESSAGE, 'error');
+  } finally {
+    button.disabled = false;
+  }
 }
 
 function createFavoriteResetRegistrar(): () => void {
@@ -64,7 +98,7 @@ function createFavoriteResetRegistrar(): () => void {
 
 const registerFavoriteResetOnLogout = createFavoriteResetRegistrar();
 
-export function createGameInfo(game: GameDetails): DocumentFragment {
+export function createGameInfo(game: GameDetails, slug: string): DocumentFragment {
   registerFavoriteResetOnLogout();
 
   const template = document.createElement('template');
@@ -78,7 +112,7 @@ export function createGameInfo(game: GameDetails): DocumentFragment {
         </span>
         <span class="game-details-dialog__stat">
           <img class="game-details-dialog__stat-icon" src="${favoriteIcon}" alt="Likes" />
-          ${game.likes}
+          <span class="game-details-dialog__stat-likes">${game.likes}</span>
         </span>
       </div>
     </div>
@@ -94,21 +128,25 @@ export function createGameInfo(game: GameDetails): DocumentFragment {
       <button
         class="game-details-dialog__favorite"
         type="button"
-        aria-pressed="false"
-        aria-label="${FAVORITE_LABEL_ADD}"
+        aria-pressed="${game.isFavorited}"
+        aria-label="${game.isFavorited ? FAVORITE_LABEL_REMOVE : FAVORITE_LABEL_ADD}"
       >
         <img class="game-details-dialog__heart" src="${heartOutlineIcon}" alt="" />
-        <span class="game-details-dialog__favorite-label">${FAVORITE_LABEL_ADD}</span>
+        <span class="game-details-dialog__favorite-label">${
+          game.isFavorited ? FAVORITE_LABEL_REMOVE : FAVORITE_LABEL_ADD
+        }</span>
       </button>
     </div>
   `;
 
-  const favoriteButton = template.content.querySelector<HTMLButtonElement>(
-    '.game-details-dialog__favorite'
-  );
+  const favoriteButton =
+    template.content.querySelector<HTMLButtonElement>(FAVORITE_BUTTON_SELECTOR);
+  const likesStat = template.content.querySelector<HTMLElement>(LIKES_STAT_SELECTOR);
 
   favoriteButton?.addEventListener('click', () => {
-    runProtectedAction(() => toggleFavorite(favoriteButton));
+    runProtectedAction(() => {
+      void toggleFavorite(favoriteButton, likesStat, slug);
+    }, GUEST_FAVORITE_MESSAGE);
   });
 
   return template.content;
