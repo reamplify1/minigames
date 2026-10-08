@@ -1,4 +1,4 @@
-import { fetchJson, ApiError } from '../../utils/api';
+import { fetchJson, postJson, ApiError } from '../../utils/api';
 import { IMAGE_BY_SLUG, FALLBACK_IMAGE } from '../game-cards-section/games.data';
 
 export interface GameInfoItem {
@@ -17,9 +17,16 @@ export interface GameDetails {
   heroImage: string;
   rating: string;
   likes: string;
+  likesCount: number;
+  isFavorited: boolean;
   description: string;
   info: GameInfoItem[];
   records: GameRecord[];
+}
+
+export interface FavoriteToggleResult {
+  isFavorited: boolean;
+  likesCount: number;
 }
 
 interface ApiGameSpecs {
@@ -52,7 +59,7 @@ interface GameDetailsResponse {
   data: ApiGameDetails;
 }
 
-function formatLikes(count: number): string {
+export function formatLikes(count: number): string {
   return count >= 1000 ? `${(count / 1000).toFixed(1)}K` : String(count);
 }
 
@@ -91,6 +98,8 @@ function mapGame(game: ApiGameDetails): GameDetails {
     heroImage: IMAGE_BY_SLUG[game.slug] ?? FALLBACK_IMAGE,
     rating: String(game.rating),
     likes: formatLikes(game.likesCount),
+    likesCount: game.likesCount,
+    isFavorited: game.isLikedByCurrentUser,
     description: game.fullDescription,
     info: [
       { label: 'Genre', value: game.specs.genre },
@@ -102,11 +111,14 @@ function mapGame(game: ApiGameDetails): GameDetails {
   };
 }
 
-// Returns undefined when the game slug does not exist (a 404 from the API),
-// so the dialog can show its empty state instead of the error banner.
-export async function fetchGameDetails(slug: string): Promise<GameDetails | undefined> {
+export async function fetchGameDetails(
+  slug: string,
+  userEmail?: string
+): Promise<GameDetails | undefined> {
+  const query = userEmail ? `?userEmail=${encodeURIComponent(userEmail)}` : '';
+
   try {
-    const response = await fetchJson<GameDetailsResponse>(`/games/${slug}`);
+    const response = await fetchJson<GameDetailsResponse>(`/games/${slug}${query}`);
     return mapGame(response.data);
   } catch (error) {
     if (error instanceof ApiError && error.message.includes('404')) {
@@ -115,4 +127,19 @@ export async function fetchGameDetails(slug: string): Promise<GameDetails | unde
 
     throw error;
   }
+}
+
+interface FavoriteToggleResponse {
+  data: FavoriteToggleResult;
+}
+
+export async function toggleGameFavorite(
+  slug: string,
+  userEmail: string
+): Promise<FavoriteToggleResult> {
+  const response = await postJson<FavoriteToggleResponse>(`/games/${slug}/favorite`, {
+    userEmail,
+  });
+
+  return response.data;
 }

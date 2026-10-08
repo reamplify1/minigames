@@ -7,6 +7,14 @@ $snackbar-gap: space(2);
 $snackbar-radius: 12px;
 
 .snackbar-container {
+  // Resets the browser's default [popover] styling (border, padding,
+  // background, centered inset position, max-width/height) so it behaves
+  // like the plain fixed-position box it was before switching to the
+  // Popover API for its top-layer stacking.
+  inset: auto;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
   position: fixed;
   right: space(3);
   bottom: space(3);
@@ -14,6 +22,9 @@ $snackbar-radius: 12px;
   display: flex;
   flex-direction: column;
   gap: $snackbar-gap;
+  border: 0;
+  background: transparent;
+  color: inherit;
   pointer-events: none;
 }
 
