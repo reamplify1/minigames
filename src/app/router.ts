@@ -33,7 +33,6 @@ function stripBasePath(pathname: string): string {
   return stripped === '' ? '/' : stripped;
 }
 
-// "/library" -> "/minigames/library", "/" -> "/minigames/".
 function withBasePath(pathname: string): string {
   return pathname === '/' ? BASE_PATH : `${BASE_PATH.slice(0, -1)}${pathname}`;
 }
