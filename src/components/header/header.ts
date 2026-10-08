@@ -1,6 +1,7 @@
 import './header.scss';
 import logoIcon from '../../assets/icons/minigames-icon.svg';
 import burgerIcon from '../../assets/icons/burger-icon.svg';
+import userIcon from '../../assets/icons/user-icon.svg';
 import { signOut } from 'firebase/auth';
 import { createMobileMenu } from '../mobile-menu/mobile-menu';
 import { navigate } from '../../app/router';
@@ -10,6 +11,7 @@ import { firebaseAuth } from '../../firebase/firebase-config';
 import { clearSession } from '../../app/session';
 import { getCurrentSession, onAuthStateChange, setCurrentSession } from '../../app/auth-state';
 import { showSnackbar } from '../snackbar/snackbar';
+import { renderProfileBadge, type ProfileBadgeElements } from '../../app/profile-display';
 
 function renderNavLinks(): string {
   const currentPage = getCurrentPage();
@@ -28,13 +30,31 @@ function renderAuthActions(): string {
 
   return session
     ? `
-      <span class="header__user">Hi, ${session.displayName}</span>
+      <span class="header__profile">
+        <span class="header__avatar">
+          <img class="header__avatar-img" alt="" hidden data-avatar-img />
+          <span class="header__avatar-initials" hidden data-avatar-initials></span>
+          <img class="header__avatar-fallback" src="${userIcon}" alt="" hidden data-avatar-fallback />
+        </span>
+        <span class="header__user" data-profile-name></span>
+      </span>
       <button class="header__btn header__btn--outline" type="button" data-logout>Log Out</button>
     `
     : `
       <button class="header__btn header__btn--outline" type="button" data-auth-trigger="login">Log In</button>
       <button class="header__btn header__btn--accent" type="button" data-auth-trigger="register">Sign Up</button>
     `;
+}
+
+function getProfileBadgeElements(container: HTMLElement): ProfileBadgeElements | undefined {
+  const nameElement = container.querySelector<HTMLElement>(':scope [data-profile-name]');
+  const avatarImage = container.querySelector<HTMLImageElement>(':scope [data-avatar-img]');
+  const avatarInitials = container.querySelector<HTMLElement>(':scope [data-avatar-initials]');
+  const avatarFallback = container.querySelector<HTMLElement>(':scope [data-avatar-fallback]');
+
+  return nameElement && avatarImage && avatarInitials && avatarFallback
+    ? { nameElement, avatarImage, avatarInitials, avatarFallback }
+    : undefined;
 }
 
 async function handleLogout(): Promise<void> {
@@ -61,6 +81,13 @@ function bindAuthActions(container: HTMLElement): void {
     ?.addEventListener('click', () => {
       void handleLogout();
     });
+
+  const session = getCurrentSession();
+  const badgeElements = getProfileBadgeElements(container);
+
+  if (session && badgeElements) {
+    renderProfileBadge(badgeElements, session);
+  }
 }
 
 export function createHeader(): HTMLElement {

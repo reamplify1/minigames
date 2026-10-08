@@ -1,6 +1,7 @@
 import './mobile-menu.scss';
 import logoIcon from '../../assets/icons/minigames-icon.svg';
 import closeIcon from '../../assets/icons/close-button-icon.svg';
+import userIcon from '../../assets/icons/user-icon.svg';
 import { signOut } from 'firebase/auth';
 import { navigate } from '../../app/router';
 import { withAuthParameter } from '../../app/dialog-urls';
@@ -9,6 +10,7 @@ import { firebaseAuth } from '../../firebase/firebase-config';
 import { clearSession } from '../../app/session';
 import { getCurrentSession, onAuthStateChange, setCurrentSession } from '../../app/auth-state';
 import { showSnackbar } from '../snackbar/snackbar';
+import { renderProfileBadge, type ProfileBadgeElements } from '../../app/profile-display';
 
 const OPEN_CLASS = 'mobile-menu--open';
 const NO_SCROLL_CLASS = 'no-scroll';
@@ -30,13 +32,31 @@ function renderAuthActions(): string {
 
   return session
     ? `
-      <span class="mobile-menu__user">Hi, ${session.displayName}</span>
+      <span class="mobile-menu__profile">
+        <span class="mobile-menu__avatar">
+          <img class="mobile-menu__avatar-img" alt="" hidden data-avatar-img />
+          <span class="mobile-menu__avatar-initials" hidden data-avatar-initials></span>
+          <img class="mobile-menu__avatar-fallback" src="${userIcon}" alt="" hidden data-avatar-fallback />
+        </span>
+        <span class="mobile-menu__user" data-profile-name></span>
+      </span>
       <button class="mobile-menu__btn mobile-menu__btn--outline" type="button" data-logout>Log Out</button>
     `
     : `
       <button class="mobile-menu__btn mobile-menu__btn--outline" type="button" data-auth-trigger="login">Log In</button>
       <button class="mobile-menu__btn mobile-menu__btn--accent" type="button" data-auth-trigger="register">Sign Up</button>
     `;
+}
+
+function getProfileBadgeElements(container: HTMLElement): ProfileBadgeElements | undefined {
+  const nameElement = container.querySelector<HTMLElement>(':scope [data-profile-name]');
+  const avatarImage = container.querySelector<HTMLImageElement>(':scope [data-avatar-img]');
+  const avatarInitials = container.querySelector<HTMLElement>(':scope [data-avatar-initials]');
+  const avatarFallback = container.querySelector<HTMLElement>(':scope [data-avatar-fallback]');
+
+  return nameElement && avatarImage && avatarInitials && avatarFallback
+    ? { nameElement, avatarImage, avatarInitials, avatarFallback }
+    : undefined;
 }
 
 export function createMobileMenu(trigger: HTMLElement): HTMLElement {
@@ -142,6 +162,13 @@ export function createMobileMenu(trigger: HTMLElement): HTMLElement {
       ?.addEventListener('click', () => {
         void handleLogout();
       });
+
+    const session = getCurrentSession();
+    const badgeElements = getProfileBadgeElements(container);
+
+    if (session && badgeElements) {
+      renderProfileBadge(badgeElements, session);
+    }
   }
 
   function handleNavLinkClick(event: MouseEvent): void {
