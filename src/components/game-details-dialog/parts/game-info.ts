@@ -2,10 +2,12 @@ import starIcon from '../../../assets/icons/star-icon.svg';
 import favoriteIcon from '../../../assets/icons/favorite-icon.svg';
 import heartOutlineIcon from '../../../assets/icons/fav-icon.svg';
 import { runProtectedAction } from '../../../app/protected-action';
+import { onAuthStateChange } from '../../../app/auth-state';
 import type { GameDetails, GameInfoItem } from '../game-details-dialog.data';
 
 export const GAME_TITLE_ID = 'game-details-title';
 
+const FAVORITE_BUTTON_SELECTOR = '.game-details-dialog__favorite';
 const FAVORITE_LABEL_ADD = 'Add to Favorites';
 const FAVORITE_LABEL_REMOVE = 'Remove from Favorites';
 
@@ -18,8 +20,7 @@ function createInfoItem({ label, value }: GameInfoItem): string {
   `;
 }
 
-function toggleFavorite(button: HTMLButtonElement): void {
-  const isPressed = button.getAttribute('aria-pressed') !== 'true';
+function setFavoriteState(button: HTMLButtonElement, isPressed: boolean): void {
   const label = isPressed ? FAVORITE_LABEL_REMOVE : FAVORITE_LABEL_ADD;
 
   button.setAttribute('aria-pressed', String(isPressed));
@@ -32,7 +33,40 @@ function toggleFavorite(button: HTMLButtonElement): void {
   }
 }
 
+function toggleFavorite(button: HTMLButtonElement): void {
+  const isPressed = button.getAttribute('aria-pressed') !== 'true';
+  setFavoriteState(button, isPressed);
+}
+
+function createFavoriteResetRegistrar(): () => void {
+  let hasRegistered = false;
+
+  return function registerFavoriteResetOnLogout(): void {
+    if (hasRegistered) {
+      return;
+    }
+
+    hasRegistered = true;
+
+    onAuthStateChange((session) => {
+      if (session) {
+        return;
+      }
+
+      const favoriteButton = document.querySelector<HTMLButtonElement>(FAVORITE_BUTTON_SELECTOR);
+
+      if (favoriteButton) {
+        setFavoriteState(favoriteButton, false);
+      }
+    });
+  };
+}
+
+const registerFavoriteResetOnLogout = createFavoriteResetRegistrar();
+
 export function createGameInfo(game: GameDetails): DocumentFragment {
+  registerFavoriteResetOnLogout();
+
   const template = document.createElement('template');
   template.innerHTML = `
     <div class="game-details-dialog__title-row">

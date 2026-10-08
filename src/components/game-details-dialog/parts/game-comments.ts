@@ -7,11 +7,15 @@ import {
   createCommentsEmptyState,
 } from './game-comments.states';
 import { showSnackbar } from '../../snackbar/snackbar';
+import { runProtectedAction } from '../../../app/protected-action';
+import { onAuthStateChange } from '../../../app/auth-state';
 
 const COMMENTS_TITLE_ID = 'game-details-comments-title';
 const COMMENT_INPUT_ID = 'game-details-comment-input';
 const COMMENT_INPUT_MAX_HEIGHT = 88;
 const SKELETON_COUNT = 3;
+const LIKE_BUTTON_SELECTOR = '.game-details-dialog__like';
+const PRESSED_LIKE_BUTTON_SELECTOR = `${LIKE_BUTTON_SELECTOR}[aria-pressed="true"]`;
 
 function createCommentItem({
   author,
@@ -51,12 +55,10 @@ function createCommentItem({
   `;
 }
 
-// "1.5px" → 1.5
 function parsePixels(value: string): number {
   return Number(value.replace('px', '')) || 0;
 }
 
-// Grows the textarea with its text, up to 88px. After that a scrollbar appears.
 function resizeCommentInput(textarea: HTMLTextAreaElement): void {
   textarea.style.height = 'auto';
 
@@ -81,7 +83,35 @@ function setCommentsTitle(title: HTMLElement, total: number): void {
   title.textContent = `Comments (${total})`;
 }
 
+function createLikeResetRegistrar(): () => void {
+  let hasRegistered = false;
+
+  return function registerLikeResetOnLogout(): void {
+    if (hasRegistered) {
+      return;
+    }
+
+    hasRegistered = true;
+
+    onAuthStateChange((session) => {
+      if (session) {
+        return;
+      }
+
+      const pressedLikeButtons = document.querySelectorAll<HTMLButtonElement>(PRESSED_LIKE_BUTTON_SELECTOR);
+
+      for (const likeButton of pressedLikeButtons) {
+        likeButton.setAttribute('aria-pressed', 'false');
+      }
+    });
+  };
+}
+
+const registerLikeResetOnLogout = createLikeResetRegistrar();
+
 export function createGameComments(slug: string): HTMLElement {
+  registerLikeResetOnLogout();
+
   const section = document.createElement('section');
   section.className = 'game-details-dialog__comments';
   section.setAttribute('aria-labelledby', COMMENTS_TITLE_ID);
@@ -121,7 +151,6 @@ export function createGameComments(slug: string): HTMLElement {
   );
   const list = section.querySelector<HTMLElement>('.game-details-dialog__comments-list');
 
-  // Sending comments comes in a later story, so the form does nothing for now.
   form?.addEventListener('submit', (event) => {
     event.preventDefault();
   });
@@ -134,16 +163,15 @@ export function createGameComments(slug: string): HTMLElement {
     }
   });
 
-  // One listener for all like buttons in the list.
   list?.addEventListener('click', (event) => {
     if (!(event.target instanceof Element)) {
       return;
     }
 
-    const likeButton = event.target.closest<HTMLButtonElement>('.game-details-dialog__like');
+    const likeButton = event.target.closest<HTMLButtonElement>(LIKE_BUTTON_SELECTOR);
 
     if (likeButton) {
-      toggleLike(likeButton);
+      runProtectedAction(() => toggleLike(likeButton));
     }
   });
 
@@ -155,8 +183,6 @@ export function createGameComments(slug: string): HTMLElement {
     try {
       const { comments, total } = await fetchGameComments(slug);
 
-      // The dialog may already be closed (and its content replaced) by the
-      // time this resolves — skip touching detached DOM.
       if (!section.isConnected) return;
 
       if (title) setCommentsTitle(title, total);
