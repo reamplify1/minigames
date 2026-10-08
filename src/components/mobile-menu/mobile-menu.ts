@@ -154,7 +154,7 @@ export function createMobileMenu(trigger: HTMLElement): HTMLElement {
 
     showSnackbar(
       didSignOutFail ? LOGOUT_ERROR_MESSAGE : LOGOUT_SUCCESS_MESSAGE,
-      didSignOutFail ? 'error' : 'success',
+      didSignOutFail ? 'error' : 'success'
     );
   }
 
@@ -191,7 +191,7 @@ export function createMobileMenu(trigger: HTMLElement): HTMLElement {
   closeButton?.addEventListener('click', closeMenu);
 
   const links = menu.querySelectorAll<HTMLAnchorElement>(
-    ':scope .mobile-menu__logo, :scope .mobile-menu__link',
+    ':scope .mobile-menu__logo, :scope .mobile-menu__link'
   );
   for (const link of links) {
     link.addEventListener('click', handleNavLinkClick);
