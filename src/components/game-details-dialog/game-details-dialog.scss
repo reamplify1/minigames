@@ -506,6 +506,11 @@ $game-details-backdrop-transition:
       outline: none;
       box-shadow: 0 0 0 $border-width-hairline $color-on-primary;
     }
+
+    &:disabled {
+      opacity: $opacity-disabled;
+      cursor: not-allowed;
+    }
   }
 
   &__comment-submit {

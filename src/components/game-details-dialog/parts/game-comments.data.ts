@@ -1,4 +1,4 @@
-import { fetchJson } from '../../../utils/api';
+import { fetchJson, postJson } from '../../../utils/api';
 
 export type CommentAvatarColor = 'blue' | 'yellow' | 'white';
 
@@ -14,6 +14,12 @@ export interface GameComment {
 export interface GameCommentsResult {
   comments: GameComment[];
   total: number;
+}
+
+export interface NewCommentPayload {
+  userEmail: string;
+  authorName: string;
+  text: string;
 }
 
 interface ApiComment {
@@ -34,8 +40,10 @@ interface ApiCommentsResponse {
   meta: ApiCommentsMeta;
 }
 
-// Only the 3 latest comments are shown in this story (read-only); posting,
-// liking and pagination through the rest are Story 4 work.
+interface ApiCommentResponse {
+  data: ApiComment;
+}
+
 const COMMENTS_LIMIT = 3;
 
 const MINUTE_IN_MS = 60_000;
@@ -55,9 +63,6 @@ function formatUnit(value: number, unit: string): string {
   return `${value} ${unit}${value === 1 ? '' : 's'} ago`;
 }
 
-// Converts an ISO timestamp into "just now" / "N min ago" / "N hours ago" /
-// "N days ago" / "N weeks ago" / "N months ago" / "N years ago", per the
-// task's exact bucket boundaries.
 export function formatRelativeTime(isoDate: string): string {
   const elapsedMs = Date.now() - new Date(isoDate).getTime();
 
@@ -88,13 +93,21 @@ function mapComment(comment: ApiComment, index: number): GameComment {
   };
 }
 
-export async function fetchGameComments(slug: string): Promise<GameCommentsResult> {
+export async function fetchGameComments(
+  slug: string,
+  userEmail?: string
+): Promise<GameCommentsResult> {
+  const emailQuery = userEmail ? `&userEmail=${encodeURIComponent(userEmail)}` : '';
   const response = await fetchJson<ApiCommentsResponse>(
-    `/games/${slug}/comments?limit=${COMMENTS_LIMIT}&sort=newest`
+    `/games/${slug}/comments?limit=${COMMENTS_LIMIT}&sort=newest${emailQuery}`
   );
 
   return {
     comments: response.data.map((comment, index) => mapComment(comment, index)),
     total: response.meta.totalComments,
   };
+}
+
+export async function postGameComment(slug: string, payload: NewCommentPayload): Promise<void> {
+  await postJson<ApiCommentResponse>(`/games/${slug}/comments`, payload);
 }
