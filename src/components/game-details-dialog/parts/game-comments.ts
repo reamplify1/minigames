@@ -98,7 +98,9 @@ function createLikeResetRegistrar(): () => void {
         return;
       }
 
-      const pressedLikeButtons = document.querySelectorAll<HTMLButtonElement>(PRESSED_LIKE_BUTTON_SELECTOR);
+      const pressedLikeButtons = document.querySelectorAll<HTMLButtonElement>(
+        PRESSED_LIKE_BUTTON_SELECTOR
+      );
 
       for (const likeButton of pressedLikeButtons) {
         likeButton.setAttribute('aria-pressed', 'false');
