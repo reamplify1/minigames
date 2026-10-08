@@ -74,7 +74,7 @@ async function handleLogout(): Promise<void> {
 
   showSnackbar(
     didSignOutFail ? LOGOUT_ERROR_MESSAGE : LOGOUT_SUCCESS_MESSAGE,
-    didSignOutFail ? 'error' : 'success',
+    didSignOutFail ? 'error' : 'success'
   );
 }
 
@@ -85,9 +85,11 @@ function bindAuthActions(container: HTMLElement): void {
   container
     .querySelector<HTMLButtonElement>(':scope [data-auth-trigger="register"]')
     ?.addEventListener('click', () => handleAuthTrigger('register'));
-  container.querySelector<HTMLButtonElement>(':scope [data-logout]')?.addEventListener('click', () => {
-    void handleLogout();
-  });
+  container
+    .querySelector<HTMLButtonElement>(':scope [data-logout]')
+    ?.addEventListener('click', () => {
+      void handleLogout();
+    });
 
   const session = getCurrentSession();
   const badgeElements = getProfileBadgeElements(container);
@@ -127,7 +129,7 @@ export function createHeader(): HTMLElement {
   `;
 
   const navLinks = header.querySelectorAll<HTMLAnchorElement>(
-    ':scope .header__nav-link, :scope .header__logo',
+    ':scope .header__nav-link, :scope .header__logo'
   );
   for (const link of navLinks) {
     link.addEventListener('click', handleNavClick);

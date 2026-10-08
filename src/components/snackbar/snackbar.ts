@@ -6,7 +6,7 @@ const AUTO_DISMISS_MS = 4000;
 
 function resolveContainerParent(): HTMLElement {
   const openDialog = document.querySelector<HTMLDialogElement>('dialog[open]');
-  return openDialog ?? document.body;
+  return openDialog ?? document.documentElement;
 }
 
 const getContainer = (() => {

@@ -95,8 +95,10 @@ export function getLocation(): RouteContext {
 
 export function initRouter(): void {
   globalThis.addEventListener('popstate', () => {
+    checkSessionExpiration();
     render(getContext());
   });
 
+  checkSessionExpiration();
   render(getContext(), { forceEnter: true });
 }

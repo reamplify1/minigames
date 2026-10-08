@@ -1,4 +1,5 @@
 @use '../../styles/tokens' as *;
+@use '../../styles/mixins' as *;
 
 $snackbar-success: #16a34a;
 $snackbar-error: $color-heart-active;
