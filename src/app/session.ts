@@ -1,4 +1,4 @@
-const SESSION_KEY = 'minigames:minigames-rss:app-session';
+export const SESSION_KEY = 'minigames:minigames-rss:app-session';
 
 // app session lives for 5 minutes,
 // independent of Firebase's own token lifetime.
@@ -9,6 +9,13 @@ export interface AppSession {
   email: string;
   authenticatedAt: number;
   avatarUrl?: string;
+}
+
+export type StoredSessionStatus = 'valid' | 'expired' | 'invalid' | 'none';
+
+export interface StoredSessionResult {
+  status: StoredSessionStatus;
+  session?: AppSession;
 }
 
 function isAppSession(value: unknown): value is AppSession {
@@ -37,11 +44,11 @@ export function clearSession(): void {
   localStorage.removeItem(SESSION_KEY);
 }
 
-export function readSession(): AppSession | undefined {
+export function readStoredSession(): StoredSessionResult {
   const raw = localStorage.getItem(SESSION_KEY);
 
   if (!raw) {
-    return undefined;
+    return { status: 'none' };
   }
 
   let parsed: unknown;
@@ -49,14 +56,10 @@ export function readSession(): AppSession | undefined {
   try {
     parsed = JSON.parse(raw);
   } catch {
-    clearSession();
-    return undefined;
+    return { status: 'invalid' };
   }
 
-  if (!isAppSession(parsed) || hasSessionExpired(parsed)) {
-    clearSession();
-    return undefined;
-  }
-
-  return parsed;
+  return isAppSession(parsed)
+    ? { status: hasSessionExpired(parsed) ? 'expired' : 'valid', session: parsed }
+    : { status: 'invalid' };
 }

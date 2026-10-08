@@ -7,6 +7,8 @@ import googleIcon from '../../assets/icons/google-icon.svg';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
   updateProfile,
   type User,
 } from 'firebase/auth';
@@ -52,8 +54,35 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
   'auth/weak-password': 'Password is too weak.',
   'auth/too-many-requests': 'Too many attempts. Please try again later.',
   'auth/network-request-failed': 'Network error. Check your connection and try again.',
+  'auth/account-exists-with-different-credential':
+    'An account already exists with this email using a different sign-in method.',
+  'auth/unauthorized-domain': 'This domain is not authorized for Google sign-in yet.',
+  'auth/popup-blocked':
+    'Your browser blocked the sign-in popup. Please allow popups and try again.',
+  'auth/popup-timeout': 'Sign-in is taking too long. Please try again.',
 };
 
+// The user closing the Google popup or opening a second one is a
+// cancellation, not a failure — the dialog just quietly re-enables.
+const GOOGLE_CANCELED_ERROR_CODES = new Set([
+  'auth/popup-closed-by-user',
+  'auth/cancelled-popup-request',
+  'auth/user-cancelled',
+]);
+
+const GOOGLE_SIGN_IN_TIMEOUT_MS = 90 * 1000;
+
+function createTimeoutRejection(ms: number): Promise<never> {
+  return new Promise((_resolve, reject) => {
+    setTimeout(() => {
+      reject(Object.assign(new Error('Google sign-in timed out.'), { code: 'auth/popup-timeout' }));
+    }, ms);
+  });
+}
+
+function waitWithTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([promise, createTimeoutRejection(ms)]);
+}
 interface FieldOptions {
   id: string;
   name: string;
@@ -491,6 +520,32 @@ function createAuthDialog(): HTMLDialogElement {
       setPendingState(false);
       showSnackbar(getAuthErrorMessage(error), 'error');
     }
+  }
+
+  async function handleGoogleSignIn(): Promise<void> {
+    setPendingState(true);
+
+    try {
+      const credential = await waitWithTimeout(
+        signInWithPopup(firebaseAuth, new GoogleAuthProvider()),
+        GOOGLE_SIGN_IN_TIMEOUT_MS
+      );
+      completeAuthSuccess(credential.user);
+    } catch (error) {
+      setPendingState(false);
+
+      if (!hasErrorCode(error) || !GOOGLE_CANCELED_ERROR_CODES.has(error.code)) {
+        showSnackbar(getAuthErrorMessage(error), 'error');
+      }
+    }
+  }
+
+  for (const googleButton of [loginGoogle, registerGoogle]) {
+    googleButton?.addEventListener('click', () => {
+      if (!isAuthPending) {
+        void handleGoogleSignIn();
+      }
+    });
   }
 
   dialog.addEventListener('click', (event) => {

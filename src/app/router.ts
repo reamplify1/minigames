@@ -1,3 +1,5 @@
+import { checkSessionExpiration } from './auth-state';
+
 export interface RouteContext {
   path: string;
   searchParams: URLSearchParams;
@@ -16,24 +18,12 @@ type LocationListener = (context: RouteContext) => void;
 
 export const NOT_FOUND_ROUTE = '*';
 
-const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, '');
-
 const routes = new Map<string, RouteDefinition>();
 const locationListeners: LocationListener[] = [];
 const routerState = { currentRouteKey: undefined as string | undefined };
 
-function stripBasePath(pathname: string): string {
-  if (BASE_PATH && pathname.startsWith(BASE_PATH)) {
-    const rest = pathname.slice(BASE_PATH.length);
-    return rest === '' ? '/' : rest;
-  }
-
-  return pathname;
-}
-
 function normalizePath(pathname: string): string {
-  const withoutBase = stripBasePath(pathname);
-  return withoutBase === '/home' ? '/' : withoutBase;
+  return pathname === '/home' ? '/' : pathname;
 }
 
 function resolveRouteKey(pathname: string): string {
@@ -77,6 +67,11 @@ function render(context: RouteContext, { forceEnter = false } = {}): void {
 }
 
 export function navigate(url: string, { replace = false }: NavigateOptions = {}): void {
+  // RSS-QS-4-3-2: re-validate the app session before any navigation, so an
+  // expired session is never carried forward into a newly rendered page or
+  // dialog. Public navigation still proceeds, just in Guest Mode.
+  checkSessionExpiration();
+
   const target = new URL(url, globalThis.location.origin);
   const isSameLocation =
     target.pathname + target.search === globalThis.location.pathname + globalThis.location.search;
