@@ -14,6 +14,8 @@ import { renderProfileBadge, type ProfileBadgeElements } from '../../app/profile
 
 const OPEN_CLASS = 'mobile-menu--open';
 const NO_SCROLL_CLASS = 'no-scroll';
+const LOGOUT_SUCCESS_MESSAGE = "You've been logged out.";
+const LOGOUT_ERROR_MESSAGE = 'Sign-out failed, but you have been switched to Guest Mode.';
 
 function renderNavLinks(): string {
   const currentPage = getCurrentPage();
@@ -139,15 +141,21 @@ export function createMobileMenu(trigger: HTMLElement): HTMLElement {
   async function handleLogout(): Promise<void> {
     closeMenu();
 
+    let didSignOutFail = false;
+
     try {
       await signOut(firebaseAuth);
     } catch {
-      // Local session is cleared regardless of whether the Firebase call succeeds.
+      didSignOutFail = true;
     }
 
     clearSession();
     setCurrentSession(undefined);
-    showSnackbar("You've been logged out.", 'success');
+
+    showSnackbar(
+      didSignOutFail ? LOGOUT_ERROR_MESSAGE : LOGOUT_SUCCESS_MESSAGE,
+      didSignOutFail ? 'error' : 'success',
+    );
   }
 
   function bindAuthActions(container: HTMLElement): void {
@@ -183,7 +191,7 @@ export function createMobileMenu(trigger: HTMLElement): HTMLElement {
   closeButton?.addEventListener('click', closeMenu);
 
   const links = menu.querySelectorAll<HTMLAnchorElement>(
-    ':scope .mobile-menu__logo, :scope .mobile-menu__link'
+    ':scope .mobile-menu__logo, :scope .mobile-menu__link',
   );
   for (const link of links) {
     link.addEventListener('click', handleNavLinkClick);

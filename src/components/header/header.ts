@@ -57,16 +57,25 @@ function getProfileBadgeElements(container: HTMLElement): ProfileBadgeElements |
     : undefined;
 }
 
+const LOGOUT_SUCCESS_MESSAGE = "You've been logged out.";
+const LOGOUT_ERROR_MESSAGE = 'Sign-out failed, but you have been switched to Guest Mode.';
+
 async function handleLogout(): Promise<void> {
+  let didSignOutFail = false;
+
   try {
     await signOut(firebaseAuth);
   } catch {
-    // Local session is cleared regardless of whether the Firebase call succeeds.
+    didSignOutFail = true;
   }
 
   clearSession();
   setCurrentSession(undefined);
-  showSnackbar("You've been logged out.", 'success');
+
+  showSnackbar(
+    didSignOutFail ? LOGOUT_ERROR_MESSAGE : LOGOUT_SUCCESS_MESSAGE,
+    didSignOutFail ? 'error' : 'success',
+  );
 }
 
 function bindAuthActions(container: HTMLElement): void {
@@ -76,11 +85,9 @@ function bindAuthActions(container: HTMLElement): void {
   container
     .querySelector<HTMLButtonElement>(':scope [data-auth-trigger="register"]')
     ?.addEventListener('click', () => handleAuthTrigger('register'));
-  container
-    .querySelector<HTMLButtonElement>(':scope [data-logout]')
-    ?.addEventListener('click', () => {
-      void handleLogout();
-    });
+  container.querySelector<HTMLButtonElement>(':scope [data-logout]')?.addEventListener('click', () => {
+    void handleLogout();
+  });
 
   const session = getCurrentSession();
   const badgeElements = getProfileBadgeElements(container);
@@ -120,7 +127,7 @@ export function createHeader(): HTMLElement {
   `;
 
   const navLinks = header.querySelectorAll<HTMLAnchorElement>(
-    ':scope .header__nav-link, :scope .header__logo'
+    ':scope .header__nav-link, :scope .header__logo',
   );
   for (const link of navLinks) {
     link.addEventListener('click', handleNavClick);

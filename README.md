@@ -31,3 +31,7 @@ The production build will be generated in the `dist` directory.
 ```bash
 npm run preview
 ```
+
+## App Session
+
+After a successful login/registration (email/password or Google), the app stores a minimal session object in `localStorage` under the key:
