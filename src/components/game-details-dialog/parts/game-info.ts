@@ -1,6 +1,7 @@
 import starIcon from '../../../assets/icons/star-icon.svg';
 import favoriteIcon from '../../../assets/icons/favorite-icon.svg';
 import heartOutlineIcon from '../../../assets/icons/fav-icon.svg';
+import { runProtectedAction } from '../../../app/protected-action';
 import type { GameDetails, GameInfoItem } from '../game-details-dialog.data';
 
 export const GAME_TITLE_ID = 'game-details-title';
@@ -31,8 +32,6 @@ function toggleFavorite(button: HTMLButtonElement): void {
   }
 }
 
-// Returns several sibling elements at once (title row, description, badges, buttons),
-// so it uses a <template> and gives back its content.
 export function createGameInfo(game: GameDetails): DocumentFragment {
   const template = document.createElement('template');
   template.innerHTML = `
@@ -75,7 +74,7 @@ export function createGameInfo(game: GameDetails): DocumentFragment {
   );
 
   favoriteButton?.addEventListener('click', () => {
-    toggleFavorite(favoriteButton);
+    runProtectedAction(() => toggleFavorite(favoriteButton));
   });
 
   return template.content;

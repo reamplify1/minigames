@@ -18,7 +18,9 @@ export function withoutGameParameter(): string {
 export function withAuthParameter(mode: string): string {
   const url = currentUrl();
   url.searchParams.set('auth', mode);
-  url.searchParams.delete('game');
+  // Deliberately keeps any existing "game" parameter: when a protected
+  // action opens Auth from inside Game Details (RSS-QS-4-3-2), the game's
+  // URL state must survive so it can be restored once Auth closes.
   return `${url.pathname}${url.search}`;
 }
 
