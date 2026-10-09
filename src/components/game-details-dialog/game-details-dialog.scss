@@ -610,8 +610,16 @@ $game-details-backdrop-transition:
       background-color: $color-avatar-yellow;
     }
 
-    &--white {
-      background-color: $color-white;
+    &--green {
+      background-color: $color-avatar-green;
+    }
+
+    &--pink {
+      background-color: $color-avatar-pink;
+    }
+
+    &--lavender {
+      background-color: $color-avatar-lavender;
     }
   }
 

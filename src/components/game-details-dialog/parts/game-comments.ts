@@ -24,14 +24,31 @@ const COMMENT_POST_ERROR_MESSAGE = 'Could not post your comment. Please try agai
 const COMMENT_POST_UNKNOWN_MESSAGE =
   "We couldn't confirm your comment was sent. Please check before trying again.";
 
-function createCommentItem({
-  author,
-  date,
-  text,
-  likes,
-  isLiked,
-  avatarColor,
-}: GameComment): HTMLElement {
+const AVATAR_RANDOM_COLORS = ['blue', 'yellow', 'green', 'pink', 'lavender'] as const;
+type AvatarColor = (typeof AVATAR_RANDOM_COLORS)[number];
+
+function createAvatarColorPicker(): (author: string) => AvatarColor {
+  const colorByAuthor = new Map<string, AvatarColor>();
+
+  return (author: string): AvatarColor => {
+    const existing = colorByAuthor.get(author);
+
+    if (existing) {
+      return existing;
+    }
+
+    const color =
+      AVATAR_RANDOM_COLORS[Math.floor(Math.random() * AVATAR_RANDOM_COLORS.length)] ?? 'blue';
+    colorByAuthor.set(author, color);
+
+    return color;
+  };
+}
+
+function createCommentItem(
+  { author, date, text, likes, isLiked }: GameComment,
+  avatarColor: AvatarColor
+): HTMLElement {
   const item = document.createElement('li');
 
   const article = document.createElement('article');
@@ -46,7 +63,7 @@ function createCommentItem({
   const avatar = document.createElement('span');
   avatar.className = `game-details-dialog__comment-avatar game-details-dialog__comment-avatar--${avatarColor}`;
   avatar.setAttribute('aria-hidden', 'true');
-  avatar.textContent = author.charAt(0).toUpperCase();
+  avatar.textContent = author.trim().charAt(0).toUpperCase();
 
   const name = document.createElement('span');
   name.className = 'game-details-dialog__comment-name';
@@ -111,8 +128,14 @@ function toggleLike(button: HTMLButtonElement): void {
   button.setAttribute('aria-pressed', String(isPressed));
 }
 
-function renderCommentsList(list: HTMLElement, comments: GameComment[]): void {
-  list.replaceChildren(...comments.map((comment) => createCommentItem(comment)));
+function renderCommentsList(
+  list: HTMLElement,
+  comments: GameComment[],
+  getAvatarColor: (author: string) => AvatarColor
+): void {
+  list.replaceChildren(
+    ...comments.map((comment) => createCommentItem(comment, getAvatarColor(comment.author)))
+  );
 }
 
 function setCommentsTitle(title: HTMLElement, total: number): void {
@@ -149,6 +172,8 @@ const registerLikeResetOnLogout = createLikeResetRegistrar();
 
 export function createGameComments(slug: string): HTMLElement {
   registerLikeResetOnLogout();
+
+  const getAvatarColor = createAvatarColorPicker();
 
   const section = document.createElement('section');
   section.className = 'game-details-dialog__comments';
@@ -252,7 +277,7 @@ export function createGameComments(slug: string): HTMLElement {
         if (comments.length === 0) {
           list.replaceChildren(createCommentsEmptyState());
         } else {
-          renderCommentsList(list, comments);
+          renderCommentsList(list, comments, getAvatarColor);
         }
       }
     } catch (error) {
@@ -330,7 +355,7 @@ export function createGameComments(slug: string): HTMLElement {
         return;
       }
 
-      renderCommentsList(list, comments);
+      renderCommentsList(list, comments, getAvatarColor);
     } catch {
       if (!section.isConnected) return;
       list.replaceChildren(createCommentsErrorBanner(() => void load()));
