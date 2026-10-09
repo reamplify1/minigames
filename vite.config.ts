@@ -21,6 +21,17 @@ export default defineConfig({
         // Ambient type declarations only (import.meta.env typings) — contains
         // no runtime code at all.
         'src/vite-env.d.ts',
+        // Static markup only: build a fixed HTML template with no conditions,
+        // event listeners or other logic of their own to test.
+        'src/components/hero/hero.ts',
+        'src/components/footer/footer.ts',
+        'src/components/developer-cta/developer-cta.ts',
+        'src/components/game-card/game-card.ts',
+        // Only puts the home-page sections together in order, no logic of its
+        // own to test.
+        'src/pages/home/home-page.ts',
+        // TypeScript types only — contains no runtime code at all.
+        'src/components/leaderboard/leaderboard.types.ts',
       ],
     },
   },

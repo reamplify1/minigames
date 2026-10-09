@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/19</span>
+                <span class='fraction'>19/19</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>1/1</span>
+                <span class='fraction'>4/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>1/1</span>
+                <span class='fraction'>2/2</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/19</span>
+                <span class='fraction'>19/19</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -103,80 +103,80 @@
 <a name='L38'></a><a href='#L38'>38</a>
 <a name='L39'></a><a href='#L39'>39</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import type { GameRecord } from '../game-details-dialog.data';
 &nbsp;
-<span class="cstat-no" title="statement not covered" >const RECORDS_TITLE_ID = 'game-details-records-title';</span>
-<span class="cstat-no" title="statement not covered" >const RECORD_MEDALS = ['🥇', '🥈', '🥉'] as const;</span>
+const RECORDS_TITLE_ID = 'game-details-records-title';
+const RECORD_MEDALS = ['🥇', '🥈', '🥉'] as const;
 &nbsp;
-<span class="cstat-no" title="statement not covered" >function createRecordItem({ player, score, date }: GameRecord, index: number): string {</span>
-<span class="cstat-no" title="statement not covered" >  const medal = RECORD_MEDALS[index] ?? '';</span>
+function createRecordItem({ player, score, date }: GameRecord, index: number): string {
+  const medal = RECORD_MEDALS[index] ?? '';
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return `</span>
+  return `
     &lt;li class="game-details-dialog__record"&gt;
       &lt;span class="game-details-dialog__record-player"&gt;
-<span class="cstat-no" title="statement not covered" >        &lt;span class="game-details-dialog__record-medal" aria-hidden="true"&gt;${medal}&lt;/span&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;span class="game-details-dialog__record-name"&gt;${player}&lt;/span&gt;</span>
+        &lt;span class="game-details-dialog__record-medal" aria-hidden="true"&gt;${medal}&lt;/span&gt;
+        &lt;span class="game-details-dialog__record-name"&gt;${player}&lt;/span&gt;
       &lt;/span&gt;
       &lt;span class="game-details-dialog__record-result"&gt;
-<span class="cstat-no" title="statement not covered" >        &lt;span class="game-details-dialog__record-score"&gt;${score}&lt;/span&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;span class="game-details-dialog__record-date"&gt;${date}&lt;/span&gt;</span>
+        &lt;span class="game-details-dialog__record-score"&gt;${score}&lt;/span&gt;
+        &lt;span class="game-details-dialog__record-date"&gt;${date}&lt;/span&gt;
       &lt;/span&gt;
     &lt;/li&gt;
   `;
-<span class="cstat-no" title="statement not covered" >}</span>
+}
 &nbsp;
-<span class="cstat-no" title="statement not covered" >export function createGameRecords(records: GameRecord[]): HTMLElement {</span>
-<span class="cstat-no" title="statement not covered" >  const section = document.createElement('section');</span>
-<span class="cstat-no" title="statement not covered" >  section.className = 'game-details-dialog__records';</span>
-<span class="cstat-no" title="statement not covered" >  section.setAttribute('aria-labelledby', RECORDS_TITLE_ID);</span>
-<span class="cstat-no" title="statement not covered" >  section.innerHTML = `</span>
-<span class="cstat-no" title="statement not covered" >    &lt;h3 class="game-details-dialog__records-title" id="${RECORDS_TITLE_ID}"&gt;</span>
+export function createGameRecords(records: GameRecord[]): HTMLElement {
+  const section = document.createElement('section');
+  section.className = 'game-details-dialog__records';
+  section.setAttribute('aria-labelledby', RECORDS_TITLE_ID);
+  section.innerHTML = `
+    &lt;h3 class="game-details-dialog__records-title" id="${RECORDS_TITLE_ID}"&gt;
       &lt;span class="game-details-dialog__records-icon" aria-hidden="true"&gt;🏆&lt;/span&gt;
       Top Records
     &lt;/h3&gt;
     &lt;ol class="game-details-dialog__records-list"&gt;
-<span class="cstat-no" title="statement not covered" >      ${records.map((record, index) =&gt; createRecordItem(record, index)).join('')}</span>
+      ${records.map((record, index) =&gt; createRecordItem(record, index)).join('')}
     &lt;/ol&gt;
   `;
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return section;</span>
-<span class="cstat-no" title="statement not covered" >}</span>
+  return section;
+}
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -184,7 +184,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-10-09T10:05:47.968Z
+                at 2026-10-09T10:50:06.210Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>
