@@ -1,14 +1,11 @@
 import { fetchJson, postJson } from '../../../utils/api';
 
-export type CommentAvatarColor = 'blue' | 'yellow' | 'white';
-
 export interface GameComment {
   author: string;
   date: string;
   text: string;
   likes: number;
   isLiked: boolean;
-  avatarColor: CommentAvatarColor;
 }
 
 export interface GameCommentsResult {
@@ -80,16 +77,13 @@ export function formatRelativeTime(isoDate: string): string {
   return formatUnit(Math.floor(elapsedMs / YEAR_IN_MS), 'year');
 }
 
-const AVATAR_COLORS: CommentAvatarColor[] = ['blue', 'yellow', 'white'];
-
-function mapComment(comment: ApiComment, index: number): GameComment {
+function mapComment(comment: ApiComment): GameComment {
   return {
     author: comment.authorName,
     date: formatRelativeTime(comment.createdAt),
     text: comment.text,
     likes: comment.likesCount,
     isLiked: comment.isLikedByCurrentUser,
-    avatarColor: AVATAR_COLORS[index % AVATAR_COLORS.length] ?? 'blue',
   };
 }
 
@@ -103,7 +97,7 @@ export async function fetchGameComments(
   );
 
   return {
-    comments: response.data.map((comment, index) => mapComment(comment, index)),
+    comments: response.data.map((comment) => mapComment(comment)),
     total: response.meta.totalComments,
   };
 }
