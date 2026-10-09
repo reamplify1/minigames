@@ -8,6 +8,7 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'html'],
       include: ['src/**/*.ts'],
+      exclude: ['src/main.ts', 'src/firebase/firebase-config.ts', 'src/vite-env.d.ts'],
     },
   },
 });
