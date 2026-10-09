@@ -1,5 +1,13 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 
-export default defineConfig(({ command }) => ({
-  base: command === 'build' ? '/minigames/' : '/',
-}));
+export default defineConfig({
+  base: './',
+  test: {
+    environment: 'jsdom',
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      include: ['src/**/*.ts'],
+    },
+  },
+});
