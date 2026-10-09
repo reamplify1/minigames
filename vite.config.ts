@@ -1,7 +1,10 @@
 import { defineConfig } from 'vitest/config';
 
-export default defineConfig({
-  base: './',
+// GitHub Pages serves the site from "/minigames/", so the production build
+// needs that base path (the router reads it from import.meta.env.BASE_URL).
+// The dev server and the tests keep "/" so local URLs stay simple.
+export default defineConfig(({ command }) => ({
+  base: command === 'build' ? '/minigames/' : '/',
   test: {
     environment: 'jsdom',
     coverage: {
@@ -35,4 +38,4 @@ export default defineConfig({
       ],
     },
   },
-});
+}));
