@@ -1,6 +1,11 @@
 import heartOutlineIcon from '../../../assets/icons/fav-icon.svg';
 import sendIcon from '../../../assets/icons/send-icon.svg';
-import { fetchGameComments, postGameComment, type GameComment } from './game-comments.data';
+import {
+  fetchGameComments,
+  postGameComment,
+  toggleCommentLike,
+  type GameComment,
+} from './game-comments.data';
 import {
   createCommentsSkeleton,
   createCommentsErrorBanner,
@@ -17,12 +22,17 @@ const COMMENT_INPUT_MAX_HEIGHT = 88;
 const COMMENT_MAX_LENGTH = 500;
 const SKELETON_COUNT = 3;
 const LIKE_BUTTON_SELECTOR = '.game-details-dialog__like';
+const LIKE_BUTTON_PENDING_CLASS = 'game-details-dialog__like--pending';
+const LIKE_COUNT_SELECTOR = '.game-details-dialog__like-count';
 const PRESSED_LIKE_BUTTON_SELECTOR = `${LIKE_BUTTON_SELECTOR}[aria-pressed="true"]`;
 
 const COMMENT_LENGTH_ERROR_MESSAGE = 'Comment must be between 1 and 500 characters.';
 const COMMENT_POST_ERROR_MESSAGE = 'Could not post your comment. Please try again.';
 const COMMENT_POST_UNKNOWN_MESSAGE =
   "We couldn't confirm your comment was sent. Please check before trying again.";
+const GUEST_LIKE_MESSAGE = 'Log in to like comments.';
+const LIKE_ERROR_MESSAGE = 'Could not update like. Please try again.';
+const LIKE_UNKNOWN_MESSAGE = "We couldn't confirm your like. Please check before trying again.";
 
 const AVATAR_RANDOM_COLORS = ['blue', 'yellow', 'green', 'pink', 'lavender'] as const;
 type AvatarColor = (typeof AVATAR_RANDOM_COLORS)[number];
@@ -46,7 +56,7 @@ function createAvatarColorPicker(): (author: string) => AvatarColor {
 }
 
 function createCommentItem(
-  { author, date, text, likes, isLiked }: GameComment,
+  { commentId, author, date, text, likes, isLiked }: GameComment,
   avatarColor: AvatarColor
 ): HTMLElement {
   const item = document.createElement('li');
@@ -87,6 +97,7 @@ function createCommentItem(
   const likeButton = document.createElement('button');
   likeButton.className = 'game-details-dialog__like';
   likeButton.type = 'button';
+  likeButton.dataset.commentId = commentId;
   likeButton.setAttribute('aria-pressed', String(isLiked));
   likeButton.setAttribute('aria-label', `Like comment by ${author}, ${likes} likes`);
 
@@ -121,11 +132,6 @@ function resizeCommentInput(textarea: HTMLTextAreaElement): void {
 
   textarea.style.height = `${Math.min(contentHeight, COMMENT_INPUT_MAX_HEIGHT)}px`;
   textarea.style.overflowY = contentHeight > COMMENT_INPUT_MAX_HEIGHT ? 'auto' : 'hidden';
-}
-
-function toggleLike(button: HTMLButtonElement): void {
-  const isPressed = button.getAttribute('aria-pressed') !== 'true';
-  button.setAttribute('aria-pressed', String(isPressed));
 }
 
 function renderCommentsList(
@@ -174,6 +180,7 @@ export function createGameComments(slug: string): HTMLElement {
   registerLikeResetOnLogout();
 
   const getAvatarColor = createAvatarColorPicker();
+  const pendingLikeCommentIds = new Set<string>();
 
   const section = document.createElement('section');
   section.className = 'game-details-dialog__comments';
@@ -297,6 +304,45 @@ export function createGameComments(slug: string): HTMLElement {
     }
   }
 
+  async function toggleLike(button: HTMLButtonElement, commentId: string): Promise<void> {
+    if (pendingLikeCommentIds.has(commentId)) {
+      return;
+    }
+
+    const session = getCurrentSession();
+
+    if (!session) {
+      return;
+    }
+
+    pendingLikeCommentIds.add(commentId);
+    button.disabled = true;
+    button.setAttribute('aria-busy', 'true');
+    button.classList.add(LIKE_BUTTON_PENDING_CLASS);
+
+    try {
+      const result = await toggleCommentLike(commentId, session.email);
+
+      button.setAttribute('aria-pressed', String(result.isLikedByCurrentUser));
+
+      const countElement = button.querySelector<HTMLElement>(LIKE_COUNT_SELECTOR);
+
+      if (countElement) {
+        countElement.textContent = String(result.likesCount);
+      }
+    } catch (error) {
+      showSnackbar(
+        error instanceof ApiNetworkError ? LIKE_UNKNOWN_MESSAGE : LIKE_ERROR_MESSAGE,
+        'error'
+      );
+    } finally {
+      pendingLikeCommentIds.delete(commentId);
+      button.disabled = false;
+      button.removeAttribute('aria-busy');
+      button.classList.remove(LIKE_BUTTON_PENDING_CLASS);
+    }
+  }
+
   form?.addEventListener('submit', (event) => {
     event.preventDefault();
     runProtectedAction(() => void submitComment());
@@ -332,9 +378,10 @@ export function createGameComments(slug: string): HTMLElement {
     }
 
     const likeButton = event.target.closest<HTMLButtonElement>(LIKE_BUTTON_SELECTOR);
+    const commentId = likeButton?.dataset.commentId;
 
-    if (likeButton) {
-      runProtectedAction(() => toggleLike(likeButton));
+    if (likeButton && commentId) {
+      runProtectedAction(() => void toggleLike(likeButton, commentId), GUEST_LIKE_MESSAGE);
     }
   });
 
@@ -344,7 +391,7 @@ export function createGameComments(slug: string): HTMLElement {
     list.innerHTML = createCommentsSkeleton(SKELETON_COUNT);
 
     try {
-      const { comments, total } = await fetchGameComments(slug);
+      const { comments, total } = await fetchGameComments(slug, getCurrentSession()?.email);
 
       if (!section.isConnected) return;
 

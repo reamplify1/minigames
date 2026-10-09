@@ -128,7 +128,7 @@ $game-details-backdrop-transition:
     }
 
     &:focus-visible {
-      outline: $border-width solid $color-primary;
+      outline: $border-width solid $color-on-primary;
       outline-offset: $outline-offset;
     }
   }
@@ -680,6 +680,16 @@ $game-details-backdrop-transition:
       outline: $border-width solid $color-primary;
       outline-offset: $outline-offset;
     }
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+
+    &--pending {
+      .game-details-dialog__like-icon {
+        animation: game-details-like-spin 0.6s linear infinite;
+      }
+    }
   }
 
   &__like-icon {
@@ -697,10 +707,24 @@ $game-details-backdrop-transition:
   }
 }
 
+@keyframes game-details-like-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .game-details-dialog,
   .game-details-dialog::backdrop {
     transition: none;
+  }
+
+  .game-details-dialog__like--pending .game-details-dialog__like-icon {
+    animation: none;
   }
 }
 
