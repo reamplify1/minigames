@@ -27,6 +27,10 @@ function createAuthStateStore() {
     listeners.push(listener);
   }
 
+  // Re-validates the app session against localStorage. Called at startup,
+  // on tab focus/visibility, before every router navigation, and before any
+  // protected action (RSS-QS-4-3-2). Firebase's own `currentUser` is never
+  // trusted on its own to restore an authenticated UI.
   function checkSessionExpiration(): void {
     const stored = readStoredSession();
 
@@ -42,7 +46,9 @@ function createAuthStateStore() {
     }
 
     clearSession();
-    void signOut(firebaseAuth).catch(() => {});
+    void signOut(firebaseAuth).catch(() => {
+      // The app session is already cleared locally either way.
+    });
     setCurrentSession(undefined);
 
     if (stored.status === 'expired') {
