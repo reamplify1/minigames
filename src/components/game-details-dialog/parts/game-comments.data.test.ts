@@ -1,5 +1,18 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { formatRelativeTime } from './game-comments.data';
+
+const { fetchJsonMock, postJsonMock } = vi.hoisted(() => ({
+  fetchJsonMock: vi.fn(),
+  postJsonMock: vi.fn(),
+}));
+
+vi.mock('../../../utils/api', () => ({ fetchJson: fetchJsonMock, postJson: postJsonMock }));
+
+import {
+  formatRelativeTime,
+  fetchGameComments,
+  postGameComment,
+  toggleCommentLike,
+} from './game-comments.data';
 
 const NOW = new Date('2026-06-15T12:00:00.000Z');
 
@@ -52,5 +65,102 @@ describe('formatRelativeTime', () => {
 
   it('shows years for timestamps a year old or more', () => {
     expect(formatRelativeTime(isoAgo(2 * YEAR_MS))).toBe('2 years ago');
+  });
+});
+
+describe('fetchGameComments', () => {
+  beforeEach(() => {
+    fetchJsonMock.mockReset();
+  });
+
+  it('requests the first page of newest comments without a userEmail when guest', async () => {
+    fetchJsonMock.mockResolvedValue({ data: [], meta: { totalComments: 0 } });
+
+    await fetchGameComments('cozy-solitaire');
+
+    expect(fetchJsonMock).toHaveBeenCalledWith(
+      '/games/cozy-solitaire/comments?limit=3&sort=newest'
+    );
+  });
+
+  it('adds an encoded userEmail query when authenticated', async () => {
+    fetchJsonMock.mockResolvedValue({ data: [], meta: { totalComments: 0 } });
+
+    await fetchGameComments('cozy-solitaire', 'student+rs@school.com');
+
+    expect(fetchJsonMock).toHaveBeenCalledWith(
+      '/games/cozy-solitaire/comments?limit=3&sort=newest&userEmail=student%2Brs%40school.com'
+    );
+  });
+
+  it('maps each comment and returns the total count', async () => {
+    fetchJsonMock.mockResolvedValue({
+      data: [
+        {
+          commentId: 'c1',
+          authorName: 'ForestDweller',
+          text: 'Love this game!',
+          likesCount: 4,
+          isLikedByCurrentUser: true,
+          createdAt: new Date().toISOString(),
+        },
+      ],
+      meta: { totalComments: 12 },
+    });
+
+    const result = await fetchGameComments('cozy-solitaire');
+
+    expect(result).toEqual({
+      comments: [
+        {
+          commentId: 'c1',
+          author: 'ForestDweller',
+          date: 'just now',
+          text: 'Love this game!',
+          likes: 4,
+          isLiked: true,
+        },
+      ],
+      total: 12,
+    });
+  });
+});
+
+describe('postGameComment', () => {
+  beforeEach(() => {
+    postJsonMock.mockReset();
+  });
+
+  it('posts the comment payload to the game comments endpoint', async () => {
+    postJsonMock.mockResolvedValue({ data: {} });
+
+    await postGameComment('cozy-solitaire', {
+      userEmail: 'student@rs.school',
+      authorName: 'ForestDweller',
+      text: 'Great game!',
+    });
+
+    expect(postJsonMock).toHaveBeenCalledWith('/games/cozy-solitaire/comments', {
+      userEmail: 'student@rs.school',
+      authorName: 'ForestDweller',
+      text: 'Great game!',
+    });
+  });
+});
+
+describe('toggleCommentLike', () => {
+  beforeEach(() => {
+    postJsonMock.mockReset();
+  });
+
+  it('posts to the comment like endpoint and returns the new like state', async () => {
+    postJsonMock.mockResolvedValue({ data: { isLikedByCurrentUser: true, likesCount: 5 } });
+
+    const result = await toggleCommentLike('c1', 'student@rs.school');
+
+    expect(postJsonMock).toHaveBeenCalledWith('/comments/c1/like', {
+      userEmail: 'student@rs.school',
+    });
+    expect(result).toEqual({ isLikedByCurrentUser: true, likesCount: 5 });
   });
 });
