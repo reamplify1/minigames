@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/10</span>
+                <span class='fraction'>10/10</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/1</span>
+                <span class='fraction'>1/1</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/1</span>
+                <span class='fraction'>1/1</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/10</span>
+                <span class='fraction'>10/10</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -79,38 +79,38 @@
 <a name='L14'></a><a href='#L14'>14</a>
 <a name='L15'></a><a href='#L15'>15</a>
 <a name='L16'></a><a href='#L16'>16</a>
-<a name='L17'></a><a href='#L17'>17</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L17'></a><a href='#L17'>17</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >import closeIcon from '../../../assets/icons/close-blue-icon.svg';<span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ></span></span></span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import closeIcon from '../../../assets/icons/close-blue-icon.svg';
 &nbsp;
-<span class="cstat-no" title="statement not covered" >export function createGameHero(title: string, heroImage: string, onClose: () =&gt; void): HTMLElement {</span>
-<span class="cstat-no" title="statement not covered" >  const hero = document.createElement('header');</span>
-<span class="cstat-no" title="statement not covered" >  hero.className = 'game-details-dialog__hero';</span>
-<span class="cstat-no" title="statement not covered" >  hero.innerHTML = `</span>
-<span class="cstat-no" title="statement not covered" >    &lt;img class="game-details-dialog__hero-image" src="${heroImage}" alt="${title} artwork" /&gt;</span>
+export function createGameHero(title: string, heroImage: string, onClose: () =&gt; void): HTMLElement {
+  const hero = document.createElement('header');
+  hero.className = 'game-details-dialog__hero';
+  hero.innerHTML = `
+    &lt;img class="game-details-dialog__hero-image" src="${heroImage}" alt="${title} artwork" /&gt;
     &lt;button class="game-details-dialog__close" type="button" aria-label="Close dialog"&gt;
-<span class="cstat-no" title="statement not covered" >      &lt;img class="game-details-dialog__close-icon" src="${closeIcon}" alt="" /&gt;</span>
+      &lt;img class="game-details-dialog__close-icon" src="${closeIcon}" alt="" /&gt;
     &lt;/button&gt;
   `;
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  hero.querySelector('.game-details-dialog__close')?.addEventListener('click', onClose);</span>
+  hero.querySelector('.game-details-dialog__close')?.addEventListener('click', onClose);
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return hero;</span>
-<span class="cstat-no" title="statement not covered" >}</span>
+  return hero;
+}
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -118,7 +118,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-10-09T10:05:47.968Z
+                at 2026-10-09T10:50:06.210Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>
