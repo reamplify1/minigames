@@ -1,6 +1,7 @@
 import { fetchJson, postJson } from '../../../utils/api';
 
 export interface GameComment {
+  commentId: string;
   author: string;
   date: string;
   text: string;
@@ -17,6 +18,11 @@ export interface NewCommentPayload {
   userEmail: string;
   authorName: string;
   text: string;
+}
+
+export interface LikeToggleResult {
+  isLikedByCurrentUser: boolean;
+  likesCount: number;
 }
 
 interface ApiComment {
@@ -39,6 +45,10 @@ interface ApiCommentsResponse {
 
 interface ApiCommentResponse {
   data: ApiComment;
+}
+
+interface ApiLikeToggleResponse {
+  data: LikeToggleResult;
 }
 
 const COMMENTS_LIMIT = 3;
@@ -79,6 +89,7 @@ export function formatRelativeTime(isoDate: string): string {
 
 function mapComment(comment: ApiComment): GameComment {
   return {
+    commentId: comment.commentId,
     author: comment.authorName,
     date: formatRelativeTime(comment.createdAt),
     text: comment.text,
@@ -104,4 +115,14 @@ export async function fetchGameComments(
 
 export async function postGameComment(slug: string, payload: NewCommentPayload): Promise<void> {
   await postJson<ApiCommentResponse>(`/games/${slug}/comments`, payload);
+}
+
+export async function toggleCommentLike(
+  commentId: string,
+  userEmail: string
+): Promise<LikeToggleResult> {
+  const response = await postJson<ApiLikeToggleResponse>(`/comments/${commentId}/like`, {
+    userEmail,
+  });
+  return response.data;
 }
