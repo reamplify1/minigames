@@ -1,12 +1,21 @@
 import './mobile-menu.scss';
 import logoIcon from '../../assets/icons/minigames-icon.svg';
 import closeIcon from '../../assets/icons/close-button-icon.svg';
+import userIcon from '../../assets/icons/user-icon.svg';
+import { signOut } from 'firebase/auth';
 import { navigate } from '../../app/router';
 import { withAuthParameter } from '../../app/dialog-urls';
 import { navItems, getCurrentPage } from '../header/nav-items';
+import { firebaseAuth } from '../../firebase/firebase-config';
+import { clearSession } from '../../app/session';
+import { getCurrentSession, onAuthStateChange, setCurrentSession } from '../../app/auth-state';
+import { showSnackbar } from '../snackbar/snackbar';
+import { renderProfileBadge, type ProfileBadgeElements } from '../../app/profile-display';
 
 const OPEN_CLASS = 'mobile-menu--open';
 const NO_SCROLL_CLASS = 'no-scroll';
+const LOGOUT_SUCCESS_MESSAGE = "You've been logged out.";
+const LOGOUT_ERROR_MESSAGE = 'Sign-out failed, but you have been switched to Guest Mode.';
 
 function renderNavLinks(): string {
   const currentPage = getCurrentPage();
@@ -18,6 +27,38 @@ function renderNavLinks(): string {
       return `<li><a class="mobile-menu__link${activeClass}" href="${item.href}"${ariaCurrent}>${item.label}</a></li>`;
     })
     .join('');
+}
+
+function renderAuthActions(): string {
+  const session = getCurrentSession();
+
+  return session
+    ? `
+      <span class="mobile-menu__profile">
+        <span class="mobile-menu__avatar">
+          <img class="mobile-menu__avatar-img" alt="" hidden data-avatar-img />
+          <span class="mobile-menu__avatar-initials" hidden data-avatar-initials></span>
+          <img class="mobile-menu__avatar-fallback" src="${userIcon}" alt="" hidden data-avatar-fallback />
+        </span>
+        <span class="mobile-menu__user" data-profile-name></span>
+      </span>
+      <button class="mobile-menu__btn mobile-menu__btn--outline" type="button" data-logout>Log Out</button>
+    `
+    : `
+      <button class="mobile-menu__btn mobile-menu__btn--outline" type="button" data-auth-trigger="login">Log In</button>
+      <button class="mobile-menu__btn mobile-menu__btn--accent" type="button" data-auth-trigger="register">Sign Up</button>
+    `;
+}
+
+function getProfileBadgeElements(container: HTMLElement): ProfileBadgeElements | undefined {
+  const nameElement = container.querySelector<HTMLElement>(':scope [data-profile-name]');
+  const avatarImage = container.querySelector<HTMLImageElement>(':scope [data-avatar-img]');
+  const avatarInitials = container.querySelector<HTMLElement>(':scope [data-avatar-initials]');
+  const avatarFallback = container.querySelector<HTMLElement>(':scope [data-avatar-fallback]');
+
+  return nameElement && avatarImage && avatarInitials && avatarFallback
+    ? { nameElement, avatarImage, avatarInitials, avatarFallback }
+    : undefined;
 }
 
 export function createMobileMenu(trigger: HTMLElement): HTMLElement {
@@ -45,15 +86,15 @@ export function createMobileMenu(trigger: HTMLElement): HTMLElement {
     </nav>
 
     <div class="mobile-menu__actions">
-      <button class="mobile-menu__btn mobile-menu__btn--outline" type="button">Log In</button>
-      <button class="mobile-menu__btn mobile-menu__btn--accent" type="button">Sign Up</button>
+      ${renderAuthActions()}
     </div>
   `;
 
   trigger.setAttribute('aria-controls', menu.id);
   trigger.setAttribute('aria-expanded', 'false');
 
-  const closeButton = menu.querySelector<HTMLButtonElement>('.mobile-menu__close');
+  const closeButton = menu.querySelector<HTMLButtonElement>(':scope .mobile-menu__close');
+  const actions = menu.querySelector<HTMLElement>(':scope .mobile-menu__actions');
 
   function isMenuAvailable(): boolean {
     return getComputedStyle(menu).display !== 'none';
@@ -97,6 +138,47 @@ export function createMobileMenu(trigger: HTMLElement): HTMLElement {
     navigate(withAuthParameter(mode));
   }
 
+  async function handleLogout(): Promise<void> {
+    closeMenu();
+
+    let didSignOutFail = false;
+
+    try {
+      await signOut(firebaseAuth);
+    } catch {
+      didSignOutFail = true;
+    }
+
+    clearSession();
+    setCurrentSession(undefined);
+
+    showSnackbar(
+      didSignOutFail ? LOGOUT_ERROR_MESSAGE : LOGOUT_SUCCESS_MESSAGE,
+      didSignOutFail ? 'error' : 'success'
+    );
+  }
+
+  function bindAuthActions(container: HTMLElement): void {
+    container
+      .querySelector<HTMLButtonElement>(':scope [data-auth-trigger="login"]')
+      ?.addEventListener('click', () => handleAuthTrigger('login'));
+    container
+      .querySelector<HTMLButtonElement>(':scope [data-auth-trigger="register"]')
+      ?.addEventListener('click', () => handleAuthTrigger('register'));
+    container
+      .querySelector<HTMLButtonElement>(':scope [data-logout]')
+      ?.addEventListener('click', () => {
+        void handleLogout();
+      });
+
+    const session = getCurrentSession();
+    const badgeElements = getProfileBadgeElements(container);
+
+    if (session && badgeElements) {
+      renderProfileBadge(badgeElements, session);
+    }
+  }
+
   function handleNavLinkClick(event: MouseEvent): void {
     event.preventDefault();
     const link = event.currentTarget as HTMLAnchorElement;
@@ -108,16 +190,24 @@ export function createMobileMenu(trigger: HTMLElement): HTMLElement {
   trigger.addEventListener('click', openMenu);
   closeButton?.addEventListener('click', closeMenu);
 
-  const links = menu.querySelectorAll<HTMLAnchorElement>('.mobile-menu__logo, .mobile-menu__link');
+  const links = menu.querySelectorAll<HTMLAnchorElement>(
+    ':scope .mobile-menu__logo, :scope .mobile-menu__link'
+  );
   for (const link of links) {
     link.addEventListener('click', handleNavLinkClick);
   }
 
-  menu.querySelector('.mobile-menu__btn--outline')?.addEventListener('click', () => {
-    handleAuthTrigger('login');
-  });
-  menu.querySelector('.mobile-menu__btn--accent')?.addEventListener('click', () => {
-    handleAuthTrigger('register');
+  if (actions) {
+    bindAuthActions(actions);
+  }
+
+  onAuthStateChange(() => {
+    if (!actions) {
+      return;
+    }
+
+    actions.innerHTML = renderAuthActions();
+    bindAuthActions(actions);
   });
 
   return menu;

@@ -1,62 +1,128 @@
 import heartOutlineIcon from '../../../assets/icons/fav-icon.svg';
 import sendIcon from '../../../assets/icons/send-icon.svg';
-import { fetchGameComments, type GameComment } from './game-comments.data';
+import {
+  fetchGameComments,
+  postGameComment,
+  toggleCommentLike,
+  type GameComment,
+} from './game-comments.data';
 import {
   createCommentsSkeleton,
   createCommentsErrorBanner,
   createCommentsEmptyState,
 } from './game-comments.states';
 import { showSnackbar } from '../../snackbar/snackbar';
+import { runProtectedAction } from '../../../app/protected-action';
+import { onAuthStateChange, getCurrentSession } from '../../../app/auth-state';
+import { ApiNetworkError } from '../../../utils/api';
 
 const COMMENTS_TITLE_ID = 'game-details-comments-title';
 const COMMENT_INPUT_ID = 'game-details-comment-input';
 const COMMENT_INPUT_MAX_HEIGHT = 88;
+const COMMENT_MAX_LENGTH = 500;
 const SKELETON_COUNT = 3;
+const LIKE_BUTTON_SELECTOR = '.game-details-dialog__like';
+const LIKE_BUTTON_PENDING_CLASS = 'game-details-dialog__like--pending';
+const LIKE_COUNT_SELECTOR = '.game-details-dialog__like-count';
+const PRESSED_LIKE_BUTTON_SELECTOR = `${LIKE_BUTTON_SELECTOR}[aria-pressed="true"]`;
 
-function createCommentItem({
-  author,
-  date,
-  text,
-  likes,
-  isLiked,
-  avatarColor,
-}: GameComment): string {
-  return `
-    <li>
-      <article class="game-details-dialog__comment">
-        <header class="game-details-dialog__comment-header">
-          <span class="game-details-dialog__comment-author">
-            <span
-              class="game-details-dialog__comment-avatar game-details-dialog__comment-avatar--${avatarColor}"
-              aria-hidden="true"
-            >${author.charAt(0)}</span>
-            <span class="game-details-dialog__comment-name">${author}</span>
-          </span>
-          <span class="game-details-dialog__comment-date">${date}</span>
-        </header>
-        <p class="game-details-dialog__comment-text">${text}</p>
-        <footer class="game-details-dialog__comment-footer">
-          <button
-            class="game-details-dialog__like"
-            type="button"
-            aria-pressed="${isLiked}"
-            aria-label="Like comment by ${author}, ${likes} likes"
-          >
-            <img class="game-details-dialog__like-icon" src="${heartOutlineIcon}" alt="" />
-            <span class="game-details-dialog__like-count">${likes}</span>
-          </button>
-        </footer>
-      </article>
-    </li>
-  `;
+const COMMENT_LENGTH_ERROR_MESSAGE = 'Comment must be between 1 and 500 characters.';
+const COMMENT_POST_ERROR_MESSAGE = 'Could not post your comment. Please try again.';
+const COMMENT_POST_UNKNOWN_MESSAGE =
+  "We couldn't confirm your comment was sent. Please check before trying again.";
+const GUEST_LIKE_MESSAGE = 'Log in to like comments.';
+const LIKE_ERROR_MESSAGE = 'Could not update like. Please try again.';
+const LIKE_UNKNOWN_MESSAGE = "We couldn't confirm your like. Please check before trying again.";
+
+const AVATAR_RANDOM_COLORS = ['blue', 'yellow', 'green', 'pink', 'lavender'] as const;
+type AvatarColor = (typeof AVATAR_RANDOM_COLORS)[number];
+
+function createAvatarColorPicker(): (author: string) => AvatarColor {
+  const colorByAuthor = new Map<string, AvatarColor>();
+
+  return (author: string): AvatarColor => {
+    const existing = colorByAuthor.get(author);
+
+    if (existing) {
+      return existing;
+    }
+
+    const color =
+      AVATAR_RANDOM_COLORS[Math.floor(Math.random() * AVATAR_RANDOM_COLORS.length)] ?? 'blue';
+    colorByAuthor.set(author, color);
+
+    return color;
+  };
 }
 
-// "1.5px" → 1.5
+function createCommentItem(
+  { commentId, author, date, text, likes, isLiked }: GameComment,
+  avatarColor: AvatarColor
+): HTMLElement {
+  const item = document.createElement('li');
+
+  const article = document.createElement('article');
+  article.className = 'game-details-dialog__comment';
+
+  const header = document.createElement('header');
+  header.className = 'game-details-dialog__comment-header';
+
+  const authorWrapper = document.createElement('span');
+  authorWrapper.className = 'game-details-dialog__comment-author';
+
+  const avatar = document.createElement('span');
+  avatar.className = `game-details-dialog__comment-avatar game-details-dialog__comment-avatar--${avatarColor}`;
+  avatar.setAttribute('aria-hidden', 'true');
+  avatar.textContent = author.trim().charAt(0).toUpperCase();
+
+  const name = document.createElement('span');
+  name.className = 'game-details-dialog__comment-name';
+  name.textContent = author;
+
+  authorWrapper.append(avatar, name);
+
+  const dateElement = document.createElement('span');
+  dateElement.className = 'game-details-dialog__comment-date';
+  dateElement.textContent = date;
+
+  header.append(authorWrapper, dateElement);
+
+  const textElement = document.createElement('p');
+  textElement.className = 'game-details-dialog__comment-text';
+  textElement.textContent = text;
+
+  const footer = document.createElement('footer');
+  footer.className = 'game-details-dialog__comment-footer';
+
+  const likeButton = document.createElement('button');
+  likeButton.className = 'game-details-dialog__like';
+  likeButton.type = 'button';
+  likeButton.dataset.commentId = commentId;
+  likeButton.setAttribute('aria-pressed', String(isLiked));
+  likeButton.setAttribute('aria-label', `Like comment by ${author}, ${likes} likes`);
+
+  const likeIcon = document.createElement('img');
+  likeIcon.className = 'game-details-dialog__like-icon';
+  likeIcon.src = heartOutlineIcon;
+  likeIcon.alt = '';
+
+  const likeCount = document.createElement('span');
+  likeCount.className = 'game-details-dialog__like-count';
+  likeCount.textContent = String(likes);
+
+  likeButton.append(likeIcon, likeCount);
+  footer.append(likeButton);
+
+  article.append(header, textElement, footer);
+  item.append(article);
+
+  return item;
+}
+
 function parsePixels(value: string): number {
   return Number(value.replace('px', '')) || 0;
 }
 
-// Grows the textarea with its text, up to 88px. After that a scrollbar appears.
 function resizeCommentInput(textarea: HTMLTextAreaElement): void {
   textarea.style.height = 'auto';
 
@@ -68,20 +134,54 @@ function resizeCommentInput(textarea: HTMLTextAreaElement): void {
   textarea.style.overflowY = contentHeight > COMMENT_INPUT_MAX_HEIGHT ? 'auto' : 'hidden';
 }
 
-function toggleLike(button: HTMLButtonElement): void {
-  const isPressed = button.getAttribute('aria-pressed') !== 'true';
-  button.setAttribute('aria-pressed', String(isPressed));
-}
-
-function renderCommentsList(list: HTMLElement, comments: GameComment[]): void {
-  list.innerHTML = comments.map((comment) => createCommentItem(comment)).join('');
+function renderCommentsList(
+  list: HTMLElement,
+  comments: GameComment[],
+  getAvatarColor: (author: string) => AvatarColor
+): void {
+  list.replaceChildren(
+    ...comments.map((comment) => createCommentItem(comment, getAvatarColor(comment.author)))
+  );
 }
 
 function setCommentsTitle(title: HTMLElement, total: number): void {
   title.textContent = `Comments (${total})`;
 }
 
+function createLikeResetRegistrar(): () => void {
+  let hasRegistered = false;
+
+  return function registerLikeResetOnLogout(): void {
+    if (hasRegistered) {
+      return;
+    }
+
+    hasRegistered = true;
+
+    onAuthStateChange((session) => {
+      if (session) {
+        return;
+      }
+
+      const pressedLikeButtons = document.querySelectorAll<HTMLButtonElement>(
+        PRESSED_LIKE_BUTTON_SELECTOR
+      );
+
+      for (const likeButton of pressedLikeButtons) {
+        likeButton.setAttribute('aria-pressed', 'false');
+      }
+    });
+  };
+}
+
+const registerLikeResetOnLogout = createLikeResetRegistrar();
+
 export function createGameComments(slug: string): HTMLElement {
+  registerLikeResetOnLogout();
+
+  const getAvatarColor = createAvatarColorPicker();
+  const pendingLikeCommentIds = new Set<string>();
+
   const section = document.createElement('section');
   section.className = 'game-details-dialog__comments';
   section.setAttribute('aria-labelledby', COMMENTS_TITLE_ID);
@@ -89,7 +189,7 @@ export function createGameComments(slug: string): HTMLElement {
     <h3 class="game-details-dialog__comments-title" id="${COMMENTS_TITLE_ID}">Comments</h3>
 
     <form class="game-details-dialog__comment-form">
-      <span class="game-details-dialog__user-avatar" aria-hidden="true">U</span>
+      <span class="game-details-dialog__user-avatar" aria-hidden="true"></span>
       <label class="game-details-dialog__comment-label" for="${COMMENT_INPUT_ID}">
         Write a comment
       </label>
@@ -115,35 +215,173 @@ export function createGameComments(slug: string): HTMLElement {
 
   const title = section.querySelector<HTMLElement>('.game-details-dialog__comments-title');
   const form = section.querySelector('form');
-  const textarea = section.querySelector('textarea');
+  const avatar = section.querySelector<HTMLElement>('.game-details-dialog__user-avatar');
+  const textarea = section.querySelector<HTMLTextAreaElement>(
+    '.game-details-dialog__comment-input'
+  );
   const submitButton = section.querySelector<HTMLButtonElement>(
     '.game-details-dialog__comment-submit'
   );
   const list = section.querySelector<HTMLElement>('.game-details-dialog__comments-list');
 
-  // Sending comments comes in a later story, so the form does nothing for now.
+  const formState = { sending: false };
+
+  function syncCommentForm(): void {
+    if (!textarea || !submitButton || !avatar) {
+      return;
+    }
+
+    const session = getCurrentSession();
+    const isLocked = !session || formState.sending;
+
+    textarea.disabled = isLocked;
+    submitButton.disabled = isLocked || textarea.value.trim() === '';
+    avatar.textContent = session ? session.displayName.charAt(0).toUpperCase() : '';
+  }
+
+  async function submitComment(): Promise<void> {
+    if (!textarea || !submitButton || formState.sending) {
+      return;
+    }
+
+    const session = getCurrentSession();
+
+    if (!session) {
+      return;
+    }
+
+    const text = textarea.value.trim();
+
+    if (text.length === 0 || text.length > COMMENT_MAX_LENGTH) {
+      showSnackbar(COMMENT_LENGTH_ERROR_MESSAGE, 'error');
+      return;
+    }
+
+    formState.sending = true;
+    syncCommentForm();
+
+    try {
+      await postGameComment(slug, {
+        userEmail: session.email,
+        authorName: session.displayName,
+        text,
+      });
+
+      textarea.value = '';
+      resizeCommentInput(textarea);
+
+      const { comments, total } = await fetchGameComments(slug, session.email);
+
+      if (!section.isConnected) {
+        return;
+      }
+
+      if (title) {
+        setCommentsTitle(title, total);
+      }
+
+      if (list) {
+        if (comments.length === 0) {
+          list.replaceChildren(createCommentsEmptyState());
+        } else {
+          renderCommentsList(list, comments, getAvatarColor);
+        }
+      }
+    } catch (error) {
+      if (!section.isConnected) {
+        return;
+      }
+
+      showSnackbar(
+        error instanceof ApiNetworkError
+          ? COMMENT_POST_UNKNOWN_MESSAGE
+          : COMMENT_POST_ERROR_MESSAGE,
+        'error'
+      );
+    } finally {
+      formState.sending = false;
+      syncCommentForm();
+    }
+  }
+
+  async function toggleLike(button: HTMLButtonElement, commentId: string): Promise<void> {
+    if (pendingLikeCommentIds.has(commentId)) {
+      return;
+    }
+
+    const session = getCurrentSession();
+
+    if (!session) {
+      return;
+    }
+
+    pendingLikeCommentIds.add(commentId);
+    button.disabled = true;
+    button.setAttribute('aria-busy', 'true');
+    button.classList.add(LIKE_BUTTON_PENDING_CLASS);
+
+    try {
+      const result = await toggleCommentLike(commentId, session.email);
+
+      button.setAttribute('aria-pressed', String(result.isLikedByCurrentUser));
+
+      const countElement = button.querySelector<HTMLElement>(LIKE_COUNT_SELECTOR);
+
+      if (countElement) {
+        countElement.textContent = String(result.likesCount);
+      }
+    } catch (error) {
+      showSnackbar(
+        error instanceof ApiNetworkError ? LIKE_UNKNOWN_MESSAGE : LIKE_ERROR_MESSAGE,
+        'error'
+      );
+    } finally {
+      pendingLikeCommentIds.delete(commentId);
+      button.disabled = false;
+      button.removeAttribute('aria-busy');
+      button.classList.remove(LIKE_BUTTON_PENDING_CLASS);
+    }
+  }
+
   form?.addEventListener('submit', (event) => {
     event.preventDefault();
+    runProtectedAction(() => void submitComment());
   });
 
   textarea?.addEventListener('input', () => {
     resizeCommentInput(textarea);
-
-    if (submitButton) {
-      submitButton.disabled = textarea.value.trim() === '';
-    }
+    syncCommentForm();
   });
 
-  // One listener for all like buttons in the list.
+  textarea?.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' || event.shiftKey) {
+      return;
+    }
+
+    event.preventDefault();
+    form?.requestSubmit();
+  });
+
+  onAuthStateChange(() => {
+    if (!section.isConnected) {
+      return;
+    }
+
+    syncCommentForm();
+  });
+
+  syncCommentForm();
+
   list?.addEventListener('click', (event) => {
     if (!(event.target instanceof Element)) {
       return;
     }
 
-    const likeButton = event.target.closest<HTMLButtonElement>('.game-details-dialog__like');
+    const likeButton = event.target.closest<HTMLButtonElement>(LIKE_BUTTON_SELECTOR);
+    const commentId = likeButton?.dataset.commentId;
 
-    if (likeButton) {
-      toggleLike(likeButton);
+    if (likeButton && commentId) {
+      runProtectedAction(() => void toggleLike(likeButton, commentId), GUEST_LIKE_MESSAGE);
     }
   });
 
@@ -153,10 +391,8 @@ export function createGameComments(slug: string): HTMLElement {
     list.innerHTML = createCommentsSkeleton(SKELETON_COUNT);
 
     try {
-      const { comments, total } = await fetchGameComments(slug);
+      const { comments, total } = await fetchGameComments(slug, getCurrentSession()?.email);
 
-      // The dialog may already be closed (and its content replaced) by the
-      // time this resolves — skip touching detached DOM.
       if (!section.isConnected) return;
 
       if (title) setCommentsTitle(title, total);
@@ -166,7 +402,7 @@ export function createGameComments(slug: string): HTMLElement {
         return;
       }
 
-      renderCommentsList(list, comments);
+      renderCommentsList(list, comments, getAvatarColor);
     } catch {
       if (!section.isConnected) return;
       list.replaceChildren(createCommentsErrorBanner(() => void load()));

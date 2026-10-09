@@ -12,6 +12,7 @@ import {
 import { showSnackbar } from '../snackbar/snackbar';
 import { navigate } from '../../app/router';
 import { withoutGameParameter } from '../../app/dialog-urls';
+import { getCurrentSession } from '../../app/auth-state';
 
 const DIALOG_CLASS = 'game-details-dialog';
 
@@ -21,7 +22,11 @@ function createDialogContent(slug: string, game: GameDetails, onClose: () => voi
 
   const body = document.createElement('div');
   body.className = 'game-details-dialog__body';
-  body.append(createGameInfo(game), createGameRecords(game.records), createGameComments(slug));
+  body.append(
+    createGameInfo(game, slug),
+    createGameRecords(game.records),
+    createGameComments(slug)
+  );
 
   content.append(createGameHero(game.title, game.heroImage, onClose), body);
 
@@ -93,7 +98,7 @@ export function openGameDetailsDialog(slug: string): void {
     dialog.scrollTop = 0;
 
     try {
-      const game = await fetchGameDetails(slug);
+      const game = await fetchGameDetails(slug, getCurrentSession()?.email);
       if (currentRequestId !== requestTracker.requestId) return;
 
       if (!game) {

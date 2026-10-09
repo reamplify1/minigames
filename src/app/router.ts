@@ -1,3 +1,5 @@
+import { checkSessionExpiration } from './auth-state';
+
 export interface RouteContext {
   path: string;
   searchParams: URLSearchParams;
@@ -16,9 +18,24 @@ type LocationListener = (context: RouteContext) => void;
 
 export const NOT_FOUND_ROUTE = '*';
 
+const BASE_PATH = import.meta.env.BASE_URL;
+
 const routes = new Map<string, RouteDefinition>();
 const locationListeners: LocationListener[] = [];
 const routerState = { currentRouteKey: undefined as string | undefined };
+
+function stripBasePath(pathname: string): string {
+  if (!pathname.startsWith(BASE_PATH)) {
+    return pathname;
+  }
+
+  const stripped = pathname.slice(BASE_PATH.length - 1);
+  return stripped === '' ? '/' : stripped;
+}
+
+function withBasePath(pathname: string): string {
+  return pathname === '/' ? BASE_PATH : `${BASE_PATH.slice(0, -1)}${pathname}`;
+}
 
 function normalizePath(pathname: string): string {
   return pathname === '/home' ? '/' : pathname;
@@ -31,7 +48,7 @@ function resolveRouteKey(pathname: string): string {
 
 function getContext(): RouteContext {
   return {
-    path: resolveRouteKey(globalThis.location.pathname),
+    path: resolveRouteKey(stripBasePath(globalThis.location.pathname)),
     searchParams: new URLSearchParams(globalThis.location.search),
   };
 }
@@ -65,7 +82,13 @@ function render(context: RouteContext, { forceEnter = false } = {}): void {
 }
 
 export function navigate(url: string, { replace = false }: NavigateOptions = {}): void {
-  const target = new URL(url, globalThis.location.origin);
+  checkSessionExpiration();
+
+  const requested = new URL(url, globalThis.location.origin);
+  const target = new URL(
+    `${withBasePath(stripBasePath(requested.pathname))}${requested.search}${requested.hash}`,
+    globalThis.location.origin
+  );
   const isSameLocation =
     target.pathname + target.search === globalThis.location.pathname + globalThis.location.search;
 
@@ -88,8 +111,10 @@ export function getLocation(): RouteContext {
 
 export function initRouter(): void {
   globalThis.addEventListener('popstate', () => {
+    checkSessionExpiration();
     render(getContext());
   });
 
+  checkSessionExpiration();
   render(getContext(), { forceEnter: true });
 }

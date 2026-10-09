@@ -1,19 +1,28 @@
-import { fetchJson } from '../../../utils/api';
-
-export type CommentAvatarColor = 'blue' | 'yellow' | 'white';
+import { fetchJson, postJson } from '../../../utils/api';
 
 export interface GameComment {
+  commentId: string;
   author: string;
   date: string;
   text: string;
   likes: number;
   isLiked: boolean;
-  avatarColor: CommentAvatarColor;
 }
 
 export interface GameCommentsResult {
   comments: GameComment[];
   total: number;
+}
+
+export interface NewCommentPayload {
+  userEmail: string;
+  authorName: string;
+  text: string;
+}
+
+export interface LikeToggleResult {
+  isLikedByCurrentUser: boolean;
+  likesCount: number;
 }
 
 interface ApiComment {
@@ -34,8 +43,14 @@ interface ApiCommentsResponse {
   meta: ApiCommentsMeta;
 }
 
-// Only the 3 latest comments are shown in this story (read-only); posting,
-// liking and pagination through the rest are Story 4 work.
+interface ApiCommentResponse {
+  data: ApiComment;
+}
+
+interface ApiLikeToggleResponse {
+  data: LikeToggleResult;
+}
+
 const COMMENTS_LIMIT = 3;
 
 const MINUTE_IN_MS = 60_000;
@@ -55,9 +70,6 @@ function formatUnit(value: number, unit: string): string {
   return `${value} ${unit}${value === 1 ? '' : 's'} ago`;
 }
 
-// Converts an ISO timestamp into "just now" / "N min ago" / "N hours ago" /
-// "N days ago" / "N weeks ago" / "N months ago" / "N years ago", per the
-// task's exact bucket boundaries.
 export function formatRelativeTime(isoDate: string): string {
   const elapsedMs = Date.now() - new Date(isoDate).getTime();
 
@@ -75,26 +87,42 @@ export function formatRelativeTime(isoDate: string): string {
   return formatUnit(Math.floor(elapsedMs / YEAR_IN_MS), 'year');
 }
 
-const AVATAR_COLORS: CommentAvatarColor[] = ['blue', 'yellow', 'white'];
-
-function mapComment(comment: ApiComment, index: number): GameComment {
+function mapComment(comment: ApiComment): GameComment {
   return {
+    commentId: comment.commentId,
     author: comment.authorName,
     date: formatRelativeTime(comment.createdAt),
     text: comment.text,
     likes: comment.likesCount,
     isLiked: comment.isLikedByCurrentUser,
-    avatarColor: AVATAR_COLORS[index % AVATAR_COLORS.length] ?? 'blue',
   };
 }
 
-export async function fetchGameComments(slug: string): Promise<GameCommentsResult> {
+export async function fetchGameComments(
+  slug: string,
+  userEmail?: string
+): Promise<GameCommentsResult> {
+  const emailQuery = userEmail ? `&userEmail=${encodeURIComponent(userEmail)}` : '';
   const response = await fetchJson<ApiCommentsResponse>(
-    `/games/${slug}/comments?limit=${COMMENTS_LIMIT}&sort=newest`
+    `/games/${slug}/comments?limit=${COMMENTS_LIMIT}&sort=newest${emailQuery}`
   );
 
   return {
-    comments: response.data.map((comment, index) => mapComment(comment, index)),
+    comments: response.data.map((comment) => mapComment(comment)),
     total: response.meta.totalComments,
   };
+}
+
+export async function postGameComment(slug: string, payload: NewCommentPayload): Promise<void> {
+  await postJson<ApiCommentResponse>(`/games/${slug}/comments`, payload);
+}
+
+export async function toggleCommentLike(
+  commentId: string,
+  userEmail: string
+): Promise<LikeToggleResult> {
+  const response = await postJson<ApiLikeToggleResponse>(`/comments/${commentId}/like`, {
+    userEmail,
+  });
+  return response.data;
 }
