@@ -1,0 +1,14 @@
+<div id="app">
+  <app-offline-banner />
+  <app-header />
+  <router-outlet />
+  <app-footer />
+</div>
+
+@defer (when gameSlug()) {
+  <app-game-details-dialog [slug]="gameSlug()" />
+}
+@defer (when authMode()) {
+  <app-auth-dialog [mode]="authMode()" />
+}
+<app-snackbar-host />

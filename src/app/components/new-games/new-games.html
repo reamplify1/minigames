@@ -1,0 +1,89 @@
+<section class="new-games" aria-labelledby="new-games-title" aria-roledescription="carousel">
+  <div class="new-games__header">
+    <div class="new-games__heading">
+      <span class="new-games__marker" aria-hidden="true"></span>
+      <h2 class="new-games__title" id="new-games-title">New Games</h2>
+    </div>
+    <div class="new-games__controls">
+      <button
+        class="new-games__arrow"
+        type="button"
+        aria-label="Previous games"
+        (click)="onArrowClick(-1)"
+      >
+        <img class="new-games__arrow-icon" src="assets/icons/arrow-left-icon.svg" alt="" />
+      </button>
+      <button
+        class="new-games__arrow new-games__arrow--accent"
+        type="button"
+        aria-label="Next games"
+        (click)="onArrowClick(1)"
+      >
+        <img class="new-games__arrow-icon" src="assets/icons/arrow-right-icon.svg" alt="" />
+      </button>
+    </div>
+  </div>
+
+  @if (games.error()) {
+    <div class="new-games__error" role="alert">
+      <p>Failed to load featured games.</p>
+      <button type="button" (click)="games.reload()">Retry</button>
+    </div>
+  } @else if (games.isLoading()) {
+    <ul class="new-games__track">
+      @for (card of skeletonCards; track card) {
+        <li class="new-games__skeleton-card" aria-hidden="true"></li>
+      }
+    </ul>
+  } @else if (slides().length === 0) {
+    <div class="new-games__empty">No featured games right now.</div>
+  } @else {
+    <ul #track class="new-games__track" role="list" (pointerdown)="onPointerDown($event)">
+      @for (slide of slides(); track slide.game.slug; let index = $index) {
+        <li
+          class="new-games__slide"
+          aria-roledescription="slide"
+          [attr.aria-label]="index + 1 + ' of ' + slides().length"
+          [style.width.px]="slide.layout.width"
+          [style.transform]="'translateX(' + slide.layout.x + 'px)'"
+          [class.new-games__slide--hidden]="slide.layout.isHidden"
+          [class.new-games__slide--info]="slide.layout.showsInfo"
+          [attr.inert]="slide.layout.isHidden ? '' : null"
+        >
+          <button
+            class="new-games__card"
+            type="button"
+            [attr.aria-label]="
+              slide.game.title +
+              ', rating ' +
+              slide.game.rating +
+              ', ' +
+              slide.game.likes +
+              ' likes. Open details'
+            "
+            (click)="onCardClick(slide.game.slug)"
+          >
+            <img class="new-games__card-image" [src]="slide.game.image" alt="" draggable="false" />
+            <span class="new-games__card-overlay" aria-hidden="true">
+              <span class="new-games__card-title">{{ slide.game.title }}</span>
+              <span class="new-games__card-stats">
+                <span class="new-games__card-stat">
+                  <img class="new-games__card-stat-icon" src="assets/icons/star-icon.svg" alt="" />
+                  {{ slide.game.rating }}
+                </span>
+                <span class="new-games__card-stat">
+                  <img
+                    class="new-games__card-stat-icon"
+                    src="assets/icons/favorite-icon.svg"
+                    alt=""
+                  />
+                  {{ slide.game.likes }}
+                </span>
+              </span>
+            </span>
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</section>

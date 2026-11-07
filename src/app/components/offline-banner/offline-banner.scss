@@ -1,0 +1,16 @@
+@use '../../../styles/tokens' as *;
+@use '../../../styles/mixins' as *;
+
+.offline-banner {
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  margin: 0;
+  padding: space(1) space(2);
+  background-color: $color-on-primary;
+  color: $color-white;
+  font-family: $font-family-base;
+  font-size: $font-size-body-small;
+  line-height: $line-height-140;
+  text-align: center;
+}

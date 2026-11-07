@@ -1,0 +1,64 @@
+<footer class="footer">
+  <div class="footer__inner">
+    <div class="footer__top">
+      <div class="footer__brand">
+        <a class="footer__logo" routerLink="/">
+          <img class="footer__logo-icon" src="assets/icons/minigames-icon.svg" alt="" />
+          <span>MiniGames</span>
+        </a>
+        <p class="footer__description">
+          Take a short break and have fun. Hundreds of curated casual mini-games right in your web
+          browser. No download required.
+        </p>
+      </div>
+      <nav class="footer__columns" aria-label="Footer navigation">
+        @for (column of columns; track column.title) {
+          <div class="footer__column">
+            <h3 class="footer__heading">{{ column.title }}</h3>
+            <ul class="footer__list">
+              @for (link of column.links; track link) {
+                <li>
+                  <a class="footer__link" routerLink="/">{{ link }}</a>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+        <div class="footer__column">
+          <h3 class="footer__heading">Community</h3>
+          <ul class="footer__socials">
+            @for (social of socials; track social.label) {
+              <li>
+                <a class="footer__social" routerLink="/" [attr.aria-label]="social.label">
+                  <img class="footer__social-icon" [src]="social.icon" alt="" />
+                </a>
+              </li>
+            }
+          </ul>
+        </div>
+      </nav>
+    </div>
+    <div class="footer__bottom">
+      <p class="footer__copyright">© 2026 MiniGames. All rights reserved.</p>
+      <a
+        class="footer__bottom-link"
+        href="https://rs.school/courses/short-track"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img class="footer__bottom-icon" src="assets/icons/rs-icon.svg" alt="" />
+        RS School
+      </a>
+      <a
+        class="footer__bottom-link"
+        href="https://github.com/reamplify1"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img class="footer__bottom-icon" src="assets/icons/github-icon.svg" alt="" />
+        &#64;reamplify1
+      </a>
+      <p class="footer__credit">Designed with love</p>
+    </div>
+  </div>
+</footer>

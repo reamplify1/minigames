@@ -1,0 +1,97 @@
+<dialog
+  #dialog
+  class="auth-dialog"
+  aria-label="Log in or register"
+  [attr.data-mode]="activeMode()"
+  [attr.data-pending]="pending()"
+  (click)="onDialogClick($event)"
+  (cancel)="onCancel($event)"
+  (close)="onClose()"
+>
+  <div class="auth-dialog__content">
+    <div class="auth-dialog__tabs" role="tablist" aria-label="Authentication mode">
+      <button
+        #loginTab
+        class="auth-dialog__tab"
+        id="auth-tab-login"
+        type="button"
+        role="tab"
+        aria-controls="auth-panel-login"
+        [attr.aria-selected]="activeMode() === 'login'"
+        [disabled]="pending()"
+        (click)="switchMode('login', loginTab)"
+      >
+        Login
+      </button>
+      <button
+        #registerTab
+        class="auth-dialog__tab"
+        id="auth-tab-register"
+        type="button"
+        role="tab"
+        aria-controls="auth-panel-register"
+        [attr.aria-selected]="activeMode() === 'register'"
+        [disabled]="pending()"
+        (click)="switchMode('register', registerTab)"
+      >
+        Register
+      </button>
+    </div>
+
+    <section
+      class="auth-dialog__panel auth-dialog__panel--login"
+      id="auth-panel-login"
+      role="tabpanel"
+      aria-labelledby="auth-tab-login"
+    >
+      <header class="auth-dialog__header">
+        <h2 class="auth-dialog__title" id="auth-login-title">Welcome Back!</h2>
+        <p class="auth-dialog__subtitle">Sign in to resume your games and progress.</p>
+      </header>
+      <app-login-form
+        [pending]="pending()"
+        (login)="login($event)"
+        (googleClick)="loginWithGoogle()"
+      />
+      <p class="auth-dialog__switch">
+        Don't have an account?
+        <button
+          class="auth-dialog__link"
+          type="button"
+          [disabled]="pending()"
+          (click)="switchMode('register', registerTab)"
+        >
+          Register
+        </button>
+      </p>
+    </section>
+
+    <section
+      class="auth-dialog__panel auth-dialog__panel--register"
+      id="auth-panel-register"
+      role="tabpanel"
+      aria-labelledby="auth-tab-register"
+    >
+      <header class="auth-dialog__header">
+        <h2 class="auth-dialog__title" id="auth-register-title">Create Account</h2>
+        <p class="auth-dialog__subtitle">Join MiniGames to track your score &amp; streak.</p>
+      </header>
+      <app-register-form
+        [pending]="pending()"
+        (register)="register($event)"
+        (googleClick)="loginWithGoogle()"
+      />
+      <p class="auth-dialog__switch">
+        Already have an account?
+        <button
+          class="auth-dialog__link"
+          type="button"
+          [disabled]="pending()"
+          (click)="switchMode('login', loginTab)"
+        >
+          Login
+        </button>
+      </p>
+    </section>
+  </div>
+</dialog>

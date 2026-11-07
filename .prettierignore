@@ -3,4 +3,5 @@ dist
 build
 coverage
 *.min.js
-package-lock.json
+package-lock.json.angular
+src/app/core/firebase-env.generated.ts

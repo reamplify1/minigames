@@ -1,0 +1,69 @@
+<section class="library-games" aria-label="Games">
+  @if (games.error()) {
+    <div class="library-games__error" role="alert">
+      <p>Failed to load games.</p>
+      <button type="button" (click)="games.reload()">Retry</button>
+    </div>
+  } @else if (games.isLoading()) {
+    <ul class="library-games__list">
+      @for (card of skeletonCards; track card) {
+        <li class="library-games__skeleton-card" aria-hidden="true"></li>
+      }
+    </ul>
+  } @else if (gameCards().length === 0) {
+    <div class="library-games__empty">No games available right now.</div>
+  } @else {
+    <ul class="library-games__list" role="list">
+      @for (game of gameCards(); track game.id) {
+        <li>
+          <article class="library-card">
+            <img
+              class="library-card__cover"
+              [src]="game.cover"
+              [alt]="game.title + ' cover'"
+              loading="lazy"
+            />
+            <div class="library-card__content">
+              <div class="library-card__info">
+                <h2 class="library-card__title">{{ game.title }}</h2>
+                <span class="library-card__genre">{{ game.genre }}</span>
+              </div>
+              <span
+                class="library-card__price"
+                [class.library-card__price--free]="game.price === freePrice"
+              >
+                {{ game.price }}
+              </span>
+              <p class="library-card__description">{{ game.description }}</p>
+              <div class="library-card__stats">
+                <span class="library-card__stat">
+                  <img
+                    class="library-card__stat-icon"
+                    src="assets/icons/star-icon.svg"
+                    alt="Rating"
+                  />
+                  <span>{{ game.rating }}</span>
+                </span>
+                <span class="library-card__stat">
+                  <img
+                    class="library-card__stat-icon"
+                    src="assets/icons/favorite-icon.svg"
+                    alt="Likes"
+                  />
+                  <span>{{ game.likes }}</span>
+                </span>
+              </div>
+              <button
+                class="library-card__details"
+                type="button"
+                (click)="dialogs.openGame(game.id)"
+              >
+                Details
+              </button>
+            </div>
+          </article>
+        </li>
+      }
+    </ul>
+  }
+</section>

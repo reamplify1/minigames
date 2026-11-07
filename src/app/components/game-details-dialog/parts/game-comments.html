@@ -1,0 +1,62 @@
+<section class="game-details-dialog__comments" aria-labelledby="game-details-comments-title">
+  <h3 class="game-details-dialog__comments-title" id="game-details-comments-title">
+    @if (result(); as loaded) {
+      Comments ({{ loaded.total }})
+    } @else {
+      Comments
+    }
+  </h3>
+
+  <form #form class="game-details-dialog__comment-form" (submit)="onSubmit($event)">
+    <span class="game-details-dialog__user-avatar" aria-hidden="true">{{ userInitial() }}</span>
+    <label class="game-details-dialog__comment-label" for="game-details-comment-input">
+      Write a comment
+    </label>
+    <textarea
+      #textarea
+      class="game-details-dialog__comment-input"
+      id="game-details-comment-input"
+      name="comment"
+      rows="1"
+      placeholder="Write a comment..."
+      [disabled]="isFormLocked()"
+      (input)="onInput(textarea.value)"
+      (keydown)="onKeydown($event, form)"
+    ></textarea>
+    <button
+      class="game-details-dialog__comment-submit"
+      type="submit"
+      aria-label="Submit comment"
+      [disabled]="!canSubmit()"
+    >
+      <img
+        class="game-details-dialog__comment-submit-icon"
+        src="assets/icons/send-icon.svg"
+        alt=""
+      />
+    </button>
+  </form>
+
+  <ul class="game-details-dialog__comments-list">
+    @if (result(); as loaded) {
+      @for (comment of loaded.comments; track comment.commentId) {
+        <li>
+          <app-game-comment [comment]="comment" [avatarColor]="getAvatarColor(comment.author)" />
+        </li>
+      } @empty {
+        <li class="game-details-dialog__comments-empty">
+          No comments yet. Be the first to share your thoughts!
+        </li>
+      }
+    } @else if (commentsResource.error()) {
+      <li class="game-details-dialog__comments-error" role="alert">
+        <p>Failed to load comments.</p>
+        <button type="button" (click)="commentsResource.reload()">Retry</button>
+      </li>
+    } @else {
+      @for (comment of skeletonComments; track comment) {
+        <li class="game-details-dialog__comment-skeleton" aria-hidden="true"></li>
+      }
+    }
+  </ul>
+</section>

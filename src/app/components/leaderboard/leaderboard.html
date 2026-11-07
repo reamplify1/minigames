@@ -1,0 +1,113 @@
+<section class="leaderboard" aria-labelledby="leaderboard-title">
+  <div class="leaderboard__header">
+    <span class="leaderboard__marker" aria-hidden="true"></span>
+    <h2 class="leaderboard__title" id="leaderboard-title">
+      Top Players<span class="leaderboard__text-full"> This Week</span>
+    </h2>
+  </div>
+
+  @if (leaderboard.error()) {
+    <div class="leaderboard__error" role="alert">
+      <p>Failed to load the leaderboard.</p>
+      <button type="button" (click)="leaderboard.reload()">Retry</button>
+    </div>
+  } @else if (!leaderboard.isLoading() && players().length === 0) {
+    <div class="leaderboard__empty">No leaderboard data yet.</div>
+  } @else {
+    <div class="leaderboard__table-wrap">
+      <table class="leaderboard__table" aria-labelledby="leaderboard-title">
+        <thead>
+          <tr>
+            <th
+              class="leaderboard__cell leaderboard__cell--head leaderboard__cell--rank"
+              scope="col"
+            >
+              Rank
+            </th>
+            <th
+              class="leaderboard__cell leaderboard__cell--head leaderboard__cell--player"
+              scope="col"
+            >
+              Player
+            </th>
+            <th
+              class="leaderboard__cell leaderboard__cell--head leaderboard__cell--games"
+              scope="col"
+            >
+              Games<span class="leaderboard__text-full"> Played</span>
+            </th>
+            <th
+              class="leaderboard__cell leaderboard__cell--head leaderboard__cell--score"
+              scope="col"
+            >
+              <span class="leaderboard__text-full">Total </span>Score
+            </th>
+            <th
+              class="leaderboard__cell leaderboard__cell--head leaderboard__cell--streak"
+              scope="col"
+            >
+              Streak
+            </th>
+            <th
+              class="leaderboard__cell leaderboard__cell--head leaderboard__cell--favorite"
+              scope="col"
+            >
+              Favorite Game
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (leaderboard.isLoading()) {
+            @for (row of skeletonRows; track row) {
+              <tr class="leaderboard__row leaderboard__row--skeleton" aria-hidden="true">
+                <td class="leaderboard__cell" colspan="6">
+                  <div class="leaderboard__skeleton-line"></div>
+                </td>
+              </tr>
+            }
+          } @else {
+            @for (player of players(); track player.name; let rank = $index) {
+              <tr
+                class="leaderboard__row"
+                [class.leaderboard__row--extra]="rank >= compactVisibleRows"
+              >
+                <td
+                  class="leaderboard__cell leaderboard__cell--rank"
+                  [class.leaderboard__cell--first-place]="rank === 0"
+                >
+                  #{{ rank + 1 }}
+                </td>
+                <td class="leaderboard__cell leaderboard__cell--player">
+                  <div class="leaderboard__player">
+                    <span
+                      class="leaderboard__avatar leaderboard__avatar--{{ player.avatarColor }}"
+                      aria-hidden="true"
+                    >
+                      {{ player.initials }}
+                    </span>
+                    <span class="leaderboard__name">{{ player.name }}</span>
+                  </div>
+                </td>
+                <td class="leaderboard__cell leaderboard__cell--games">{{ player.gamesPlayed }}</td>
+                <td class="leaderboard__cell leaderboard__cell--score">
+                  <span class="leaderboard__text-full">{{ player.score }}</span>
+                  <span class="leaderboard__text-compact">{{ player.compactScore }}</span>
+                </td>
+                <td class="leaderboard__cell leaderboard__cell--streak">
+                  <span class="leaderboard__streak">
+                    <span class="leaderboard__streak-icon" aria-hidden="true">🔥</span>
+                    <span class="leaderboard__text-full">{{ player.streakDays }} days</span>
+                    <span class="leaderboard__text-compact">{{ player.streakDays }}d</span>
+                  </span>
+                </td>
+                <td class="leaderboard__cell leaderboard__cell--favorite">
+                  <span class="leaderboard__pill">{{ player.favoriteGame }}</span>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

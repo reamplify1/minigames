@@ -1,0 +1,90 @@
+<div
+  #menu
+  class="mobile-menu"
+  id="mobile-menu"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Navigation menu"
+  [class.mobile-menu--open]="isOpen()"
+>
+  <div class="mobile-menu__top">
+    <a class="mobile-menu__logo" routerLink="/" (click)="close()">
+      <img class="mobile-menu__logo-icon" src="assets/icons/minigames-icon.svg" alt="" />
+      <span>MiniGames</span>
+    </a>
+    <button
+      #closeButton
+      class="mobile-menu__close"
+      type="button"
+      aria-label="Close menu"
+      (click)="close()"
+    >
+      <img class="mobile-menu__close-icon" src="assets/icons/close-button-icon.svg" alt="" />
+    </button>
+  </div>
+
+  <nav class="mobile-menu__nav" aria-label="Mobile navigation">
+    <ul class="mobile-menu__list">
+      @for (item of navItems; track item.label) {
+        <li>
+          @if (item.hasPage) {
+            <a
+              class="mobile-menu__link"
+              [routerLink]="item.href"
+              routerLinkActive="mobile-menu__link--active"
+              ariaCurrentWhenActive="page"
+              [routerLinkActiveOptions]="navLinkMatch"
+              (click)="close()"
+            >
+              {{ item.label }}
+            </a>
+          } @else {
+            <a class="mobile-menu__link" [routerLink]="item.href" (click)="close()">
+              {{ item.label }}
+            </a>
+          }
+        </li>
+      }
+    </ul>
+  </nav>
+
+  <div class="mobile-menu__actions">
+    @if (auth.profile(); as profile) {
+      <span class="mobile-menu__profile">
+        <span class="mobile-menu__avatar">
+          @if (profile.avatarUrl && !avatarFailed()) {
+            <img
+              class="mobile-menu__avatar-img"
+              [src]="profile.avatarUrl"
+              alt=""
+              (error)="avatarFailed.set(true)"
+            />
+          } @else if (profile.initials) {
+            <span class="mobile-menu__avatar-initials">{{ profile.initials }}</span>
+          } @else {
+            <img class="mobile-menu__avatar-fallback" src="assets/icons/user-icon.svg" alt="" />
+          }
+        </span>
+        <span class="mobile-menu__user">{{ profile.name }}</span>
+      </span>
+      <button class="mobile-menu__btn mobile-menu__btn--outline" type="button" (click)="logout()">
+        Log Out
+      </button>
+    } @else {
+      <button
+        class="mobile-menu__btn mobile-menu__btn--outline"
+        type="button"
+        (click)="openAuth('login')"
+      >
+        Log In
+      </button>
+      <button
+        class="mobile-menu__btn mobile-menu__btn--accent"
+        type="button"
+        (click)="openAuth('register')"
+      >
+        Sign Up
+      </button>
+    }
+  </div>
+</div>

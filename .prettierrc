@@ -4,5 +4,13 @@
   "singleQuote": true,
   "printWidth": 100,
   "tabWidth": 2,
-  "endOfLine": "lf"
+  "endOfLine": "lf",
+  "overrides": [
+    {
+      "files": "*.html",
+      "options": {
+        "parser": "angular"
+      }
+    }
+  ]
 }
