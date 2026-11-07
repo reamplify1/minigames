@@ -11,9 +11,18 @@ import { NewGames } from '../../components/new-games/new-games';
     <main>
       <app-hero />
       <app-new-games />
-      <app-leaderboard />
-      <app-developer-cta />
+      @defer (on viewport) {
+        <app-leaderboard />
+      } @placeholder {
+        <div class="home-page__placeholder home-page__placeholder--leaderboard"></div>
+      }
+      @defer (on viewport) {
+        <app-developer-cta />
+      } @placeholder {
+        <div class="home-page__placeholder home-page__placeholder--developer-cta"></div>
+      }
     </main>
   `,
+  styleUrl: './home-page.scss',
 })
 export class HomePage {}

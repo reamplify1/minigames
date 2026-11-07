@@ -4,6 +4,10 @@
   <app-footer />
 </div>
 
-<app-game-details-dialog [slug]="gameSlug()" />
-<app-auth-dialog [mode]="authMode()" />
+@defer (when gameSlug()) {
+  <app-game-details-dialog [slug]="gameSlug()" />
+}
+@defer (when authMode()) {
+  <app-auth-dialog [mode]="authMode()" />
+}
 <app-snackbar-host />

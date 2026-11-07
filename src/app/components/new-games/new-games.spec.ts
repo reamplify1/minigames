@@ -24,7 +24,7 @@ describe('parseFeaturedGames', () => {
       title: 'Palia',
       rating: 4.8,
       likes: '89.5K',
-      image: 'assets/images/games/palia-card.png',
+      image: 'assets/images/games/palia-card.jpg',
     });
   });
 

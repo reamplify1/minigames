@@ -22,19 +22,26 @@ describe('App', () => {
     return element.querySelector<HTMLDialogElement>(selector)?.open ?? false;
   }
 
+  async function waitUntilOpen(element: HTMLElement, selector: string): Promise<void> {
+    await vi.waitFor(async () => {
+      await settle();
+      expect(isOpen(element, selector)).toBe(true);
+    });
+  }
+
   beforeEach(() => {
     localStorage.clear();
   });
 
   it('opens the game dialog from the URL', async () => {
     const element = await setup('/?game=palia');
-    expect(isOpen(element, '.game-details-dialog')).toBe(true);
+    await waitUntilOpen(element, '.game-details-dialog');
   });
 
   it('opens the login dialog from the URL', async () => {
     const element = await setup('/library?auth=register');
 
-    expect(isOpen(element, '.auth-dialog')).toBe(true);
+    await waitUntilOpen(element, '.auth-dialog');
     expect(element.querySelector<HTMLElement>('.auth-dialog')?.dataset['mode']).toBe('register');
   });
 
@@ -46,7 +53,7 @@ describe('App', () => {
   it('shows only the login dialog when both are in the URL', async () => {
     const element = await setup('/?game=palia&auth=login');
 
-    expect(isOpen(element, '.auth-dialog')).toBe(true);
+    await waitUntilOpen(element, '.auth-dialog');
     expect(isOpen(element, '.game-details-dialog')).toBe(false);
   });
 

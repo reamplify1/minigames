@@ -26,7 +26,7 @@ $hero-overlay-opacity: 0.65;
     position: absolute;
     inset: $hero-image-inset;
     z-index: $z-index-behind;
-    background: url('../../../assets/images/hero-bg.png') $hero-image-position / cover no-repeat;
+    background: url('../../../assets/images/hero-bg.jpg') $hero-image-position / cover no-repeat;
     opacity: $hero-image-opacity;
   }
 

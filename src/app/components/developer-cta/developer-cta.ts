@@ -4,7 +4,12 @@ import { Component } from '@angular/core';
   selector: 'app-developer-cta',
   template: `
     <section class="developer-cta" aria-labelledby="developer-cta-title">
-      <img class="developer-cta__illustration" src="assets/images/illustration-side.png" alt="" />
+      <img
+        class="developer-cta__illustration"
+        src="assets/images/illustration-side.png"
+        alt=""
+        loading="lazy"
+      />
       <div class="developer-cta__card">
         <h2 class="developer-cta__title" id="developer-cta-title">Are You a Game Developer?</h2>
         <p class="developer-cta__text">{{ description }}</p>

@@ -1,19 +1,15 @@
 import { Injectable } from '@angular/core';
-import { initializeApp } from 'firebase/app';
-import {
-  createUserWithEmailAndPassword,
-  getAuth,
-  GoogleAuthProvider,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  signOut,
-  updateProfile,
-  type Auth,
-  type User,
-} from 'firebase/auth';
+import type { Auth, User } from 'firebase/auth';
 import { firebaseOptions } from './firebase-env.generated';
 
 const GOOGLE_SIGN_IN_TIMEOUT_MS: number = 90 * 1000;
+
+type FirebaseAuthSdk = typeof import('firebase/auth');
+
+interface FirebaseConnection {
+  auth: Auth;
+  sdk: FirebaseAuthSdk;
+}
 
 function rejectAfter(ms: number): Promise<never> {
   return new Promise<never>(
@@ -29,27 +25,25 @@ function rejectAfter(ms: number): Promise<never> {
 
 @Injectable({ providedIn: 'root' })
 export class FirebaseAuthService {
-  private firebaseAuth: Auth | undefined;
-
-  private get auth(): Auth {
-    this.firebaseAuth ??= getAuth(initializeApp(firebaseOptions));
-    return this.firebaseAuth;
-  }
+  private connection: Promise<FirebaseConnection> | undefined;
 
   async login(email: string, password: string): Promise<User> {
-    const credential = await signInWithEmailAndPassword(this.auth, email, password);
+    const { auth, sdk } = await this.connect();
+    const credential = await sdk.signInWithEmailAndPassword(auth, email, password);
     return credential.user;
   }
 
   async register(email: string, password: string, displayName: string): Promise<User> {
-    const credential = await createUserWithEmailAndPassword(this.auth, email, password);
-    await updateProfile(credential.user, { displayName });
+    const { auth, sdk } = await this.connect();
+    const credential = await sdk.createUserWithEmailAndPassword(auth, email, password);
+    await sdk.updateProfile(credential.user, { displayName });
     return credential.user;
   }
 
   async loginWithGoogle(): Promise<User> {
+    const { auth, sdk } = await this.connect();
     const credential = await Promise.race([
-      signInWithPopup(this.auth, new GoogleAuthProvider()),
+      sdk.signInWithPopup(auth, new sdk.GoogleAuthProvider()),
       rejectAfter(GOOGLE_SIGN_IN_TIMEOUT_MS),
     ]);
 
@@ -57,6 +51,18 @@ export class FirebaseAuthService {
   }
 
   async logout(): Promise<void> {
-    await signOut(this.auth);
+    const { auth, sdk } = await this.connect();
+    await sdk.signOut(auth);
+  }
+
+  private connect(): Promise<FirebaseConnection> {
+    this.connection ??= Promise.all([import('firebase/app'), import('firebase/auth')]).then(
+      ([app, sdk]: [typeof import('firebase/app'), FirebaseAuthSdk]): FirebaseConnection => ({
+        auth: sdk.getAuth(app.initializeApp(firebaseOptions)),
+        sdk,
+      })
+    );
+
+    return this.connection;
   }
 }
