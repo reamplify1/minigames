@@ -14,3 +14,35 @@ body {
   color: var(--color-text);
   background-color: tokens.$color-background;
 }
+
+.no-scroll {
+  overflow: hidden;
+}
+
+app-root,
+app-header,
+app-mobile-menu,
+app-footer,
+app-snackbar-host,
+app-home-page,
+app-library-page,
+app-not-found-page,
+app-hero,
+app-new-games,
+app-leaderboard,
+app-developer-cta,
+app-filter-sort-section,
+app-game-cards-section,
+app-pagination-section,
+app-auth-dialog,
+app-login-form,
+app-register-form,
+app-auth-field,
+app-game-details-dialog,
+app-game-hero,
+app-game-info,
+app-game-records,
+app-game-comments,
+app-game-comment {
+  display: contents;
+}

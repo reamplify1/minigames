@@ -1,0 +1,84 @@
+<section class="filter-sort-section" aria-labelledby="library-title">
+  <div class="filter-sort-section__intro">
+    <h1 class="filter-sort-section__title" id="library-title">Game Library</h1>
+    <p class="filter-sort-section__subtitle">Browse our collection of casual mini-games</p>
+  </div>
+
+  <div class="filter-sort-bar">
+    @if (categories.error()) {
+      <div class="filter-sort-bar__error" role="alert">
+        <span>Failed to load categories.</span>
+        <button type="button" (click)="categories.reload()">Retry</button>
+      </div>
+    } @else if (categories.isLoading()) {
+      <ul class="filter-sort-bar__chips" role="list" aria-hidden="true">
+        @for (chip of skeletonChips; track chip) {
+          <li class="filter-sort-bar__chip-skeleton"></li>
+        }
+      </ul>
+    } @else if (chips().length === 0) {
+      <div class="filter-sort-bar__empty">No categories available.</div>
+    } @else {
+      <ul class="filter-sort-bar__chips" role="list" appDragScroll>
+        @for (chip of chips(); track chip.id) {
+          <li>
+            <button
+              class="chip"
+              type="button"
+              [class.chip--active]="chip.id === category()"
+              [attr.aria-pressed]="chip.id === category()"
+              (click)="selectCategory(chip.id)"
+            >
+              {{ chip.label }}
+            </button>
+          </li>
+        }
+      </ul>
+    }
+
+    <div #sortDropdown class="filter-sort-bar__sort sort-dropdown">
+      <button
+        #sortTrigger
+        class="sort-trigger"
+        type="button"
+        aria-haspopup="true"
+        aria-controls="sort-options"
+        [attr.aria-expanded]="isSortOpen()"
+        (click)="toggleSort()"
+      >
+        <span>Sort by: {{ sortLabel() }}</span>
+        <img
+          class="sort-trigger__chevron"
+          src="assets/icons/arrow-drop-down-icon.svg"
+          alt=""
+          aria-hidden="true"
+        />
+      </button>
+
+      <ul class="sort-dropdown__options" id="sort-options" [hidden]="!isSortOpen()">
+        @for (option of sortOptions; track option.id) {
+          <li
+            class="sort-dropdown__item"
+            [class.sort-dropdown__item--selected]="option.label === sortLabel()"
+          >
+            <button
+              class="sort-dropdown__option"
+              type="button"
+              [class.sort-dropdown__option--selected]="option.label === sortLabel()"
+              [attr.aria-current]="option.label === sortLabel()"
+              (click)="selectSort(option.id)"
+            >
+              <img
+                class="sort-dropdown__check"
+                src="assets/icons/check-icon.svg"
+                alt=""
+                aria-hidden="true"
+              />
+              <span>{{ option.label }}</span>
+            </button>
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+</section>

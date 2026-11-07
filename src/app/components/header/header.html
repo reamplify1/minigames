@@ -1,0 +1,87 @@
+<header class="header">
+  <div class="header__inner">
+    <a class="header__logo" routerLink="/">
+      <img class="header__logo-icon" src="assets/icons/minigames-icon.svg" alt="" />
+      <span class="header__logo-text">MiniGames</span>
+    </a>
+
+    <div class="header__right">
+      <nav class="header__nav" aria-label="Main navigation">
+        <ul class="header__nav-list">
+          @for (item of navItems; track item.label) {
+            <li>
+              @if (item.hasPage) {
+                <a
+                  class="header__nav-link"
+                  [routerLink]="item.href"
+                  routerLinkActive="header__nav-link--active"
+                  ariaCurrentWhenActive="page"
+                  [routerLinkActiveOptions]="navLinkMatch"
+                >
+                  {{ item.label }}
+                </a>
+              } @else {
+                <a class="header__nav-link" [routerLink]="item.href">{{ item.label }}</a>
+              }
+            </li>
+          }
+        </ul>
+      </nav>
+
+      <div class="header__actions">
+        <div class="header__auth-actions">
+          @if (auth.profile(); as profile) {
+            <span class="header__profile">
+              <span class="header__avatar">
+                @if (profile.avatarUrl && !avatarFailed()) {
+                  <img
+                    class="header__avatar-img"
+                    [src]="profile.avatarUrl"
+                    alt=""
+                    (error)="avatarFailed.set(true)"
+                  />
+                } @else if (profile.initials) {
+                  <span class="header__avatar-initials">{{ profile.initials }}</span>
+                } @else {
+                  <img class="header__avatar-fallback" src="assets/icons/user-icon.svg" alt="" />
+                }
+              </span>
+              <span class="header__user">{{ profile.name }}</span>
+            </span>
+            <button class="header__btn header__btn--outline" type="button" (click)="auth.logout()">
+              Log Out
+            </button>
+          } @else {
+            <button
+              class="header__btn header__btn--outline"
+              type="button"
+              (click)="dialogs.openAuth('login')"
+            >
+              Log In
+            </button>
+            <button
+              class="header__btn header__btn--accent"
+              type="button"
+              (click)="dialogs.openAuth('register')"
+            >
+              Sign Up
+            </button>
+          }
+        </div>
+        <button
+          #burger
+          class="header__burger"
+          type="button"
+          aria-label="Open menu"
+          aria-controls="mobile-menu"
+          [attr.aria-expanded]="menu.isOpen()"
+          (click)="menu.open()"
+        >
+          <img src="assets/icons/burger-icon.svg" alt="" />
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <app-mobile-menu #menu [trigger]="burger" />
+</header>

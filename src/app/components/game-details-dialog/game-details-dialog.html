@@ -1,0 +1,69 @@
+<dialog
+  #dialog
+  class="game-details-dialog"
+  aria-labelledby="game-details-title"
+  (click)="onDialogClick($event)"
+  (close)="onClose()"
+>
+  @if (slug(); as gameSlug) {
+    @if (game(); as details) {
+      <div class="game-details-dialog__content">
+        <app-game-hero [title]="details.title" [image]="details.heroImage" (closed)="close()" />
+        <div class="game-details-dialog__body">
+          <app-game-info [game]="details" [slug]="gameSlug" />
+          <app-game-records [records]="details.records" />
+          <app-game-comments [slug]="gameSlug" />
+        </div>
+      </div>
+    } @else if (isNotFound()) {
+      <div class="game-details-dialog__content">
+        <div class="game-details-dialog__state game-details-dialog__state--empty">
+          <p class="game-details-dialog__state-text">This game could not be found.</p>
+        </div>
+        <ng-container *ngTemplateOutlet="closeButton" />
+      </div>
+    } @else if (gameResource.error()) {
+      <div class="game-details-dialog__content">
+        <div class="game-details-dialog__state" role="alert">
+          <p class="game-details-dialog__state-text">Failed to load game details.</p>
+          <button
+            class="game-details-dialog__state-retry"
+            type="button"
+            (click)="gameResource.reload()"
+          >
+            Retry
+          </button>
+        </div>
+        <ng-container *ngTemplateOutlet="closeButton" />
+      </div>
+    } @else {
+      <div class="game-details-dialog__content" aria-busy="true">
+        <div class="game-details-dialog__hero game-details-dialog__hero--skeleton"></div>
+        <div class="game-details-dialog__body">
+          <div
+            class="game-details-dialog__skeleton-line game-details-dialog__skeleton-line--title"
+          ></div>
+          <div class="game-details-dialog__skeleton-line"></div>
+          <div
+            class="game-details-dialog__skeleton-line game-details-dialog__skeleton-line--short"
+          ></div>
+          <div
+            class="game-details-dialog__skeleton-line game-details-dialog__skeleton-line--short"
+          ></div>
+        </div>
+        <ng-container *ngTemplateOutlet="closeButton" />
+      </div>
+    }
+  }
+</dialog>
+
+<ng-template #closeButton>
+  <button
+    class="game-details-dialog__close"
+    type="button"
+    aria-label="Close dialog"
+    (click)="close()"
+  >
+    <img class="game-details-dialog__close-icon" src="assets/icons/close-blue-icon.svg" alt="" />
+  </button>
+</ng-template>

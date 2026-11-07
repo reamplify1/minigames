@@ -1,0 +1,44 @@
+<section class="pagination-section">
+  <nav class="pagination" aria-label="Library pagination">
+    <button
+      class="pagination__arrow pagination__arrow--previous"
+      type="button"
+      aria-label="Previous page"
+      [disabled]="currentPage() === 1"
+      (click)="goToPage(currentPage() - 1)"
+    >
+      <svg class="pagination__arrow-icon" viewBox="0 -960 960 960" aria-hidden="true">
+        <path d="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z" fill="currentColor" />
+      </svg>
+    </button>
+
+    <ul #pagesList class="pagination__pages">
+      @for (page of visiblePages(); track page) {
+        <li>
+          <button
+            class="pagination__page"
+            type="button"
+            [class.pagination__page--active]="page === currentPage()"
+            [attr.aria-label]="'Page ' + page"
+            [attr.aria-current]="page === currentPage() ? 'page' : null"
+            (click)="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+        </li>
+      }
+    </ul>
+
+    <button
+      class="pagination__arrow pagination__arrow--next"
+      type="button"
+      aria-label="Next page"
+      [disabled]="currentPage() === lastPage()"
+      (click)="goToPage(currentPage() + 1)"
+    >
+      <svg class="pagination__arrow-icon" viewBox="0 -960 960 960" aria-hidden="true">
+        <path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z" fill="currentColor" />
+      </svg>
+    </button>
+  </nav>
+</section>

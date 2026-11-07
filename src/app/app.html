@@ -1,0 +1,9 @@
+<div id="app">
+  <app-header />
+  <router-outlet />
+  <app-footer />
+</div>
+
+<app-game-details-dialog [slug]="gameSlug()" />
+<app-auth-dialog [mode]="authMode()" />
+<app-snackbar-host />
