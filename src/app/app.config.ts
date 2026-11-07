@@ -1,4 +1,4 @@
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import {
   PreloadAllModules,
@@ -7,6 +7,7 @@ import {
   withViewTransitions,
 } from '@angular/router';
 import { routes } from './app.routes';
+import { apiInterceptor } from './core/api.interceptor';
 import { skipTransitionOnSamePage } from './core/page-transition';
 
 export const appConfig: ApplicationConfig = {
@@ -17,6 +18,6 @@ export const appConfig: ApplicationConfig = {
       withPreloading(PreloadAllModules),
       withViewTransitions({ onViewTransitionCreated: skipTransitionOnSamePage })
     ),
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([apiInterceptor])),
   ],
 };

@@ -14,6 +14,7 @@ import { AuthDialog } from './components/auth-dialog/auth-dialog';
 import { Footer } from './components/footer/footer';
 import { GameDetailsDialog } from './components/game-details-dialog/game-details-dialog';
 import { Header } from './components/header/header';
+import { OfflineBanner } from './components/offline-banner/offline-banner';
 import { SnackbarHost } from './components/snackbar/snackbar';
 import { AuthService } from './core/auth.service';
 import {
@@ -27,7 +28,15 @@ const ALREADY_AUTHENTICATED_MESSAGE: string = "You're already signed in.";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Header, Footer, SnackbarHost, AuthDialog, GameDetailsDialog],
+  imports: [
+    RouterOutlet,
+    OfflineBanner,
+    Header,
+    Footer,
+    SnackbarHost,
+    AuthDialog,
+    GameDetailsDialog,
+  ],
   templateUrl: './app.html',
   host: {
     '(window:focus)': 'auth.checkSessionExpiration()',
